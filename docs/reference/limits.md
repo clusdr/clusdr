@@ -37,6 +37,6 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 ## Distribution
 
 - Release binaries embed the tag via ldflags. Source builds print `dev`
-- Install channels: install script, Homebrew tap `odurgut/tap`, Docker Hub `odurgut/clusdr`
+- Install channels: Linux install script, Docker Hub `odurgut/clusdr`
 - Python SDK: `pip install clusdr`
 - No license file in this tree

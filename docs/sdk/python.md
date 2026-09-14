@@ -6,6 +6,8 @@ Package `clusdr` on PyPI. CPython 3.10+. Applications call the daemon on this ho
 pip install clusdr
 ```
 
+Same version train as the daemon (first release: `0.1.0`).
+
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
 Contributor checkout (editable + proto): `pip install -e ".[dev]"` in the `clusdr-python` tree. That is not the product install.

@@ -23,7 +23,7 @@ Application → local SDK → local daemon → cluster
 curl -fsSL https://clusdr.io/install.sh | sh
 ```
 
-Homebrew: `brew install odurgut/tap/clusdr`. Image: `odurgut/clusdr` on Docker Hub. Other channels: **[Install](docs/guide/install.md)**.
+Linux amd64/arm64. Image: `odurgut/clusdr` on Docker Hub. Other channels: **[Install](docs/guide/install.md)**.
 
 ## Run
 

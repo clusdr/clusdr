@@ -1,6 +1,6 @@
 # Contributing
 
-Build and test from this repository. Operators install a release binary ([guide](docs/guide/install.md)); this file is the source-build path.
+Build and test from this repository. Operators install a **Linux** release binary ([guide](docs/guide/install.md)); this file is the source-build path (any Go 1.25 host).
 
 Product behavior is described in [docs/](docs/README.md), not here.
 

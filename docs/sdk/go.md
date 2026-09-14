@@ -6,6 +6,8 @@ Module `github.com/odurgut/clusdr/sdk`, package `clusdr`. Applications call the 
 go get github.com/odurgut/clusdr/sdk
 ```
 
+Same version train as the daemon (first release: `v0.1.0`). Wire types live in `github.com/odurgut/clusdr/api`.
+
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
 ## Connect

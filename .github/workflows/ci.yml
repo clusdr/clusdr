@@ -49,3 +49,9 @@ jobs:
 
       - name: Verify binary runs
         run: ./bin/clusdr version
+
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: check

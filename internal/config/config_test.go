@@ -63,6 +63,23 @@ func TestDefaults(t *testing.T) {
 	if cfg.Raft.LeaderLeaseTimeout != 75*time.Millisecond {
 		t.Errorf("default raft leader lease: got %v, want 75ms", cfg.Raft.LeaderLeaseTimeout)
 	}
+
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		if cfg.Data.Dir != "/var/lib/clusdr" {
+			t.Errorf("data dir: got %q, want /var/lib/clusdr", cfg.Data.Dir)
+		}
+		if cfg.GRPC.ControlSocket != "/var/lib/clusdr/clusdr.sock" {
+			t.Errorf("control socket: got %q, want /var/lib/clusdr/clusdr.sock", cfg.GRPC.ControlSocket)
+		}
+		return
+	}
+	if cfg.Data.Dir != home+"/.clusdr" {
+		t.Errorf("data dir: got %q, want %q", cfg.Data.Dir, home+"/.clusdr")
+	}
+	if cfg.GRPC.ControlSocket != home+"/.clusdr/clusdr.sock" {
+		t.Errorf("control socket: got %q, want %q", cfg.GRPC.ControlSocket, home+"/.clusdr/clusdr.sock")
+	}
 }
 
 func TestValidate_RaftLeaseVsHeartbeat(t *testing.T) {

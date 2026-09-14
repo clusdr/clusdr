@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"path/filepath"
 
 	"google.golang.org/grpc/credentials"
 
@@ -214,17 +215,21 @@ func InitGRPC(_ context.Context, a *App) error {
 		runtimeLn = ln
 	}
 
-	// Control API — Unix socket (CLI connects here)
+	// Control API — Unix socket (CLI connects here). Binding is non-fatal:
+	// a missing parent dir or unwritable path must not take the daemon down.
 	controlLn := a.Opt.ControlListener
 	if controlLn == nil {
-		ln, err := net.Listen("unix", a.Cfg.GRPC.ControlSocket)
-		if err != nil {
-			// Non-fatal in dev: socket may require /var/run.
-			// Log a warning and skip; CLI status will report "not running".
-			a.Log.Warn("control socket unavailable, skipping",
-				"socket", a.Cfg.GRPC.ControlSocket, "err", err)
+		sock := a.Cfg.GRPC.ControlSocket
+		if err := os.MkdirAll(filepath.Dir(sock), 0o700); err != nil {
+			a.Log.Warn("control socket unavailable, skipping", "socket", sock, "err", err)
 		} else {
-			controlLn = ln
+			_ = os.Remove(sock)
+			ln, err := net.Listen("unix", sock)
+			if err != nil {
+				a.Log.Warn("control socket unavailable, skipping", "socket", sock, "err", err)
+			} else {
+				controlLn = ln
+			}
 		}
 	}
 

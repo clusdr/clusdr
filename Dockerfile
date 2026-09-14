@@ -21,9 +21,12 @@ FROM gcr.io/distroless/static-debian12:nonroot
 
 COPY --from=builder /clusdr /clusdr
 
+ENV CLUSDR_DATA_DIR=/var/lib/clusdr
+ENV CLUSDR_CONTROL_SOCKET=/var/lib/clusdr/clusdr.sock
+
 VOLUME ["/var/lib/clusdr"]
 
-EXPOSE 7947
+EXPOSE 7946 7947
 
 ENTRYPOINT ["/clusdr"]
 CMD ["start"]

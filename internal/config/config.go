@@ -145,7 +145,7 @@ func Defaults() Config {
 		},
 		GRPC: GRPCConfig{
 			Addr:           "127.0.0.1:7947",
-			ControlSocket:  "/var/run/clusdr.sock",
+			ControlSocket:  defaultControlSocket(),
 			DialTimeout:    5 * time.Second,
 			RequestTimeout: 10 * time.Second,
 		},
@@ -305,8 +305,16 @@ func envBool(getenv func(string) string, key string, dest *bool) {
 
 func defaultDataDir() string {
 	home, err := os.UserHomeDir()
-	if err != nil {
+	if err != nil || home == "" {
 		return "/var/lib/clusdr"
 	}
 	return home + "/.clusdr"
+}
+
+func defaultControlSocket() string {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return "/var/lib/clusdr/clusdr.sock"
+	}
+	return home + "/.clusdr/clusdr.sock"
 }

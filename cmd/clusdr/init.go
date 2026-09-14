@@ -132,7 +132,7 @@ database. Run this once on the first node. Other nodes join with
 			fmt.Fprintln(out, "  The join token is shown only once. Store it securely.")
 			fmt.Fprintln(out)
 			fmt.Fprintln(out, "next steps:")
-			fmt.Fprintln(out, "  clusdr start                    start this node")
+			fmt.Fprintln(out, "  clusdr start --bootstrap        start this node as the first voter")
 			fmt.Fprintln(out, "  clusdr certs show               inspect the cluster CA")
 			fmt.Fprintln(out, "  clusdr join --token <token> <addr>")
 

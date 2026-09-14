@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: clusdr
+
+builds:
+  - id: clusdr
+    main: ./cmd/clusdr
+    binary: clusdr
+    env:
+      - CGO_ENABLED=0
+    goos: [linux]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X github.com/odurgut/clusdr/internal/version.Version={{.Version}}
+      - -X github.com/odurgut/clusdr/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/odurgut/clusdr/internal/version.BuildTime={{.Date}}
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: odurgut
+    name: clusdr
+  name_template: "v{{.Version}}"
+  extra_files:
+    - glob: ./scripts/install.sh
+      name_template: install.sh
+  footer: |
+    ```bash
+    curl -fsSL https://clusdr.io/install.sh | sh
+    ```
+    Linux amd64/arm64. Image: `odurgut/clusdr`.

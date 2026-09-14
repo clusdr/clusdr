@@ -9,14 +9,14 @@ What this version is built and tested against. Anything else is unclaimed.
 | Daemon language / build | Go 1.25 |
 | Application protocol | gRPC, package `clusdr.v1alpha1` |
 | Go SDK module | `github.com/odurgut/clusdr/sdk` — [docs](../sdk/go.md) |
-| Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md)
+| Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md) |
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
-| Install script | `https://clusdr.io/install.sh` |
-| Homebrew | `brew install odurgut/tap/clusdr` |
+| Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
 | Container | Docker Hub `odurgut/clusdr` |
+| Release train | `0.1.0` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr` |
 | Local storage | BoltDB under `data.dir` |
 | Consensus | Hashicorp Raft |
-| Default OS assumption | Linux or macOS (Unix control socket) |
+| Default OS assumption | Linux (Unix control socket) |
 
 ## Best effort
 
@@ -31,8 +31,8 @@ What this version is built and tested against. Anything else is unclaimed.
 
 | Layer | Note |
 |---|---|
-| Windows as a documented host | Control API is a Unix socket. Not tested here |
-| apt / rpm / Snap / Homebrew core / Helm | Not published. Use the install script, the tap, or the image |
+| Windows or macOS as a documented host | Control API is a Unix socket. Operator binaries are Linux only |
+| apt / rpm / Snap / Homebrew / Helm | Not published. Use the install script or the image |
 | HTTP/JSON Runtime API | gRPC only |
 | Kubernetes operator / Helm | Not in this tree |
 
