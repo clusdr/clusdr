@@ -12,7 +12,7 @@ What this version is built and tested against. Anything else is unclaimed.
 | Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md) |
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
-| Container | GHCR `ghcr.io/odurgut/clusdr` (linux/amd64, linux/arm64) |
+| Container | Docker Hub `odurgut/clusdr` (linux/amd64, linux/arm64) |
 | Release train | `0.1.0` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr` |
 | Local storage | BoltDB under `data.dir` |
 | Consensus | Hashicorp Raft |

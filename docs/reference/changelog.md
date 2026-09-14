@@ -15,11 +15,11 @@ First tagged release. Daemon, Go SDK (`github.com/odurgut/clusdr/sdk` + `…/api
 - Go SDK `github.com/odurgut/clusdr/sdk` (`Local`, `Dial`)
 - Python SDK `pip install clusdr`
 - `clusdr-bench` (election / events / members / locks) — source-only, not a release artifact
-- Docker image `ghcr.io/odurgut/clusdr` and single-node compose file
+- Docker image `odurgut/clusdr` and single-node compose file
 - Observer nodes: `clusdr join --observer` (Raft non-voter). `Member.role` is `voter` or `observer`
 - `clusdr promote [node-id]` turns an observer into a voter
 - Observer daemons reject Lock / TryLock / Unlock / Renew; leases still work
-- Operator install: Linux amd64/arm64 via `curl -fsSL https://clusdr.io/install.sh | sh`, GHCR `ghcr.io/odurgut/clusdr`
+- Operator install: Linux amd64/arm64 via `curl -fsSL https://clusdr.io/install.sh | sh`, Docker Hub `odurgut/clusdr`
 
 ### Changed
 

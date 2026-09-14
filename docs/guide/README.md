@@ -16,7 +16,7 @@ Read these pages **in order**. Each one leaves a cluster you use on the next pag
 3. [Grow the cluster](grow.md) — a second voter, then an observer
 4. [Watch and publish](watch.md) — what changed, and a signal that is not Raft
 5. [Use it from your app](from-your-app.md) — local SDK, locks, leases
-6. [Run on other hosts](other-hosts.md) — real addresses, GHCR, health
+6. [Run on other hosts](other-hosts.md) — real addresses, Docker Hub, health
 
 After the guide: [Overview](../overview.md) if you are still deciding, [concepts](../concepts/README.md) for guarantees, [reference](../reference/README.md) for a flag or RPC.
 
