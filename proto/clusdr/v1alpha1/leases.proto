@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// LeaseService provides named TTL grants backed by Raft.
+//
+// A lease is lighter than a lock: Grant never blocks. The owner must Renew
+// before the deadline or the leader expires the grant (lease.expired).
+service LeaseService {
+  rpc Grant(GrantLeaseRequest) returns (GrantLeaseResponse);
+  rpc Renew(RenewLeaseRequest) returns (RenewLeaseResponse);
+  rpc Revoke(RevokeLeaseRequest) returns (RevokeLeaseResponse);
+  rpc ListLeases(ListLeasesRequest) returns (ListLeasesResponse);
+}
+
+message GrantLeaseRequest {
+  // name is the lease identity (1–128 chars: letters, digits, . _ -).
+  string name = 1;
+  // owner is the node or client id. Empty → this daemon's node id.
+  string owner = 2;
+  // ttl_ms is the grant lifetime. 0 uses the daemon default (lease.ttl).
+  int64 ttl_ms = 3;
+}
+
+message GrantLeaseResponse {
+  bool granted = 1;
+  string message = 2;
+  uint64 fencing_token = 3;
+  string owner = 4;
+  int64 deadline_unix_ms = 5;
+}
+
+message RenewLeaseRequest {
+  string name = 1;
+  string owner = 2;
+  uint64 fencing_token = 3;
+  // ttl_ms replaces the remaining lifetime. 0 reuses the original TTL.
+  int64 ttl_ms = 4;
+}
+
+message RenewLeaseResponse {
+  bool renewed = 1;
+  string message = 2;
+  uint64 fencing_token = 3;
+  int64 deadline_unix_ms = 4;
+}
+
+message RevokeLeaseRequest {
+  string name = 1;
+  string owner = 2;
+  uint64 fencing_token = 3;
+}
+
+message RevokeLeaseResponse {
+  bool revoked = 1;
+  string message = 2;
+}
+
+message ListLeasesRequest {}
+
+message LeaseInfo {
+  string name = 1;
+  string owner = 2;
+  uint64 fencing_token = 3;
+  int64 granted_unix_ms = 4;
+  int64 deadline_unix_ms = 5;
+}
+
+message ListLeasesResponse {
+  repeated LeaseInfo leases = 1;
+}

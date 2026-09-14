@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// EventService publishes custom cluster-wide events.
+//
+// A PublishEvent call is accepted on any node. That node emits the event on
+// its local Watch bus (type "custom.<topic>") and fans it out to every alive
+// peer in one hop. Peers emit locally and do not re-fanout (relay=true).
+// Custom events are ephemeral: they are not written to the Raft log and are
+// not replayed on Watch reconnect (snapshot is membership/leader only).
+service EventService {
+  rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
+}
+
+message PublishEventRequest {
+  // topic is the routing key. The Watch type becomes "custom.<topic>".
+  // Allowed characters: A-Z a-z 0-9 . _ -  (1–128 chars).
+  string topic = 1;
+
+  // payload is an opaque application blob. Max 64 KiB.
+  bytes payload = 2;
+
+  // event_id is a unique id used to suppress duplicates on retry/fan-out.
+  // Empty on a client call; the receiving node generates one.
+  string event_id = 3;
+
+  // source is the originating node id. Empty on a client call; filled by
+  // the first node that accepts the publish.
+  string source = 4;
+
+  // relay is true on node-to-node fan-out. Relayed events are emitted
+  // locally but not forwarded again (prevents publish storms).
+  bool relay = 5;
+}
+
+message PublishEventResponse {
+  bool accepted = 1;
+  string message = 2;
+  string event_id = 3;
+  // type is the Watch event type, e.g. "custom.deployment".
+  string type = 4;
+}

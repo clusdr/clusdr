@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// WatchService streams cluster events to connected clients.
+//
+// On every new stream the server sends a snapshot of current cluster state
+// (alive members + current leader as synthetic events) and then forwards
+// live events from the internal event bus.  This means a client that
+// reconnects always receives the full current picture before any live delta.
+service WatchService {
+  rpc Watch(WatchRequest) returns (stream WatchResponse);
+}
+
+// WatchRequest optionally filters the event stream.
+message WatchRequest {
+  // If non-empty, only events whose type matches one of these strings are
+  // forwarded.  Supported types: "member.join", "member.left",
+  // "leader.changed".  An empty list means "all events".
+  // Protocol events (watch.sync, watch.gap) are always delivered.
+  repeated string event_types = 1;
+
+  // last_seq is the last live sequence number the client processed.
+  // On reconnect the server sends a state snapshot, then a watch.sync
+  // (seq = current bus seq) and a watch.gap if last_seq is behind.
+  // 0 means "no prior seq" (first connect).
+  uint64 last_seq = 2;
+
+  // topics filters custom events by routing key (without the "custom."
+  // prefix). When non-empty, only custom.<topic> events for listed topics
+  // are forwarded — membership snapshot/live events are omitted.
+  // Protocol events (watch.sync, watch.gap) are always delivered.
+  // An empty list means "do not filter by topic".
+  repeated string topics = 3;
+}
+
+// WatchResponse carries a single cluster event.
+message WatchResponse {
+  // type is a dot-separated event kind: "member.join", "member.left",
+  // "leader.changed".
+  string type = 1;
+
+  // source is the node ID that caused the event.
+  string source = 2;
+
+  // payload is optional JSON-encoded detail (e.g. {"address":"host:port"}).
+  bytes payload = 3;
+
+  // timestamp_unix_ms is when the event occurred (milliseconds since epoch).
+  int64 timestamp_unix_ms = 4;
+
+  // seq is the global monotonically increasing sequence number assigned by the
+  // event bus.  Snapshot events carry seq=0.  watch.sync carries the bus seq
+  // the snapshot is consistent with.  A jump in live seq (or a watch.gap
+  // event) means the client missed events and should treat the snapshot as
+  // source of truth.
+  uint64 seq = 5;
+}

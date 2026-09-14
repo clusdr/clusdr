@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+import "clusdr/v1alpha1/membership.proto";
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// JoinService handles node-to-node join requests.
+// A joining node calls this on an existing cluster member.
+service JoinService {
+  rpc Join(JoinRequest) returns (JoinResponse);
+  // Promote turns an existing observer into a voter. Followers forward to the leader.
+  rpc Promote(PromoteRequest) returns (PromoteResponse);
+}
+
+message JoinRequest {
+  // node_id is the unique ID of the joining node.
+  string node_id = 1;
+  // cluster_id must match the target cluster's ID; rejected otherwise.
+  string cluster_id = 2;
+  // address is the gRPC Runtime API address of the joining node.
+  string address = 3;
+  // raft_addr is the Raft TCP address of the joining node.
+  // Required for the leader to call AddVoter.
+  string raft_addr = 4;
+  // join_token is the cluster join token from `clusdr init`.
+  // Required on the first (non-relay) Join when the cluster has a token hash.
+  string join_token = 5;
+  // relay is set when a follower forwards Join to the leader so the
+  // destination does not forward again. Token checks still apply.
+  bool relay = 6;
+  // observer is true when the joiner should be a Raft non-voter.
+  // Empty/false means voter. Does not change quorum.
+  bool observer = 7;
+}
+
+message JoinResponse {
+  // accepted is true when the join was granted.
+  bool accepted = 1;
+  // message carries the rejection reason when accepted is false.
+  string message = 2;
+  // members is the current cluster member list sent to the joining node.
+  repeated Member members = 3;
+  // node_cert / node_key are a PEM certificate issued by the cluster CA
+  // for the joining node. Empty on relayed joins.
+  bytes node_cert = 4;
+  bytes node_key = 5;
+  // ca_cert is the cluster CA certificate (PEM). Install it as the trust root.
+  bytes ca_cert = 6;
+  // join_token_hash is the SHA-256 of the cluster join token so the new
+  // node can validate future joiners.
+  bytes join_token_hash = 7;
+}
+
+// ControlService handles operator commands from the CLI to the local daemon.
+service ControlService {
+  // RequestJoin tells the local daemon to join the cluster at addr.
+  rpc RequestJoin(RequestJoinRequest) returns (RequestJoinResponse);
+  // RequestPromote asks the local daemon to promote a node (empty id = self).
+  rpc RequestPromote(RequestPromoteRequest) returns (RequestPromoteResponse);
+}
+
+message RequestJoinRequest {
+  // addr is the gRPC Runtime API address of any existing cluster member.
+  string addr = 1;
+  // token is the cluster join token printed by `clusdr init`.
+  string token = 2;
+  // observer is true when the local daemon should join as a Raft non-voter.
+  bool observer = 3;
+}
+
+message RequestJoinResponse {
+  bool joined = 1;
+  string message = 2;
+  // members is the cluster state after joining.
+  repeated Member members = 3;
+  // cert_issued is true when the cluster returned a node certificate.
+  bool cert_issued = 4;
+}
+
+message PromoteRequest {
+  string node_id = 1;
+  // relay is set when a follower forwards Promote to the leader.
+  bool relay = 2;
+}
+
+message PromoteResponse {
+  bool promoted = 1;
+  string message = 2;
+  repeated Member members = 3;
+}
+
+message RequestPromoteRequest {
+  // node_id is the member to promote. Empty means the local node.
+  string node_id = 1;
+}
+
+message RequestPromoteResponse {
+  bool promoted = 1;
+  string message = 2;
+  repeated Member members = 3;
+}

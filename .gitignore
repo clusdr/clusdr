@@ -1,0 +1,34 @@
+.try/
+
+bin/
+dist/
+*.db
+*.sock
+
+# Config with secrets
+clusdr.yaml
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test output
+*.test
+*.out
+coverage.txt
+
+# Python SDK
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/

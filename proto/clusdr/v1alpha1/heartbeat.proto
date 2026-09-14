@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// HeartbeatService is the liveness probe called by peer nodes.
+service HeartbeatService {
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message PingRequest {
+  // sender_id is the node ID of the pinging node.
+  string sender_id = 1;
+}
+
+message PingResponse {
+  // node_id is the responding node's ID.
+  string node_id = 1;
+  bool alive = 2;
+}

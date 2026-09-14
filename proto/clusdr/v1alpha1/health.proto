@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// HealthService provides node health and identity information.
+// Available on both the Control (Unix socket) and Runtime (TCP) APIs.
+service HealthService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  // node_id is the unique identifier of this node.
+  string node_id = 1;
+  // cluster_id is the cluster this node belongs to.
+  string cluster_id = 2;
+  // role is the current role of this node (standalone | follower | leader).
+  string role = 3;
+  // healthy is true when the node is running and reachable.
+  bool healthy = 4;
+}

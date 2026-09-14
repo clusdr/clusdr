@@ -1,0 +1,31 @@
+services:
+  clusdr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: dev
+    image: clusdr:dev
+    restart: unless-stopped
+    environment:
+      CLUSDR_NODE_ADDR: "0.0.0.0:7947"
+      CLUSDR_GRPC_ADDR: "0.0.0.0:7947"
+      CLUSDR_DATA_DIR: "/var/lib/clusdr"
+      CLUSDR_LOG_FORMAT: "json"
+      CLUSDR_LOG_LEVEL: "info"
+      # Set these in a .env file or override on the command line:
+      # CLUSDR_NODE_ID: ""
+      # CLUSDR_CLUSTER_ID: ""
+    ports:
+      - "7947:7947"
+    volumes:
+      - clusdr-data:/var/lib/clusdr
+    healthcheck:
+      test: ["CMD", "/clusdr", "version"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  clusdr-data:

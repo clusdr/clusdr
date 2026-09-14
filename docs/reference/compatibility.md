@@ -1,0 +1,39 @@
+# Compatibility
+
+What this version is built and tested against. Anything else is unclaimed.
+
+## Supported
+
+| Layer | Value |
+|---|---|
+| Daemon language / build | Go 1.25 |
+| Application protocol | gRPC, package `clusdr.v1alpha1` |
+| Go SDK module | `github.com/odurgut/clusdr/sdk` — [docs](../sdk/go.md) |
+| Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md)
+| Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
+| Install script | `https://clusdr.io/install.sh` |
+| Homebrew | `brew install odurgut/tap/clusdr` |
+| Container | Docker Hub `odurgut/clusdr` |
+| Local storage | BoltDB under `data.dir` |
+| Consensus | Hashicorp Raft |
+| Default OS assumption | Linux or macOS (Unix control socket) |
+
+## Best effort
+
+| Layer | Note |
+|---|---|
+| `docker compose up` | One container, `clusdr start`, no `init`. Identity warning in logs. Healthcheck is `clusdr version`, not cluster Health |
+| Cross-host cluster | Works when `raft.addr` and each node's advertised `node.addr` / `grpc.addr` are reachable. Defaults bind Raft to `127.0.0.1:7946` |
+| `CLUSDR_TLS=disabled` | Plaintext. Development only |
+| `go install` of `cmd/clusdr` | Requires a Go toolchain. Not the operator path |
+
+## Not supported
+
+| Layer | Note |
+|---|---|
+| Windows as a documented host | Control API is a Unix socket. Not tested here |
+| apt / rpm / Snap / Homebrew core / Helm | Not published. Use the install script, the tap, or the image |
+| HTTP/JSON Runtime API | gRPC only |
+| Kubernetes operator / Helm | Not in this tree |
+
+API package name **v1alpha1** means the wire shape can still change. [Limits](limits.md).

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package clusdr.v1alpha1;
+
+option go_package = "github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+
+// MembershipService provides cluster membership information.
+// Available on both Control (Unix socket) and Runtime (TCP) APIs.
+service MembershipService {
+  // ListMembers returns all known cluster members and their current status.
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+  // GetLeader returns the current cluster leader.
+  rpc GetLeader(GetLeaderRequest) returns (GetLeaderResponse);
+}
+
+// Member describes a single node in the cluster.
+message Member {
+  // id is the unique identifier of this node.
+  string id = 1;
+  // address is the gRPC Runtime API address of this node.
+  string address = 2;
+  // status is the current liveness of this node: alive | leaving | dead.
+  string status = 3;
+  // leader is true when this node is the current Raft leader.
+  bool leader = 4;
+  // role is voter | observer. Empty means voter.
+  string role = 5;
+}
+
+message ListMembersRequest {}
+
+message ListMembersResponse {
+  repeated Member members = 1;
+}
+
+message GetLeaderRequest {}
+
+message GetLeaderResponse {
+  // leader_id is the node ID of the current leader. Empty if no leader.
+  string leader_id = 1;
+  // address is the gRPC address of the leader node.
+  string address = 2;
+}
