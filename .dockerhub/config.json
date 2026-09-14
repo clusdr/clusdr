@@ -1,0 +1,8 @@
+{
+  "repository": "odurgut/clusdr",
+  "short_description": "A runtime for the cluster. An SDK for the app.",
+  "categories": [
+    {"name": "Developer tools", "slug": "developer-tools"},
+    {"name": "Networking", "slug": "networking"}
+  ]
+}

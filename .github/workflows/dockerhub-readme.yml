@@ -1,0 +1,27 @@
+name: Docker Hub README
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .dockerhub/**
+      - docs/assets/logo-512.png
+      - docs/assets/logo-hub.svg
+      - .github/workflows/dockerhub-readme.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hub:
+    name: Update overview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push description and categories
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: python3 .dockerhub/push.py
