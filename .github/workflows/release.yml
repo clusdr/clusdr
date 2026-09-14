@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ["v[0-9]*"]
+    tags: ["v*.*.*"]
 
 permissions:
   contents: write
@@ -52,25 +52,44 @@ jobs:
   docker:
     name: Docker Hub
     runs-on: ubuntu-latest
-    if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check Docker Hub credentials
+        id: hub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+            echo "DOCKERHUB_USERNAME / DOCKERHUB_TOKEN not set; skipping image"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - if: steps.hub.outputs.skip != 'true'
+        uses: actions/checkout@v4
 
-      - uses: docker/login-action@v3
+      - if: steps.hub.outputs.skip != 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - if: steps.hub.outputs.skip != 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - if: steps.hub.outputs.skip != 'true'
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Image version
+      - if: steps.hub.outputs.skip != 'true'
+        name: Image version
         id: ver
         run: |
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/build-push-action@v6
+      - if: steps.hub.outputs.skip != 'true'
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
