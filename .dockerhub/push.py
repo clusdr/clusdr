@@ -30,7 +30,7 @@ def load() -> tuple[dict, str]:
     return cfg, readme
 
 
-def request(method: str, url: str, token: str | None = None, data: dict | None = None) -> tuple[int, object]:
+def request(method: str, url: str, token: str | None = None, data: object | None = None) -> tuple[int, object]:
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if token:
         headers["Authorization"] = f"JWT {token}"
@@ -74,18 +74,27 @@ def main() -> None:
     payload = {
         "description": cfg["short_description"],
         "full_description": readme,
-        "categories": cfg["categories"],
     }
     status, result = request("PATCH", f"{HUB}/repositories/{ns}/{name}/", token=token, data=payload)
     if status != 200:
         die(f"PATCH repository failed ({status}): {result}")
 
-    cats = result.get("categories") if isinstance(result, dict) else None
-    desc = result.get("description") if isinstance(result, dict) else None
+    cat_status, _ = request(
+        "PATCH",
+        f"{HUB}/repositories/{ns}/{name}/categories/",
+        token=token,
+        data=cfg["categories"],
+    )
+    if cat_status != 200:
+        die(f"PATCH categories failed ({cat_status})")
+
+    status, verify = request("GET", f"{HUB}/repositories/{ns}/{name}/", token=token)
+    if status != 200 or not isinstance(verify, dict):
+        die(f"GET repository failed ({status})")
     print(f"updated {ns}/{name}")
-    print(f"description: {desc}")
-    print(f"categories: {cats}")
-    full = result.get("full_description") if isinstance(result, dict) else None
+    print(f"description: {verify.get('description')}")
+    print(f"categories: {verify.get('categories')}")
+    full = verify.get("full_description")
     print(f"overview_bytes: {len(full.encode()) if isinstance(full, str) else 0}")
 
 
