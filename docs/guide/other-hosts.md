@@ -2,7 +2,7 @@
 
 [Step 2](first-member.md) and [step 3](grow.md) used `127.0.0.1`. That cannot form a cluster across machines. You now point every peer at addresses they can actually dial.
 
-`clusdr` is already on each host ([step 1](install.md)), or you use the Docker Hub image below.
+`clusdr` is already on each host ([step 1](install.md)), or you use the published Linux image below.
 
 ## Addresses
 
@@ -24,12 +24,12 @@ Do not share `data.dir` between two processes. Back it up if you need identity a
 
 TLS stays on. Do not set `CLUSDR_TLS=disabled` unless every node and every client does. Confirm certs with `clusdr certs show`. Apps on a host load PEMs from that host's `data.dir`.
 
-## Docker Hub
+## Container image
 
-The pipeline publishes `odurgut/clusdr`.
+The pipeline publishes `ghcr.io/odurgut/clusdr` (linux/amd64 and linux/arm64).
 
 ```bash
-docker pull odurgut/clusdr
+docker pull ghcr.io/odurgut/clusdr
 ```
 
 Image: distroless non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, exposes **7947**. Map **7946** if Raft peers sit outside the container network.

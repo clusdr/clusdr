@@ -3,13 +3,21 @@ name: Release
 on:
   push:
     tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing git tag to publish the Linux image for
+        required: true
+        default: v0.1.0
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   goreleaser:
     name: GitHub Release
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,53 +58,85 @@ jobs:
           gh release upload "$tag" latest.json --clobber
 
   docker:
-    name: Docker Hub
+    name: Linux image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Check Docker Hub credentials
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Image version
+        id: ver
+        run: |
+          tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Optional Docker Hub login
         id: hub
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
-            echo "DOCKERHUB_USERNAME / DOCKERHUB_TOKEN not set; skipping image"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+          if [ -n "$DOCKERHUB_USERNAME" ] && [ -n "$DOCKERHUB_TOKEN" ]; then
+            echo "push=true" >> "$GITHUB_OUTPUT"
           else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "DOCKERHUB_USERNAME / DOCKERHUB_TOKEN not set; GHCR only"
+            echo "push=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - if: steps.hub.outputs.skip != 'true'
-        uses: actions/checkout@v4
-
-      - if: steps.hub.outputs.skip != 'true'
-        uses: docker/setup-qemu-action@v3
-
-      - if: steps.hub.outputs.skip != 'true'
-        uses: docker/setup-buildx-action@v3
-
-      - if: steps.hub.outputs.skip != 'true'
+      - if: steps.hub.outputs.push == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - if: steps.hub.outputs.skip != 'true'
-        name: Image version
-        id: ver
+      - name: Image tags
+        id: tags
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+          HUB: ${{ steps.hub.outputs.push }}
         run: |
-          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-          echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          {
+            echo "list<<EOF"
+            echo "ghcr.io/odurgut/clusdr:${TAG}"
+            echo "ghcr.io/odurgut/clusdr:latest"
+            if [ "$HUB" = true ]; then
+              echo "odurgut/clusdr:${TAG}"
+              echo "odurgut/clusdr:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-      - if: steps.hub.outputs.skip != 'true'
-        uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            odurgut/clusdr:${{ github.ref_name }}
-            odurgut/clusdr:latest
+          tags: ${{ steps.tags.outputs.list }}
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.commit }}
+
+      - name: Public GHCR package
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            "/user/packages/container/clusdr/visibility" \
+            -f visibility=public \
+            || true

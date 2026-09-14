@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         VERSION: dev
-    # Published users: image: odurgut/clusdr
+    # Published users: image: ghcr.io/odurgut/clusdr
     image: clusdr:dev
     restart: unless-stopped
     environment:

@@ -40,4 +40,4 @@ release:
     ```bash
     curl -fsSL https://clusdr.io/install.sh | sh
     ```
-    Linux amd64/arm64. Image: `odurgut/clusdr`.
+    Linux amd64/arm64. Image: `ghcr.io/odurgut/clusdr`.

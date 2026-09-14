@@ -47,10 +47,10 @@ No `CLUSDR_*` is required on a laptop.
 
 ## Other ways to get the binary
 
-**Docker Hub** (the published image; used later on [other hosts](other-hosts.md)):
+**GHCR** (the published Linux image; used later on [other hosts](other-hosts.md)):
 
 ```bash
-docker pull odurgut/clusdr
+docker pull ghcr.io/odurgut/clusdr
 ```
 
 The image is distroless, non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, port **7947**. Map Raft **7946** if peers sit outside the container network.

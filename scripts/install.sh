@@ -30,7 +30,7 @@ os_arch() {
 	case "$os" in
 	linux) ;;
 	darwin)
-		die "macOS is not a supported host. Clusdr ships Linux amd64/arm64. Use Docker Hub odurgut/clusdr, or build from source."
+		die "macOS is not a supported host. Clusdr ships Linux amd64/arm64. Use ghcr.io/odurgut/clusdr, or build from source."
 		;;
 	mingw* | msys* | cygwin* | windows*)
 		die "Windows is not a supported host. Clusdr ships Linux amd64/arm64."
