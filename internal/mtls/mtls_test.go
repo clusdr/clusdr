@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/odurgut/clusdr/internal/mtls"
-	"github.com/odurgut/clusdr/internal/pki"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/pki"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func TestWriteLoadFiles(t *testing.T) {

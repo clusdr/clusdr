@@ -1,4 +1,4 @@
-module github.com/odurgut/clusdr/api
+module github.com/durguto/clusdr/api
 
 go 1.25.0
 

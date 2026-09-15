@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/odurgut/clusdr/internal/leases"
-	"github.com/odurgut/clusdr/internal/mtls"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/leases"
+	"github.com/durguto/clusdr/internal/mtls"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 // LeaseRaft is the consensus surface LeaseService uses. Implemented by *consensus.Node.

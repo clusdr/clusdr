@@ -3,9 +3,9 @@ package app
 import (
 	"fmt"
 
-	"github.com/odurgut/clusdr/internal/mtls"
-	"github.com/odurgut/clusdr/internal/pki"
-	"github.com/odurgut/clusdr/internal/store"
+	"github.com/durguto/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/pki"
+	"github.com/durguto/clusdr/internal/store"
 )
 
 // joinSec implements grpcserver.JoinSecurity using the local store.

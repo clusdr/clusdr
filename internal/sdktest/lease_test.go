@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/grpcserver"
-	"github.com/odurgut/clusdr/internal/leases"
-	"github.com/odurgut/clusdr/internal/membership"
-	"github.com/odurgut/clusdr/sdk"
+	"github.com/durguto/clusdr/internal/grpcserver"
+	"github.com/durguto/clusdr/internal/leases"
+	"github.com/durguto/clusdr/internal/membership"
+	"github.com/durguto/clusdr/sdk"
 )
 
 func startLeaseSDKServer(t *testing.T) (addr string, table *leases.Table) {

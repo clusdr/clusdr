@@ -59,8 +59,8 @@ cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
 internal/           daemon
 proto/              .proto sources
-api/                generated Go stubs (module github.com/odurgut/clusdr/api)
-sdk/                application SDK (module github.com/odurgut/clusdr/sdk)
+api/                generated Go stubs (module github.com/durguto/clusdr/api)
+sdk/                application SDK (module github.com/durguto/clusdr/sdk)
 ```
 
 Sibling checkouts:

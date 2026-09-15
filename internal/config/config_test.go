@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/config"
+	"github.com/durguto/clusdr/internal/config"
 )
 
 func TestDefaults(t *testing.T) {

@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/events"
 )
 
 // Status is the liveness state of a cluster member.

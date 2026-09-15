@@ -12,7 +12,7 @@ The [guide](../guide/from-your-app.md) is the first call. These pages are the SD
 
 | Language | Install | Start here |
 |---|---|---|
-| Go | `go get github.com/odurgut/clusdr/sdk` | [Go SDK](go.md) |
+| Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
 
 CPython 3.10+. Wire package `clusdr.v1alpha1`.

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/odurgut/clusdr/internal/store"
+	"github.com/durguto/clusdr/internal/store"
 )
 
 func openTemp(t *testing.T) *store.Store {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/odurgut/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/events"
 )
 
 func TestTopicFromType(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func (c *client) Lock(ctx context.Context, name string, ttl time.Duration) (*Lock, error) {

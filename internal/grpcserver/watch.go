@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/odurgut/clusdr/internal/eventbus"
-	"github.com/odurgut/clusdr/internal/events"
-	"github.com/odurgut/clusdr/internal/membership"
-	proto "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/eventbus"
+	"github.com/durguto/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/membership"
+	proto "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 // WatchStater provides the current cluster state for the snapshot sent to

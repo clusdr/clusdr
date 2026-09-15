@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/odurgut/clusdr/internal/mtls"
-	"github.com/odurgut/clusdr/internal/pki"
-	"github.com/odurgut/clusdr/internal/store"
+	"github.com/durguto/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/pki"
+	"github.com/durguto/clusdr/internal/store"
 )
 
 func TestShowCerts_ReadsPEMFiles(t *testing.T) {

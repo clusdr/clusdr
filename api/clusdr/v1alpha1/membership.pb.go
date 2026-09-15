@@ -293,7 +293,7 @@ const file_clusdr_v1alpha1_membership_proto_rawDesc = "" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress2\xc1\x01\n" +
 	"\x11MembershipService\x12X\n" +
 	"\vListMembers\x12#.clusdr.v1alpha1.ListMembersRequest\x1a$.clusdr.v1alpha1.ListMembersResponse\x12R\n" +
-	"\tGetLeader\x12!.clusdr.v1alpha1.GetLeaderRequest\x1a\".clusdr.v1alpha1.GetLeaderResponseB>Z<github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\tGetLeader\x12!.clusdr.v1alpha1.GetLeaderRequest\x1a\".clusdr.v1alpha1.GetLeaderResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_membership_proto_rawDescOnce sync.Once

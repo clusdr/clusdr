@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func displayMemberRole(m *pb.Member) string {

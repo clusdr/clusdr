@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/locks"
+	"github.com/durguto/clusdr/internal/locks"
 )
 
 func TestRunExpirer_ReleasesDueLock(t *testing.T) {

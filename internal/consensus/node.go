@@ -15,9 +15,9 @@ import (
 	raftlib "github.com/hashicorp/raft"
 	raftbolt "github.com/hashicorp/raft-boltdb/v2"
 
-	"github.com/odurgut/clusdr/internal/leases"
-	"github.com/odurgut/clusdr/internal/locks"
-	"github.com/odurgut/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/leases"
+	"github.com/durguto/clusdr/internal/locks"
+	"github.com/durguto/clusdr/internal/membership"
 )
 
 // Config holds Raft-specific parameters.

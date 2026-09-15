@@ -8,11 +8,11 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/odurgut/clusdr/internal/config"
-	"github.com/odurgut/clusdr/internal/mtls"
-	"github.com/odurgut/clusdr/internal/pki"
-	"github.com/odurgut/clusdr/internal/store"
-	"github.com/odurgut/clusdr/internal/uid"
+	"github.com/durguto/clusdr/internal/config"
+	"github.com/durguto/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/pki"
+	"github.com/durguto/clusdr/internal/store"
+	"github.com/durguto/clusdr/internal/uid"
 )
 
 func newInitCmd(f *rootFlags) *cobra.Command {

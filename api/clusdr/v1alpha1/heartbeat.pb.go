@@ -130,7 +130,7 @@ const file_clusdr_v1alpha1_heartbeat_proto_rawDesc = "" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x14\n" +
 	"\x05alive\x18\x02 \x01(\bR\x05alive2W\n" +
 	"\x10HeartbeatService\x12C\n" +
-	"\x04Ping\x12\x1c.clusdr.v1alpha1.PingRequest\x1a\x1d.clusdr.v1alpha1.PingResponseB>Z<github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\x04Ping\x12\x1c.clusdr.v1alpha1.PingRequest\x1a\x1d.clusdr.v1alpha1.PingResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_heartbeat_proto_rawDescOnce sync.Once

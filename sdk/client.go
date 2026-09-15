@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 type client struct {

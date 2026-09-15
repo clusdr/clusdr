@@ -1,6 +1,6 @@
 # gRPC API
 
-Package `clusdr.v1alpha1`. Sources: `proto/clusdr/v1alpha1/`. Generated Go stubs: module `github.com/odurgut/clusdr/api`.
+Package `clusdr.v1alpha1`. Sources: `proto/clusdr/v1alpha1/`. Generated Go stubs: module `github.com/durguto/clusdr/api`.
 
 Applications should use the [SDKs](../../sdk/README.md). This section is the wire contract.
 

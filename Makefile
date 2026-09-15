@@ -4,7 +4,7 @@ VERSION  ?= dev
 COMMIT   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
 BUILT_AT ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-PKG      := github.com/odurgut/clusdr/internal/version
+PKG      := github.com/durguto/clusdr/internal/version
 LDFLAGS  := -ldflags "\
   -X $(PKG).Version=$(VERSION) \
   -X $(PKG).Commit=$(COMMIT) \

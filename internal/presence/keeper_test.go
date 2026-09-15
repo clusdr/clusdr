@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/presence"
+	"github.com/durguto/clusdr/internal/presence"
 )
 
 type fakeHolder struct {

@@ -1,4 +1,4 @@
-module github.com/odurgut/clusdr
+module github.com/durguto/clusdr
 
 go 1.25.0
 
@@ -29,8 +29,8 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/odurgut/clusdr/api v0.1.0
-	github.com/odurgut/clusdr/sdk v0.1.0
+	github.com/durguto/clusdr/api v0.1.0
+	github.com/durguto/clusdr/sdk v0.1.0
 	github.com/spf13/pflag v1.0.10 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
@@ -38,6 +38,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 )
 
-replace github.com/odurgut/clusdr/api => ./api
+replace github.com/durguto/clusdr/api => ./api
 
-replace github.com/odurgut/clusdr/sdk => ./sdk
+replace github.com/durguto/clusdr/sdk => ./sdk

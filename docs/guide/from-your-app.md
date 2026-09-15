@@ -14,7 +14,7 @@ Keep `clusdr start` running. Then pick a language:
 
 | Language | Install | Full docs |
 |---|---|---|
-| Go | `go get github.com/odurgut/clusdr/sdk` | [Go SDK](../sdk/go.md) |
+| Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
 
 ```go

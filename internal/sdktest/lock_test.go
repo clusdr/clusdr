@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/grpcserver"
-	"github.com/odurgut/clusdr/internal/locks"
-	"github.com/odurgut/clusdr/internal/membership"
-	"github.com/odurgut/clusdr/sdk"
+	"github.com/durguto/clusdr/internal/grpcserver"
+	"github.com/durguto/clusdr/internal/locks"
+	"github.com/durguto/clusdr/internal/membership"
+	"github.com/durguto/clusdr/sdk"
 )
 
 func startLockSDKServer(t *testing.T) (addr string, table *locks.Table) {

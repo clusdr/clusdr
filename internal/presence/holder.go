@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/odurgut/clusdr/internal/mtls"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/mtls"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 // RaftMutator is the leader-side lease surface. Implemented by *consensus.Node.

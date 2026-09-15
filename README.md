@@ -13,7 +13,7 @@
   <a href="https://github.com/durguto/clusdr/actions/workflows/ci.yml"><img src="https://github.com/durguto/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/durguto/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/durguto/clusdr" alt="Go version"></a>
   <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr" alt="Release"></a>
-  <a href="https://pkg.go.dev/github.com/odurgut/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/odurgut/clusdr/sdk.svg" alt="Go Reference"></a>
+  <a href="https://pkg.go.dev/github.com/durguto/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/durguto/clusdr/sdk.svg" alt="Go Reference"></a>
   <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=docker" alt="Docker"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
 </p>
@@ -56,7 +56,7 @@ c = local()
 members = c.members()
 ```
 
-Go: `go get github.com/odurgut/clusdr/sdk`. Python: `pip install clusdr`.
+Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`.
 
 ## Docs
 

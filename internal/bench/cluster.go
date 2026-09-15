@@ -10,10 +10,10 @@ import (
 
 	raftlib "github.com/hashicorp/raft"
 
-	"github.com/odurgut/clusdr/internal/consensus"
-	"github.com/odurgut/clusdr/internal/leases"
-	"github.com/odurgut/clusdr/internal/locks"
-	"github.com/odurgut/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/consensus"
+	"github.com/durguto/clusdr/internal/leases"
+	"github.com/durguto/clusdr/internal/locks"
+	"github.com/durguto/clusdr/internal/membership"
 )
 
 const (

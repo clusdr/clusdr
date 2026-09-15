@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
-	"github.com/odurgut/clusdr/internal/membership"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/membership"
 )
 
 // MemberLister is the read interface the membership service consumes.

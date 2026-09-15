@@ -10,12 +10,12 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
-	"github.com/odurgut/clusdr/internal/eventbus"
-	"github.com/odurgut/clusdr/internal/events"
-	"github.com/odurgut/clusdr/internal/membership"
-	"github.com/odurgut/clusdr/internal/mtls"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
-	"github.com/odurgut/clusdr/internal/uid"
+	"github.com/durguto/clusdr/internal/eventbus"
+	"github.com/durguto/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/mtls"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/uid"
 )
 
 const seenEventCap = 4096

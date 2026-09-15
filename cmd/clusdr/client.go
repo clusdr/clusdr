@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/odurgut/clusdr/internal/config"
-	"github.com/odurgut/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/config"
+	"github.com/durguto/clusdr/internal/mtls"
 )
 
 // dialDaemon opens a gRPC connection to the running daemon's Runtime API.

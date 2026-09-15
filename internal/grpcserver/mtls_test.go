@@ -8,11 +8,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/odurgut/clusdr/internal/grpcserver"
-	"github.com/odurgut/clusdr/internal/membership"
-	"github.com/odurgut/clusdr/internal/mtls"
-	"github.com/odurgut/clusdr/internal/pki"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/grpcserver"
+	"github.com/durguto/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/mtls"
+	"github.com/durguto/clusdr/internal/pki"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func startMTLSServer(t *testing.T, ca, cert, key []byte) (*grpcserver.Server, string) {

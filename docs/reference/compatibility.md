@@ -8,7 +8,7 @@ What this version is built and tested against. Anything else is unclaimed.
 |---|---|
 | Daemon language / build | Go 1.25 |
 | Application protocol | gRPC, package `clusdr.v1alpha1` |
-| Go SDK module | `github.com/odurgut/clusdr/sdk` — [docs](../sdk/go.md) |
+| Go SDK module | `github.com/durguto/clusdr/sdk` — [docs](../sdk/go.md) |
 | Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md) |
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |

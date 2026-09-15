@@ -1,12 +1,12 @@
 # Go SDK
 
-Module `github.com/odurgut/clusdr/sdk`, package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](README.md).
+Module `github.com/durguto/clusdr/sdk`, package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](README.md).
 
 ```bash
-go get github.com/odurgut/clusdr/sdk
+go get github.com/durguto/clusdr/sdk
 ```
 
-Same version train as the daemon (first release: `v0.1.0`). Wire types live in `github.com/odurgut/clusdr/api`.
+Same version train as the daemon. Wire types live in `github.com/durguto/clusdr/api`.
 
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
@@ -17,7 +17,7 @@ import (
     "context"
     "time"
 
-    "github.com/odurgut/clusdr/sdk"
+    "github.com/durguto/clusdr/sdk"
 )
 
 c, err := clusdr.Local()

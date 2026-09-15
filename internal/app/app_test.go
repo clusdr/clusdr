@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/app"
-	"github.com/odurgut/clusdr/internal/eventbus"
-	"github.com/odurgut/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/app"
+	"github.com/durguto/clusdr/internal/eventbus"
+	"github.com/durguto/clusdr/internal/events"
 )
 
 func nopOpts() app.Options {

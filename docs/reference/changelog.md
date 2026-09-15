@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Go module path is `github.com/durguto/clusdr` (`sdk/`, `api/`). Proxy `v0.1.0` stays `github.com/odurgut/clusdr`.
+
 ## 0.1.0 — 2026-09-14
 
 First tagged release. Daemon, Go SDK (`github.com/odurgut/clusdr/sdk` + `…/api`), and Python `clusdr` share this version.

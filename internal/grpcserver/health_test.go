@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/odurgut/clusdr/internal/grpcserver"
-	pb "github.com/odurgut/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/grpcserver"
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func nopLogger() *slog.Logger {

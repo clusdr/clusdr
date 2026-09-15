@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/events"
-	"github.com/odurgut/clusdr/internal/locks"
+	"github.com/durguto/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/locks"
 )
 
 func TestAcquire_SecondHolderLoses(t *testing.T) {

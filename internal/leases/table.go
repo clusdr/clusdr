@@ -9,7 +9,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/odurgut/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/events"
 )
 
 const (

@@ -199,7 +199,7 @@ const file_clusdr_v1alpha1_watch_proto_rawDesc = "" +
 	"\x11timestamp_unix_ms\x18\x04 \x01(\x03R\x0ftimestampUnixMs\x12\x10\n" +
 	"\x03seq\x18\x05 \x01(\x04R\x03seq2X\n" +
 	"\fWatchService\x12H\n" +
-	"\x05Watch\x12\x1d.clusdr.v1alpha1.WatchRequest\x1a\x1e.clusdr.v1alpha1.WatchResponse0\x01B>Z<github.com/odurgut/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\x05Watch\x12\x1d.clusdr.v1alpha1.WatchRequest\x1a\x1e.clusdr.v1alpha1.WatchResponse0\x01B>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_watch_proto_rawDescOnce sync.Once

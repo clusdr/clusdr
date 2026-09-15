@@ -6,7 +6,7 @@ import (
 
 	raftlib "github.com/hashicorp/raft"
 
-	"github.com/odurgut/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/membership"
 )
 
 func addObserver(t *testing.T, c *chaosCluster, id string) *chaosNode {

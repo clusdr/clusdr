@@ -117,7 +117,7 @@ Init the volume before the first `start --bootstrap`.
 This image is the daemon, not the SDK.
 
 ```bash
-go get github.com/odurgut/clusdr/sdk
+go get github.com/durguto/clusdr/sdk
 pip install clusdr
 ```
 

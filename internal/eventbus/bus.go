@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/events"
+	"github.com/durguto/clusdr/internal/events"
 )
 
 // Bus fans out published events to all active subscriptions.

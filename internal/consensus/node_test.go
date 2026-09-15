@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/odurgut/clusdr/internal/consensus"
-	"github.com/odurgut/clusdr/internal/membership"
+	"github.com/durguto/clusdr/internal/consensus"
+	"github.com/durguto/clusdr/internal/membership"
 )
 
 // nopApplier satisfies consensus.MemberApplier without any real membership engine.
