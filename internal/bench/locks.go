@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	raftlib "github.com/hashicorp/raft"
@@ -13,6 +14,14 @@ func transientLeadership(err error) bool {
 	return errors.Is(err, raftlib.ErrLeadershipLost) ||
 		errors.Is(err, raftlib.ErrNotLeader) ||
 		errors.Is(err, raftlib.ErrLeadershipTransferInProgress)
+}
+
+func alreadyReleased(err error) bool {
+	if err == nil {
+		return false
+	}
+	s := err.Error()
+	return strings.Contains(s, "is not held") || strings.Contains(s, "fencing token mismatch")
 }
 
 func measureLocks(ctx context.Context, cl *Cluster, ops int) (Result, error) {
@@ -66,8 +75,16 @@ func measureLocks(ctx context.Context, cl *Cluster, ops int) (Result, error) {
 		if i >= warmup {
 			samples = append(samples, elapsed)
 		}
-		if err := lead.Raft.ApplyLockRelease(name, "bench", tok); err != nil {
+		for {
+			err := lead.Raft.ApplyLockRelease(name, "bench", tok)
+			if err == nil || alreadyReleased(err) {
+				break
+			}
 			if !transientLeadership(err) {
+				return Result{}, fmt.Errorf("locks sample %d: release: %w", i, err)
+			}
+			retries++
+			if retries > 20 {
 				return Result{}, fmt.Errorf("locks sample %d: release: %w", i, err)
 			}
 			waitCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
@@ -75,9 +92,6 @@ func measureLocks(ctx context.Context, cl *Cluster, ops int) (Result, error) {
 			cancel()
 			if err != nil {
 				return Result{}, fmt.Errorf("locks sample %d: leader: %w", i, err)
-			}
-			if err := lead.Raft.ApplyLockRelease(name, "bench", tok); err != nil {
-				return Result{}, fmt.Errorf("locks sample %d: release: %w", i, err)
 			}
 		}
 	}
