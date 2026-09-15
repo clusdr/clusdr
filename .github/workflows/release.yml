@@ -73,7 +73,7 @@ jobs:
           tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
-          echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - uses: docker/login-action@v3
         with:
@@ -91,6 +91,10 @@ jobs:
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.commit }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
 
       - name: Docker Hub overview
         env:
