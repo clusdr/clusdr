@@ -57,6 +57,7 @@ If you change configuration, CLI, proto, SDK, or defaults, update the matching p
 ```text
 cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
+examples/           small Go and Python programs against a local daemon
 internal/           daemon
 proto/              .proto sources
 api/                generated Go stubs (module github.com/durguto/clusdr/api)

@@ -56,7 +56,7 @@ c = local()
 members = c.members()
 ```
 
-Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`.
+Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Runnable copies: [examples/](examples/).
 
 ## Docs
 

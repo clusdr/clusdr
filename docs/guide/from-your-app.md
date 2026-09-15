@@ -35,7 +35,7 @@ lk = c.lock("scheduler", ttl=15)
 
 What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
 
-Model, env, holder, both languages: **[SDKs](../sdk/)**.
+Model, env, holder, both languages: **[SDKs](../sdk/)**. Copy-paste programs: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
 
 ## Next
 

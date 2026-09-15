@@ -8,7 +8,7 @@ your process  ──►  clusdr on this host  ──►  the rest of the cluster
 
 Same split as a local Docker engine. Two apps on one machine share one daemon.
 
-The [guide](../guide/from-your-app.md) is the first call. These pages are the SDK.
+The [guide](../guide/from-your-app.md) is the first call. These pages are the SDK. Runnable copies: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
 
 | Language | Install | Start here |
 |---|---|---|
