@@ -45,7 +45,7 @@ func WithInsecure() Option {
 	return func(o *options) { o.insecure = true }
 }
 
-// WithDataDir is the directory containing ca.crt, node.crt, node.key.
+// WithDataDir is the directory containing ca.crt, node.crt, and node.key.
 func WithDataDir(dir string) Option {
 	return func(o *options) { o.dataDir = dir }
 }
@@ -57,7 +57,8 @@ func WithHolder(id string) Option {
 	return func(o *options) { o.holder = strings.TrimSpace(id) }
 }
 
-// WithRequestTimeout is used when the caller context has no deadline.
+// WithRequestTimeout is used when the caller context has no deadline
+// (default 10s). A context deadline always wins.
 func WithRequestTimeout(d time.Duration) Option {
 	return func(o *options) {
 		if d > 0 {

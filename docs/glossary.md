@@ -16,7 +16,7 @@ Terms used in these docs, the CLI, and the SDK.
 | **Status** | Liveness: `alive`, `leaving`, or `dead`. Not the same as role. |
 | **Role** | Raft suffrage: `voter` or `observer`. CLI also prints `leader` for the current leader. |
 | **Join token** | One-time secret from `clusdr init`. Hash stored; plaintext shown once. |
-| **Presence** | Lease named `presence.<nodeID>`. Expiry removes the member. |
+| **Presence** | Lease named `presence.<nodeID>`. Expiry **removes** the Raft server (`member.left`), not a soft disconnect. Default TTL 3s. |
 | **Fencing token** | Monotonic token on a lock or lease grant. Stale holders cannot unlock a newer grant. |
 | **Watch** | Server stream of cluster and custom events. |
 | **Custom event** | `custom.<topic>` from `Publish`. Gossip, not Raft. |

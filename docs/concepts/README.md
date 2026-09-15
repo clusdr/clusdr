@@ -12,7 +12,7 @@ Guarantees and vocabulary. Learn the product in the [guide](../guide/) first. Fl
 | [Custom events](events.md) | What is `publish`? |
 | [Locks](locks.md) | What is an exclusive name? |
 | [Leases](leases.md) | What is a named TTL grant? |
-| [Presence](presence.md) | How does a dead node leave? |
+| [Presence](presence.md) | Crash vs reboot vs `join`? |
 | [Security](security.md) | How do join tokens and mTLS work? |
 | [Consistency](consistency.md) | What is on Raft, what is not? |
 

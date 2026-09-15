@@ -8,7 +8,7 @@ your process  ──►  clusdr daemon on this host  ──►  the rest of the 
 
 Same split as a local Docker engine. Two apps on one machine share one daemon.
 
-The [guide](../guide/from-your-app.md) is the first call. These pages are the SDK. Runnable copies: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
+The [guide](../guide/from-your-app.md) is the first call. These pages are the walkthrough. Go API on [pkg.go.dev](https://pkg.go.dev/github.com/durguto/clusdr/sdk). Runnable copies: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
 
 | Language | Install | Start here |
 |---|---|---|
@@ -48,3 +48,5 @@ TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` 
 ## Holder
 
 Each connection has a lock/lease identity. Empty → generated `sdk-<hex>`. Two apps on the same host cannot unlock each other unless they share `WithHolder` / `holder=`.
+
+One Go `Cluster` is safe from many goroutines (same holder: `Unlock` is process-wide for that name). Python: unary calls are fine from several threads; run one `watch()` loop per `Cluster` — `close()` cancels the last in-flight Watch RPC.

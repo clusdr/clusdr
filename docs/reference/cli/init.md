@@ -25,4 +25,5 @@ Config already exists without `--force`.
 ## See also
 
 - [Start the first member](../../guide/first-member.md)
+- [Configuration](../configuration.md)
 - [Security](../../concepts/security.md)

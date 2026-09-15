@@ -13,17 +13,19 @@ What this version is built and tested against. Anything else is unclaimed.
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
 | Container | Docker Hub `durguto/clusdr` (linux/amd64, linux/arm64); GHCR mirror `ghcr.io/durguto/clusdr` |
-| Release train | `0.1.1` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr` |
+| Release train | `0.1.2` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr` |
 | Local storage | BoltDB under `data.dir` |
 | Consensus | Hashicorp Raft |
 | Default OS assumption | Linux (Unix control socket) |
+| Multi-host cluster | Linux daemons on different machines. Set dialable `raft.addr` and advertised `node.addr` ([other hosts](../guide/other-hosts.md)). Localhost defaults are laptop-only |
+
+CI in this train is same-host (multiple processes / in-memory partition). Two-VM jobs are not in the matrix; that is a test gap, not “Raft is best effort.”
 
 ## Best effort
 
 | Layer | Note |
 |---|---|
 | `docker compose up` | One container, `clusdr start`, no `init`. Identity warning in logs. Healthcheck is `clusdr version`, not cluster Health |
-| Cross-host cluster | Works when `raft.addr` and each node's advertised `node.addr` / `grpc.addr` are reachable. Defaults bind Raft to `127.0.0.1:7946` |
 | `CLUSDR_TLS=disabled` | Plaintext. Development only |
 | `go install` of `cmd/clusdr` | Requires a Go toolchain. Not the operator path |
 

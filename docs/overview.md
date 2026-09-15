@@ -13,7 +13,7 @@ It does that without being a general-purpose coordination suite.
 
 - Agents or services need membership and a watch stream
 - Services need leader election without standing up etcd or Consul as a product
-- A node dying should produce `member.left` without a graceful leave ([presence](concepts/presence.md))
+- A node dying should produce `member.left` without a graceful leave. That also removes it from Raft; raise presence TTL so a reboot is `start`, not another `join` ([presence](concepts/presence.md))
 - You need exclusive [locks](concepts/locks.md) or named TTL [leases](concepts/leases.md) with fencing tokens
 - Extra hosts should see state without changing quorum ([observers](concepts/observers.md))
 - You need small signals (`publish` → `custom.<topic>`), not a durable log

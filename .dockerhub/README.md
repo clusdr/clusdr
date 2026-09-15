@@ -28,7 +28,8 @@ Application → local SDK → this container → the rest of the cluster
 
 | Tag | What it is |
 |---|---|
-| `v0.1.1` | Current release |
+| `v0.1.2` | Current release |
+| `v0.1.1` | Go 1.27, `durguto/clusdr` |
 | `v0.1.0` | First release |
 | `latest` | Same image as the newest `vX.Y.Z` |
 
@@ -95,7 +96,7 @@ In-tree `docker-compose.yml` is **one node** and does not run `init`. A healthch
 ```yaml
 services:
   clusdr:
-    image: durguto/clusdr:v0.1.1
+    image: durguto/clusdr:v0.1.2
     restart: unless-stopped
     environment:
       CLUSDR_NODE_ADDR: "127.0.0.1:7947"

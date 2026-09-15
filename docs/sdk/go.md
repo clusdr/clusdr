@@ -1,6 +1,6 @@
 # Go SDK
 
-Module `github.com/durguto/clusdr/sdk`, package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](./).
+Module [`github.com/durguto/clusdr/sdk`](https://pkg.go.dev/github.com/durguto/clusdr/sdk), package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](./).
 
 ```bash
 go get github.com/durguto/clusdr/sdk
@@ -8,7 +8,7 @@ go get github.com/durguto/clusdr/sdk
 
 Same version train as the daemon. Wire types live in `github.com/durguto/clusdr/api`.
 
-A running daemon is required ([guide: first member](../guide/first-member.md)).
+**pkg.go.dev** is the API reference (package comment, examples, every exported type). This page is the walkthrough. A running daemon is required ([guide: first member](../guide/first-member.md)).
 
 ## Connect
 
@@ -33,7 +33,7 @@ defer c.Close()
 c, err := clusdr.Dial("127.0.0.1:8947", clusdr.WithDataDir("./data-b"))
 ```
 
-`Dial` is for tests and operators. Apps use `Local`.
+`Dial` is not wrong; it is `Local` with an explicit address. Use it in tests and when a second daemon on this host listens on another port. Do not `Dial` a **remote** node's Runtime API as the normal app path — put a daemon on that host and call `Local` there. The SDK never meshes with Raft peers.
 
 | Option | Meaning |
 |---|---|
@@ -43,6 +43,14 @@ c, err := clusdr.Dial("127.0.0.1:8947", clusdr.WithDataDir("./data-b"))
 | `WithRequestTimeout(d)` | Used when the caller context has **no** deadline (default 10s) |
 
 If the caller context already has a deadline, that deadline wins.
+
+## Concurrent use
+
+One `Cluster` is safe from many goroutines: unary RPCs, independent `Watch` calls (each has its own channel and stream), and different lock **names**.
+
+Same connection = same holder. `Unlock("scheduler")` from any goroutine releases that name for the whole process. Two goroutines `Lock`ing the same name both see the same grant (idempotent on this holder); they do not get two exclusive owners.
+
+Do not `range` the same Watch channel from two goroutines unless you want events split between them. `Close` cancels in-flight RPCs and Watch streams.
 
 ## `Cluster`
 
@@ -218,4 +226,4 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 - Join, promote, config
 - A public `WithReadyTimeout`
 
-Wire shapes: [gRPC API](../reference/api/).
+Wire shapes: [gRPC API](../reference/api/). Runnable programs: [examples/](https://github.com/durguto/clusdr/tree/main/examples).

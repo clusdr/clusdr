@@ -39,7 +39,9 @@ from clusdr import dial
 c = dial("127.0.0.1:8947", data_dir="./data-b")
 ```
 
-`dial` is for tests and operators. Apps use `local()`.
+`dial` is `local()` with an explicit address (tests, a second daemon on this host). Do not `dial` a **remote** node's Runtime API as the normal app path — put a daemon on that host and call `local()` there.
+
+Unary methods are fine from several threads. Same connection = same holder (`unlock` is process-wide for that name). Run one `watch()` loop per client.
 
 ```python
 local(
@@ -110,7 +112,7 @@ for event in c.watch():
         event.payload  # bytes
 ```
 
-`watch()` is a blocking iterator. It reconnects with `last_seq` on drop (backoff 0.05s → 2s). `close()` cancels the in-flight RPC and ends the loop.
+`watch()` is a blocking iterator. It reconnects with `last_seq` on drop (backoff 0.05s → 2s). `close()` cancels the in-flight RPC and ends the loop. Run **one** `watch()` per `Cluster`; a second loop overwrites the cancel handle. Unary methods (`members`, `lock`, `publish`, …) are fine from other threads.
 
 `topics` / `event_types` match the CLI. Empty (default) is the full bus.
 

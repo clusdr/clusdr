@@ -15,8 +15,12 @@ On **every** node:
 | `grpc.addr` / `CLUSDR_GRPC_ADDR` | Bind address for the Runtime API |
 | `data.dir` | Unique per process |
 
+Config file vs data dir vs socket, laptop vs `/etc` + `/var/lib`: [Configuration](../reference/configuration.md).
+
 Seed: `clusdr init`, then `clusdr start --bootstrap`.  
 Others: `clusdr start` without bootstrap, then `clusdr join --token … <seed-runtime>`.
+
+After that, a reboot of the **same** `data.dir` is `clusdr start` again if the node is still in Raft. Default presence TTL is 3s, which ejects a host that takes longer to come back — raise `lease.presence_ttl` on servers ([presence](../concepts/presence.md)). Do not `init` a second time.
 
 Prefer 3 or 5 **voters**. Extra machines that only need a local API: `join --observer` ([step 3](grow.md)).
 

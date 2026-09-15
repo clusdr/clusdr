@@ -51,6 +51,8 @@ TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
 | `clusdr leader` / SDK `Unavailable` | No current leader | One voter: that process must be up. Three voters: majority must be up ([leadership](../concepts/leadership.md)) |
 | Frequent elections, flapping leader | Peer RTT larger than Raft timers | Defaults are 150ms heartbeat/election. Raise them ([limits](limits.md), [configuration](configuration.md)) |
 | `member.left` while the process still exists | Presence lease `presence.<nodeID>` expired (default 3s) | Process wedged or partitioned. Heartbeats are the slower backup ([presence](../concepts/presence.md)) |
+| After every reboot I must `join` again | Default `presence_ttl` 3s elapsed while the host was down; the leader **removed** the Raft server | Raise `lease.presence_ttl` above reboot time. Same `data.dir` + `clusdr start` if still a member. `join` only after removal ([presence](../concepts/presence.md)) |
+| `member.left` after crash / SIGKILL / reboot | Same path as a leave. No `disconnect` event | Expected. Rejoin with the same token and `node.id` only if the TTL already fired |
 | Extra elections on Docker / two hosts | `node.addr` is `0.0.0.0` or `127.0.0.1` on a remote peer | Advertise a host:port **peers can dial** ([other hosts](../guide/other-hosts.md)) |
 | `Health.healthy` is always true | Not a bug | `Health.role` is always `standalone` in this version. Use `members` |
 

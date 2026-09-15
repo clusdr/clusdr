@@ -106,7 +106,9 @@ There is no demote in this version.
 
 ## What “alive” means
 
-Each daemon holds a presence lease `presence.<nodeID>` (default 3s). If it expires, the leader removes the member and you see `member.left`. Heartbeats are the slower backup.
+Each daemon holds a presence lease `presence.<nodeID>`. If it expires, the leader **removes that Raft server** and you see `member.left`. Heartbeats are the slower backup.
+
+Default TTL is **3s** (fine for this laptop kill-and-watch). On real hosts that reboot, raise `lease.presence_ttl` and treat `join` as first add / after removal — not every boot. Full operator path: [presence](../concepts/presence.md).
 
 Kill the observer: the voter list and quorum stay put. Kill a voter in a 3-node cluster: the other two elect.
 

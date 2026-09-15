@@ -33,6 +33,7 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 - Default Raft heartbeat and election are 150ms. If peer RTT is larger, raise them or you get extra elections
 - `docker compose` is a single node without `init`
 - Two processes must not share one `data.dir`
+- Presence expiry (and heartbeat misses) **remove** the Raft server. There is no `disconnect` event and no auto-rejoin. Default TTL is 3s; raise it for reboots ([presence](../concepts/presence.md))
 
 ## Distribution
 

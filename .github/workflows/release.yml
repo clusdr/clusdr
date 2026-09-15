@@ -8,7 +8,7 @@ on:
       tag:
         description: Existing git tag to publish Hub and GHCR images for
         required: true
-        default: v0.1.1
+        default: v0.1.2
 
 permissions:
   contents: write

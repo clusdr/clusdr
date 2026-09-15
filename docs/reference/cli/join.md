@@ -2,6 +2,8 @@
 
 Tells the **local** daemon to join the cluster member at `<addr>` (that member's Runtime API). The local daemon must already be running.
 
+Use this for a process that is **not** in the Raft configuration yet: first join, or after [presence](../../concepts/presence.md) already removed the node. A restart that beats `lease.presence_ttl` is `clusdr start` only — not another `join`. Same token and `node.id` if you do have to join again.
+
 ## Synopsis
 
 ```bash
@@ -27,6 +29,7 @@ clusdr join --token <token> [--observer] <addr>
 
 ## See also
 
+- [Presence](../../concepts/presence.md) — when `join` is needed after a reboot
 - [Errors](../../reference/errors.md)
 - [Grow the cluster](../../guide/grow.md)
 - [ControlService](../api/control.md)

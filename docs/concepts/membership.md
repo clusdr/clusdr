@@ -24,11 +24,16 @@ Join and leave that change the Raft configuration go through the **leader**. A f
 
 The first process in a new cluster must bootstrap. Later nodes must not.
 
+`join` is once per **new** Raft member (or after the leader already removed that id). A reboot of a node that is still in the configuration is `clusdr start` with the same `data.dir`. Details: [presence](presence.md).
+
 ## How a node disappears
 
-- Operator or peer leave → leader `RemoveServer` + `remove_member`
-- [Presence](presence.md) lease expiry → same leave path
-- Heartbeat misses (slower backup)
+There is no separate disconnect signal. Watch only has `member.left`.
+
+- [Presence](presence.md) lease expiry → leader `RemoveServer` + `remove_member` (default TTL 3s)
+- Heartbeat misses → same remove path (slower backup)
+
+A host that was removed must `join` again. One that returns inside the TTL does not.
 
 ## Listing
 
@@ -39,6 +44,7 @@ No leader → `GetLeader` returns `Unavailable`.
 
 ## Related
 
+- [Presence](presence.md)
 - [Observers](observers.md)
 - [Leadership](leadership.md)
 - [Start the first member](../guide/first-member.md)

@@ -16,7 +16,9 @@ You need `clusdr` on `PATH` from [step 1](install.md).
 clusdr init
 ```
 
-This writes `clusdr.yaml`, a cluster id, a node id, a cluster CA, a seed certificate, and a **join token**. It does not start anything.
+This writes `clusdr.yaml` in the current directory (or `--config`), a cluster id, a node id, a cluster CA, a seed certificate, and a **join token**. It does not start anything.
+
+The YAML is short: ids, advertised `node.addr`, log. Other knobs stay at built-in defaults until you add them. How to edit that file, and a server layout: [Configuration](../reference/configuration.md).
 
 The token is printed **once**. Copy it. You need it in [step 3](grow.md). The hash is stored; the plaintext is not.
 

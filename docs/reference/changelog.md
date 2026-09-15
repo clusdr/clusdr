@@ -2,12 +2,24 @@
 
 ## Unreleased
 
+## 0.1.2 — 2026-09-15
+
+Daemon, Go modules `sdk`/`api`, and Python `clusdr` share `0.1.2`.
+
 ### Added
 
 - GHCR mirror `ghcr.io/durguto/clusdr` (same tags as Docker Hub `durguto/clusdr`)
 - [Errors](errors.md) lookup: join token, TLS, dial, observer locks
 - [examples/](https://github.com/durguto/clusdr/tree/main/examples): Go `who` / `scheduler` / `worker`, Python `watch` / `agent`
 - SDK Watch topic / event-type filters (`WithTopics` / `watch(topics=…)`), same semantics as CLI `--topic` / `--type`
+- [Configuration](configuration.md): what `init` writes, how to edit, laptop vs server paths
+- [Presence](../concepts/presence.md): reboot vs `join`, default 3s TTL, what to set on a server
+- [Compatibility](compatibility.md): multi-host cluster is supported (not “best effort”)
+- Go SDK package docs and examples for pkg.go.dev; goroutine / Local vs Dial notes on the SDK walkthrough
+
+### Notes
+
+- Proxy `v0.1.0` for `github.com/odurgut/clusdr` is frozen. Do not retag it. Use `github.com/durguto/clusdr`.
 
 ## 0.1.1 — 2026-09-15
 
