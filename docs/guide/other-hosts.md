@@ -56,3 +56,4 @@ You installed a binary, bootstrapped a member, grew the cluster, watched the str
 - Still deciding if this is the right tool: [Overview](../overview.md)
 - Guarantees (what is on Raft, how presence works): [concepts](../concepts/)
 - A flag, RPC, or SDK type: [reference](../reference/)
+- Token, TLS, dial, locks: [Errors](../reference/errors.md)

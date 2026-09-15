@@ -5,6 +5,7 @@
 ### Added
 
 - GHCR mirror `ghcr.io/durguto/clusdr` (same tags as Docker Hub `durguto/clusdr`)
+- [Errors](errors.md) lookup: join token, TLS, dial, observer locks
 
 ## 0.1.1 — 2026-09-15
 

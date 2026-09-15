@@ -38,5 +38,6 @@ Applications talk to the local daemon. Not the operator path.
 | What a word means | [Glossary](glossary.md) |
 | Guarantees (Raft, presence, observers, …) | [Concepts](concepts/) |
 | A flag or RPC | [Reference](reference/) |
+| Join token, TLS, dial, locks | [Errors](reference/errors.md) |
 
 Contributor workflow (build, proto, tests) is in [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md), not in this tree.

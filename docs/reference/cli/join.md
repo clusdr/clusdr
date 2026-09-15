@@ -27,5 +27,6 @@ clusdr join --token <token> [--observer] <addr>
 
 ## See also
 
+- [Errors](../../reference/errors.md)
 - [Grow the cluster](../../guide/grow.md)
 - [ControlService](../api/control.md)
