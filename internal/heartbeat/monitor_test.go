@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 	"github.com/durguto/clusdr/internal/heartbeat"
 	"github.com/durguto/clusdr/internal/membership"
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 func nopLog() *slog.Logger {

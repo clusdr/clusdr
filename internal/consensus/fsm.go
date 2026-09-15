@@ -250,7 +250,7 @@ type fsmSnapshot struct {
 
 func (s *fsmSnapshot) Persist(sink raftlib.SnapshotSink) error {
 	if _, err := sink.Write(s.data); err != nil {
-		sink.Cancel() //nolint:errcheck
+		_ = sink.Cancel()
 		return fmt.Errorf("snapshot persist: %w", err)
 	}
 	return sink.Close()

@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/durguto/clusdr/internal/grpcserver"
 	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	"github.com/durguto/clusdr/internal/grpcserver"
 )
 
 func nopLogger() *slog.Logger {
@@ -31,7 +31,7 @@ func TestHealthService(t *testing.T) {
 		Role:      "standalone",
 	})
 
-	go srv.Serve(ln) //nolint:errcheck
+	go srv.Serve(ln)                                         //nolint:errcheck
 	t.Cleanup(func() { srv.Shutdown(context.Background()) }) //nolint:errcheck
 
 	conn, err := grpc.NewClient(ln.Addr().String(),
@@ -79,7 +79,7 @@ func TestHealthService_PanicRecovery(t *testing.T) {
 		Role:   "standalone",
 	})
 
-	go srv.Serve(ln) //nolint:errcheck
+	go srv.Serve(ln)                                         //nolint:errcheck
 	t.Cleanup(func() { srv.Shutdown(context.Background()) }) //nolint:errcheck
 
 	conn, err := grpc.NewClient(ln.Addr().String(),

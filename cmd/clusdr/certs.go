@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	bolt "go.etcd.io/bbolt"
+	bolterr "go.etcd.io/bbolt/errors"
 
 	"github.com/durguto/clusdr/internal/mtls"
 	"github.com/durguto/clusdr/internal/pki"
@@ -88,7 +88,7 @@ func showCerts(out io.Writer, dataDir string) error {
 func printJoinToken(out io.Writer, dataDir string) {
 	st, err := store.OpenBrief(dataDir)
 	if err != nil {
-		if errors.Is(err, bolt.ErrTimeout) {
+		if errors.Is(err, bolterr.ErrTimeout) {
 			fmt.Fprintln(out, "join token     : (store locked)")
 			return
 		}

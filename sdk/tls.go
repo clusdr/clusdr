@@ -58,10 +58,11 @@ func clientTLS(caPEM, certPEM, keyPEM []byte) (credentials.TransportCredentials,
 		return nil, fmt.Errorf("clusdr: client keypair: %w", err)
 	}
 	return credentials.NewTLS(&tls.Config{
-		MinVersion:         tls.VersionTLS12,
-		Certificates:       []tls.Certificate{cert},
-		RootCAs:            pool,
-		InsecureSkipVerify: true, //nolint:gosec // G402: identity is CA, not dial hostname
+		MinVersion:             tls.VersionTLS12,
+		Certificates:           []tls.Certificate{cert},
+		RootCAs:                pool,
+		InsecureSkipVerify:     true, //nolint:gosec // G402: identity is CA, not dial hostname
+		SessionTicketsDisabled: true, // VerifyPeerCertificate is skipped on resumed sessions
 		VerifyPeerCertificate: func(raw [][]byte, _ [][]*x509.Certificate) error {
 			return verifyPeer(pool, raw)
 		},

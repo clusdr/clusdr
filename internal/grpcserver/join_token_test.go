@@ -13,10 +13,10 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 	"github.com/durguto/clusdr/internal/grpcserver"
 	"github.com/durguto/clusdr/internal/membership"
 	"github.com/durguto/clusdr/internal/pki"
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 type testJoinSec struct {

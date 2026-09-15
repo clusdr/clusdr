@@ -25,7 +25,8 @@ vet:
 	go vet -C sdk ./...
 
 lint:
-	golangci-lint run
+	golangci-lint run ./...
+	cd sdk && golangci-lint run --config ../.golangci.yml ./...
 
 proto:
 	protoc \

@@ -39,7 +39,7 @@ const (
 	keyCAKey         = "ca.key"
 	keyNodeCert      = "node.crt"
 	keyNodeKey       = "node.key"
-	keyJoinTokenHash = "join_token.sha256"
+	keyJoinTokenHash = "join_token.sha256" //nolint:gosec // G101: BoltDB key name, not a secret
 )
 
 var (
@@ -81,7 +81,7 @@ func open(dataDir string, timeout time.Duration) (*Store, error) {
 
 	s := &Store{db: db}
 	if err := s.initBuckets(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, err
 	}
 	return s, nil

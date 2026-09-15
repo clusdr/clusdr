@@ -8,7 +8,7 @@
 
 ## Testing
 
-- [ ] `make test` and `make vet` (skip if docs-only)
+- [ ] `make test`, `make vet`, and `make lint` (skip if docs-only)
 - [ ] Docs under `docs/` updated in this change if config, CLI, proto, SDK, or defaults moved
 
 ## Commits

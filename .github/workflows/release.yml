@@ -29,6 +29,14 @@ jobs:
           go-version: "1.27.1"
           cache: true
 
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version-file: .golangci-lint-version
+          install-only: true
+
+      - name: golangci-lint
+        run: make lint
+
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser

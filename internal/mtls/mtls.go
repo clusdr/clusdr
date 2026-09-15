@@ -117,10 +117,11 @@ func clientConfig(caPEM, certPEM, keyPEM []byte) (*tls.Config, error) {
 		return nil, fmt.Errorf("mtls: client keypair: %w", err)
 	}
 	return &tls.Config{
-		MinVersion:         tls.VersionTLS12,
-		Certificates:       []tls.Certificate{cert},
-		RootCAs:            pool,
-		InsecureSkipVerify: true, //nolint:gosec // G402: identity is CA, not dial hostname
+		MinVersion:             tls.VersionTLS12,
+		Certificates:           []tls.Certificate{cert},
+		RootCAs:                pool,
+		InsecureSkipVerify:     true, //nolint:gosec // G402: identity is CA, not dial hostname
+		SessionTicketsDisabled: true, // VerifyPeerCertificate is skipped on resumed sessions
 		VerifyPeerCertificate: func(raw [][]byte, _ [][]*x509.Certificate) error {
 			return verifyPeer(pool, raw)
 		},
@@ -167,12 +168,12 @@ func WriteFiles(dir string, caCert, nodeCert, nodeKey []byte) error {
 		return err
 	}
 	if len(caCert) > 0 {
-		if err := os.WriteFile(filepath.Join(dir, CAFile), caCert, 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, CAFile), caCert, 0o644); err != nil { //nolint:gosec // G306: CA PEM is public
 			return err
 		}
 	}
 	if len(nodeCert) > 0 {
-		if err := os.WriteFile(filepath.Join(dir, CertFile), nodeCert, 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, CertFile), nodeCert, 0o644); err != nil { //nolint:gosec // G306: node cert PEM is public
 			return err
 		}
 	}

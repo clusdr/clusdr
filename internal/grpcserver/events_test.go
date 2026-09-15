@@ -12,11 +12,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
+	proto "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 	"github.com/durguto/clusdr/internal/eventbus"
 	"github.com/durguto/clusdr/internal/events"
 	"github.com/durguto/clusdr/internal/grpcserver"
 	"github.com/durguto/clusdr/internal/membership"
-	proto "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 )
 
 type eventNode struct {

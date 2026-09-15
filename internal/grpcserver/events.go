@@ -10,11 +10,11 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
+	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 	"github.com/durguto/clusdr/internal/eventbus"
 	"github.com/durguto/clusdr/internal/events"
 	"github.com/durguto/clusdr/internal/membership"
 	"github.com/durguto/clusdr/internal/mtls"
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
 	"github.com/durguto/clusdr/internal/uid"
 )
 

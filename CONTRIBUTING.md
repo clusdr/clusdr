@@ -36,6 +36,7 @@ CI lints PR commits against that grammar. Prefer squash-merge; the squash title 
 ```bash
 make test    # go test -race ./... and sdk/
 make vet
+make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
 ```
 
