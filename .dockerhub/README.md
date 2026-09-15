@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://clusdr.io"><img src="https://img.shields.io/badge/docs-clusdr.io-0C0C10" alt="docs"></a>
   <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr?label=release" alt="release"></a>
-  <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/v/durguto/clusdr?sort=semver&label=image" alt="image"></a>
+  <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/pulls/durguto/clusdr" alt="image"></a>
   <a href="https://github.com/durguto/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
 </p>
 
