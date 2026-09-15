@@ -1,6 +1,6 @@
 # Contributing
 
-Build and test from this repository. Operators install a **Linux** release binary ([guide](docs/guide/install.md)); this file is the source-build path (any Go 1.25 host).
+Build and test from this repository. Operators install a **Linux** release binary ([guide](docs/guide/install.md)); this file is the source-build path (any Go 1.27 host).
 
 Product behavior is described in [docs/](docs/README.md), not here.
 
@@ -31,7 +31,7 @@ CI lints PR commits against that grammar. Prefer squash-merge; the squash title 
 
 ## Requirements
 
-- Go 1.25
+- Go 1.27
 
 ```bash
 make test    # go test -race ./... and sdk/

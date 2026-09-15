@@ -16,7 +16,7 @@ That puts the latest release into `/usr/local/bin`. Another prefix:
 curl -fsSL https://clusdr.io/install.sh | BINDIR=~/bin sh
 ```
 
-The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSION=0.1.0`. Override the archive origin with `CLUSDR_DOWNLOAD_ORIGIN`.
+The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSION=0.1.1`. Override the archive origin with `CLUSDR_DOWNLOAD_ORIGIN`.
 
 Archives are published as GitHub Releases and served from `clusdr.io`. Direct GitHub URL if you need it:
 

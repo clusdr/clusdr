@@ -1,9 +1,9 @@
 module github.com/durguto/clusdr/sdk
 
-go 1.25.0
+go 1.27.0
 
 require (
-	github.com/durguto/clusdr/api v0.1.0
+	github.com/durguto/clusdr/api v0.1.1
 	google.golang.org/grpc v1.83.2
 )
 

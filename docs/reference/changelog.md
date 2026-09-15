@@ -1,11 +1,19 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 — 2026-09-15
+
+First tags on `github.com/durguto/clusdr` (`sdk/`, `api/`). Daemon, Go modules, and Python `clusdr` share `0.1.1`.
 
 ### Changed
 
-- Go module path is `github.com/durguto/clusdr` (`sdk/`, `api/`). Proxy `v0.1.0` stays `github.com/odurgut/clusdr`.
-- Docker image is `durguto/clusdr`. Hub `v0.1.0` on `odurgut/clusdr` is leftover.
+- Toolchain is Go 1.27 (CI and release use 1.27.1)
+- Published image is `durguto/clusdr`
+- Nested `sdk/` and `api/` zips include LICENSE and NOTICE
+
+### Notes
+
+- Proxy `v0.1.0` for `github.com/odurgut/clusdr` is frozen. Use `github.com/durguto/clusdr`.
+- Hub `odurgut/clusdr` leftover from 0.1.0; pull `durguto/clusdr`
 
 ## 0.1.0 — 2026-09-14
 
