@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Release workflow publishes GitHub archives and Hub/GHCR images only after lint and tests succeed
+
 ## 0.1.2 — 2026-09-15
 
 Daemon, Go modules `sdk`/`api`, and Python `clusdr` share `0.1.2`.
