@@ -10,12 +10,12 @@
 <p align="center">A runtime for the cluster. An SDK for the app.</p>
 
 <p align="center">
-  <a href="https://github.com/odurgut/clusdr/actions/workflows/ci.yml"><img src="https://github.com/odurgut/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/odurgut/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/odurgut/clusdr" alt="Go version"></a>
-  <a href="https://github.com/odurgut/clusdr/releases"><img src="https://img.shields.io/github/v/release/odurgut/clusdr" alt="Release"></a>
+  <a href="https://github.com/durguto/clusdr/actions/workflows/ci.yml"><img src="https://github.com/durguto/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/durguto/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/durguto/clusdr" alt="Go version"></a>
+  <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr" alt="Release"></a>
   <a href="https://pkg.go.dev/github.com/odurgut/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/odurgut/clusdr/sdk.svg" alt="Go Reference"></a>
   <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=docker" alt="Docker"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/odurgut/clusdr" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
 </p>
 
 Distributed runtime for cluster awareness. Applications talk to a **local daemon**; the daemon is the cluster member.

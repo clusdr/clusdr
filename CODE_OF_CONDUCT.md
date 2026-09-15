@@ -60,8 +60,8 @@ appointed representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement through GitHub,
-to [@odurgut](https://github.com/odurgut), or via a
-[private advisory](https://github.com/odurgut/clusdr/security/advisories/new).
+to [@durguto](https://github.com/durguto), or via a
+[private advisory](https://github.com/durguto/clusdr/security/advisories/new).
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

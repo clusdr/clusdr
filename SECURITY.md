@@ -4,7 +4,7 @@ Do not file a public issue for a vulnerability.
 
 ## Report
 
-Use [GitHub private vulnerability reporting](https://github.com/odurgut/clusdr/security/advisories/new).
+Use [GitHub private vulnerability reporting](https://github.com/durguto/clusdr/security/advisories/new).
 
 Include:
 

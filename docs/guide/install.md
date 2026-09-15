@@ -21,10 +21,10 @@ The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSIO
 Archives are published as GitHub Releases and served from `clusdr.io`. Direct GitHub URL if you need it:
 
 ```bash
-curl -fsSL https://github.com/odurgut/clusdr/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/durguto/clusdr/releases/latest/download/install.sh | sh
 ```
 
-Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from [clusdr.io/download](https://clusdr.io/download/) ([GitHub Releases](https://github.com/odurgut/clusdr/releases) is the source). Checksums sit next to the archives.
+Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from [clusdr.io/download](https://clusdr.io/download/) ([GitHub Releases](https://github.com/durguto/clusdr/releases) is the source). Checksums sit next to the archives.
 
 ## Check it
 

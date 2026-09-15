@@ -65,6 +65,6 @@ sdk/                application SDK (module github.com/odurgut/clusdr/sdk)
 
 Sibling checkouts:
 
-- [`clusdr-python`](https://github.com/odurgut/clusdr-python) — Python SDK
-- [`clusdr-site`](https://github.com/odurgut/clusdr-site) — clusdr.io
+- [`clusdr-python`](https://github.com/durguto/clusdr-python) — Python SDK
+- [`clusdr-site`](https://github.com/durguto/clusdr-site) — clusdr.io
 
