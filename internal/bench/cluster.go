@@ -166,6 +166,7 @@ func (c *Cluster) WaitLeader(ctx context.Context) (*Node, error) {
 }
 
 func waitLeaderOf(ctx context.Context, nodes ...*Node) (*Node, error) {
+	stable := 0
 	for {
 		if err := ctx.Err(); err != nil {
 			return nil, fmt.Errorf("wait for leader: %w", err)
@@ -186,8 +187,15 @@ func waitLeaderOf(ctx context.Context, nodes ...*Node) (*Node, error) {
 				}
 			}
 			if agree {
-				return leaders[0], nil
+				stable++
+				if stable >= 3 {
+					return leaders[0], nil
+				}
+			} else {
+				stable = 0
 			}
+		} else {
+			stable = 0
 		}
 		select {
 		case <-ctx.Done():

@@ -2,6 +2,7 @@ package consensus_test
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"strconv"
 	"testing"
@@ -163,6 +164,7 @@ func (c *chaosCluster) waitStableLeader() *chaosNode {
 func waitLeaderOf(t *testing.T, nodes ...*chaosNode) *chaosNode {
 	t.Helper()
 	deadline := time.Now().Add(10 * time.Second)
+	stable := 0
 	for time.Now().Before(deadline) {
 		var leaders []*chaosNode
 		for _, n := range nodes {
@@ -180,9 +182,15 @@ func waitLeaderOf(t *testing.T, nodes ...*chaosNode) *chaosNode {
 				}
 			}
 			if agree {
-				return leaders[0]
+				stable++
+				if stable >= 3 {
+					return leaders[0]
+				}
+				time.Sleep(20 * time.Millisecond)
+				continue
 			}
 		}
+		stable = 0
 		time.Sleep(20 * time.Millisecond)
 	}
 	t.Fatal("no stable leader")
@@ -365,6 +373,32 @@ func (c *chaosCluster) waitLockGone(name string) {
 		time.Sleep(20 * time.Millisecond)
 	}
 	c.t.Fatalf("lock %q still held after TTL", name)
+}
+
+func transientLeadership(err error) bool {
+	return errors.Is(err, raftlib.ErrLeadershipLost) ||
+		errors.Is(err, raftlib.ErrNotLeader) ||
+		errors.Is(err, raftlib.ErrLeadershipTransferInProgress)
+}
+
+func (c *chaosCluster) acquireAfterFailover(name, holder string, ttl time.Duration) (uint64, bool, error) {
+	c.t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	var lastOK bool
+	var lastErr error
+	for time.Now().Before(deadline) {
+		lead := c.waitStableLeader()
+		tok, ok, err := lead.node.ApplyLockAcquire(name, holder, ttl)
+		if err == nil && ok {
+			return tok, true, nil
+		}
+		lastOK, lastErr = ok, err
+		if err != nil && !transientLeadership(err) {
+			return 0, ok, err
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+	return 0, lastOK, lastErr
 }
 
 func (c *chaosCluster) waitLeaseGone(name string) {
@@ -604,8 +638,7 @@ func TestChaos_LockHolderDies(t *testing.T) {
 	c.waitStableLeader()
 	c.waitLockGone("scheduler")
 
-	next := c.mustLeader()
-	tok, ok, err := next.node.ApplyLockAcquire("scheduler", "worker-2", time.Hour)
+	tok, ok, err := c.acquireAfterFailover("scheduler", "worker-2", time.Hour)
 	if err != nil || !ok {
 		t.Fatalf("reacquire after holder death: ok=%v err=%v", ok, err)
 	}
