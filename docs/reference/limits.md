@@ -39,4 +39,4 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 - Release binaries embed the tag via ldflags. Source builds print `dev`
 - Install channels: Linux install script, Docker Hub `odurgut/clusdr`
 - Python SDK: `pip install clusdr`
-- No license file in this tree
+- Apache-2.0 ([LICENSE](../../LICENSE))

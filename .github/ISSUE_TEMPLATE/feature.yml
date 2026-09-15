@@ -1,0 +1,26 @@
+name: Feature request
+description: A change to the daemon, API, or Go SDK
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a **v1alpha1** product. Features that turn clusdr into a database, queue, or Kubernetes are out of scope ([limits](https://clusdr.io/docs/reference/limits)).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you solving
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you want
+      description: The API, CLI, or config change. Not a design essay.
+    validations:
+      required: true
+  - type: textarea
+    id: workarounds
+    attributes:
+      label: What you do today
+      description: Optional. How you work around it now.

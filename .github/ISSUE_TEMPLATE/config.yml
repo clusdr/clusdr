@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://clusdr.io/docs
+    about: Product behavior, install, and API. Read this before opening an issue.
+  - name: Python SDK
+    url: https://github.com/odurgut/clusdr-python/issues/new/choose
+    about: Bugs in `pip install clusdr`, not the daemon.

@@ -9,6 +9,15 @@
 
 <p align="center">A runtime for the cluster. An SDK for the app.</p>
 
+<p align="center">
+  <a href="https://github.com/odurgut/clusdr/actions/workflows/ci.yml"><img src="https://github.com/odurgut/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/odurgut/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/odurgut/clusdr" alt="Go version"></a>
+  <a href="https://github.com/odurgut/clusdr/releases"><img src="https://img.shields.io/github/v/release/odurgut/clusdr" alt="Release"></a>
+  <a href="https://pkg.go.dev/github.com/odurgut/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/odurgut/clusdr/sdk.svg" alt="Go Reference"></a>
+  <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=docker" alt="Docker"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/odurgut/clusdr" alt="License"></a>
+</p>
+
 Distributed runtime for cluster awareness. Applications talk to a **local daemon**; the daemon is the cluster member.
 
 Not a database, queue, or Kubernetes. API is **v1alpha1**. TLS is on by default.
@@ -55,4 +64,4 @@ Start at the **[guide](docs/guide/README.md)**. Hub: [docs/](docs/README.md).
 
 ## Contribute
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Contract changes (config, proto, SDK) update `docs/` in the same change.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Contract changes (config, proto, SDK) update `docs/` in the same change. Apache-2.0. Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).

@@ -1,0 +1,57 @@
+name: Bug report
+description: Something does not work as documented
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Product behavior lives in [the docs](https://clusdr.io/docs). Search existing issues first.
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: What you saw. Include logs if you have them (`CLUSDR_LOG_FORMAT=json`).
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: Exact commands, compose file, or a minimal program. Do not paste secrets or PEMs.
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `clusdr version`, or the image tag (`odurgut/clusdr:vX.Y.Z`).
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you installed
+      options:
+        - install.sh
+        - Docker Hub
+        - Built from source
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Architecture
+      options:
+        - linux/amd64
+        - linux/arm64
+        - other
+    validations:
+      required: true

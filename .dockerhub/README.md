@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://clusdr.io">
-    <img src="https://raw.githubusercontent.com/odurgut/clusdr/main/docs/assets/logo-512.png" alt="clusdr" width="128" height="128">
+    <img src="https://raw.githubusercontent.com/odurgut/clusdr/main/docs/assets/logo-512.png" alt="clusdr" width="96" height="96">
   </a>
 </p>
 
@@ -11,6 +11,7 @@
   <a href="https://clusdr.io"><img src="https://img.shields.io/badge/docs-clusdr.io-0C0C10" alt="docs"></a>
   <a href="https://github.com/odurgut/clusdr/releases"><img src="https://img.shields.io/github/v/release/odurgut/clusdr?label=release" alt="release"></a>
   <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=image" alt="image"></a>
+  <a href="https://github.com/odurgut/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/odurgut/clusdr" alt="License"></a>
 </p>
 
 ---
