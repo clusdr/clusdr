@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- GHCR mirror `ghcr.io/durguto/clusdr` (same tags as Docker Hub `durguto/clusdr`)
+
 ## 0.1.1 — 2026-09-15
 
 First tags on `github.com/durguto/clusdr` (`sdk/`, `api/`). Daemon, Go modules, and Python `clusdr` share `0.1.1`.

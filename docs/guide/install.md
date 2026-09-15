@@ -53,6 +53,8 @@ No `CLUSDR_*` is required on a laptop.
 docker pull durguto/clusdr
 ```
 
+Same image on GHCR: `docker pull ghcr.io/durguto/clusdr`.
+
 The image is distroless, non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, port **7947**. Map Raft **7946** if peers sit outside the container network.
 
 **From source** is for people changing the daemon: [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md). `clusdr-bench` is not a release artifact.

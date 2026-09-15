@@ -6,12 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing git tag to publish the Docker Hub image for
+        description: Existing git tag to publish Hub and GHCR images for
         required: true
         default: v0.1.1
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   goreleaser:
@@ -57,7 +58,7 @@ jobs:
           gh release upload "$tag" latest.json --clobber
 
   docker:
-    name: Docker Hub
+    name: Images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -80,6 +81,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: docker/build-push-action@v6
         with:
           context: .
@@ -88,9 +95,23 @@ jobs:
           tags: |
             durguto/clusdr:${{ steps.ver.outputs.tag }}
             durguto/clusdr:latest
+            ghcr.io/durguto/clusdr:${{ steps.ver.outputs.tag }}
+            ghcr.io/durguto/clusdr:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/durguto/clusdr
+            org.opencontainers.image.licenses=Apache-2.0
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.commit }}
+
+      - name: Public GHCR package
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api --method PUT \
+            -H "Accept: application/vnd.github+json" \
+            /user/packages/container/clusdr/visibility \
+            -f visibility=public
 
       - uses: actions/checkout@v4
         with:

@@ -32,7 +32,7 @@ Application → local SDK → local daemon → cluster
 curl -fsSL https://clusdr.io/install.sh | sh
 ```
 
-Linux amd64/arm64. Image: `durguto/clusdr` on Docker Hub. Other channels: **[Install](docs/guide/install.md)**.
+Linux amd64/arm64. Image: `durguto/clusdr` on Docker Hub (`ghcr.io/durguto/clusdr` is the same image). Other channels: **[Install](docs/guide/install.md)**.
 
 ## Run
 
