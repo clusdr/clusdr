@@ -83,19 +83,17 @@ func StartCluster(dir string, n int, log *slog.Logger) (*Cluster, error) {
 		c.Nodes = append(c.Nodes, node)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	if _, err := waitLeaderOf(ctx, c.Nodes[:1]...); err != nil {
 		_ = c.Close()
 		return nil, fmt.Errorf("bootstrap leader: %w", err)
 	}
-	lead := c.Leader()
-	if lead == nil {
-		_ = c.Close()
-		return nil, fmt.Errorf("bootstrap leader lost")
-	}
 	for _, n := range c.Nodes[1:] {
-		if err := lead.Raft.AddVoter(n.ID, string(n.Trans.LocalAddr())); err != nil {
+		n := n
+		if err := c.withAnyLeader(ctx, func(lead *Node) error {
+			return lead.Raft.AddVoter(n.ID, string(n.Trans.LocalAddr()))
+		}); err != nil {
 			_ = c.Close()
 			return nil, fmt.Errorf("add voter %s: %w", n.ID, err)
 		}
@@ -104,14 +102,85 @@ func StartCluster(dir string, n int, log *slog.Logger) (*Cluster, error) {
 		_ = c.Close()
 		return nil, err
 	}
-	lead = c.Leader()
 	for _, n := range c.Nodes {
-		if err := lead.Raft.ApplyAddMember(n.ID, string(n.Trans.LocalAddr())); err != nil {
+		n := n
+		if err := c.withLeader(ctx, func(lead *Node) error {
+			return lead.Raft.ApplyAddMember(n.ID, string(n.Trans.LocalAddr()))
+		}); err != nil {
 			_ = c.Close()
 			return nil, fmt.Errorf("add member %s: %w", n.ID, err)
 		}
 	}
 	return c, nil
+}
+
+func (c *Cluster) withAnyLeader(ctx context.Context, fn func(*Node) error) error {
+	var last error
+	for {
+		if err := ctx.Err(); err != nil {
+			if last != nil {
+				return last
+			}
+			return err
+		}
+		lead := c.Leader()
+		if lead == nil {
+			select {
+			case <-ctx.Done():
+				if last != nil {
+					return last
+				}
+				return ctx.Err()
+			case <-time.After(20 * time.Millisecond):
+			}
+			continue
+		}
+		err := fn(lead)
+		if err == nil {
+			return nil
+		}
+		last = err
+		if !transientLeadership(err) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return last
+		case <-time.After(30 * time.Millisecond):
+		}
+	}
+}
+
+func (c *Cluster) withLeader(ctx context.Context, fn func(*Node) error) error {
+	var last error
+	for {
+		if err := ctx.Err(); err != nil {
+			if last != nil {
+				return last
+			}
+			return err
+		}
+		lead, err := c.WaitLeader(ctx)
+		if err != nil {
+			if last != nil {
+				return last
+			}
+			return err
+		}
+		err = fn(lead)
+		if err == nil {
+			return nil
+		}
+		last = err
+		if !transientLeadership(err) {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return last
+		case <-time.After(30 * time.Millisecond):
+		}
+	}
 }
 
 func startNode(dir, id string, bootstrap bool, trans *raftlib.InmemTransport, log *slog.Logger) (*Node, error) {
