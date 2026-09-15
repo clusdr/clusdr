@@ -19,13 +19,13 @@ Read in order. Each page leaves a cluster you use on the next one.
 5. [Use it from your app](guide/from-your-app.md)
 6. [Run on other hosts](guide/other-hosts.md)
 
-[Guide hub](guide/README.md).
+[Guide hub](guide/).
 
 ## SDKs
 
 Applications talk to the local daemon. Not the operator path.
 
-- [Application SDK](sdk/README.md)
+- [Application SDK](sdk/)
 - [Go](sdk/go.md)
 - [Python](sdk/python.md)
 
@@ -36,7 +36,7 @@ Applications talk to the local daemon. Not the operator path.
 | Is this the right tool? | [Overview](overview.md) |
 | Process model, ports, disk | [Architecture](architecture.md) |
 | What a word means | [Glossary](glossary.md) |
-| Guarantees (Raft, presence, observers, …) | [Concepts](concepts/README.md) |
-| A flag or RPC | [Reference](reference/README.md) |
+| Guarantees (Raft, presence, observers, …) | [Concepts](concepts/) |
+| A flag or RPC | [Reference](reference/) |
 
-Contributor workflow (build, proto, tests) is in [CONTRIBUTING.md](../CONTRIBUTING.md), not in this tree.
+Contributor workflow (build, proto, tests) is in [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md), not in this tree.

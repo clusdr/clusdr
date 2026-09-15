@@ -37,4 +37,4 @@ It is not a voter. It does not speak Raft. Two processes on one machine share th
 
 - [Architecture](../architecture.md)
 - [Start the first member](../guide/first-member.md)
-- [SDKs](../sdk/README.md)
+- [SDKs](../sdk/)

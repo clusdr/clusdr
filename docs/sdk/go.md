@@ -1,6 +1,6 @@
 # Go SDK
 
-Module `github.com/durguto/clusdr/sdk`, package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](README.md).
+Module `github.com/durguto/clusdr/sdk`, package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](./).
 
 ```bash
 go get github.com/durguto/clusdr/sdk
@@ -213,4 +213,4 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 - Join, promote, config
 - A public `WithReadyTimeout`
 
-Wire shapes: [gRPC API](../reference/api/README.md).
+Wire shapes: [gRPC API](../reference/api/).

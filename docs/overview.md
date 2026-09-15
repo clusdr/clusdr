@@ -38,4 +38,4 @@ Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes.
 
 If you already run etcd for KV, adding Clusdr only for membership is optional.
 
-Boundaries of this version: [Limits](reference/limits.md). Mental model: [Architecture](architecture.md). To run it: [guide](guide/README.md).
+Boundaries of this version: [Limits](reference/limits.md). Mental model: [Architecture](architecture.md). To run it: [guide](guide/).

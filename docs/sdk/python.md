@@ -1,6 +1,6 @@
 # Python SDK
 
-Package `clusdr` on PyPI. CPython 3.10+. Applications call the daemon on this host. Shared model: [SDKs](README.md).
+Package `clusdr` on PyPI. CPython 3.10+. Applications call the daemon on this host. Shared model: [SDKs](./).
 
 ```bash
 pip install clusdr
@@ -224,4 +224,4 @@ Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.
 - Join, promote, config
 - Async / `asyncio` client
 
-Wire shapes: [gRPC API](../reference/api/README.md). Go surface: [Go SDK](go.md).
+Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md).

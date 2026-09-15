@@ -54,5 +54,5 @@ Prefer `members` (or Health / Members over Runtime TCP). Do not use `status` as 
 You installed a binary, bootstrapped a member, grew the cluster, watched the stream, called it from an app, and pointed it at real addresses.
 
 - Still deciding if this is the right tool: [Overview](../overview.md)
-- Guarantees (what is on Raft, how presence works): [concepts](../concepts/README.md)
-- A flag, RPC, or SDK type: [reference](../reference/README.md)
+- Guarantees (what is on Raft, how presence works): [concepts](../concepts/)
+- A flag, RPC, or SDK type: [reference](../reference/)

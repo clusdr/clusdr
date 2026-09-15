@@ -1,12 +1,12 @@
 # Reference
 
-Lookup pages. Learn the product in the [guide](../guide/README.md).
+Lookup pages. Learn the product in the [guide](../guide/).
 
 | Page | Contents |
 |---|---|
-| [CLI](cli/README.md) | Every `clusdr` command |
-| [gRPC API](api/README.md) | Every service |
-| [SDKs](../sdk/README.md) | Go and Python application clients |
+| [CLI](cli/) | Every `clusdr` command |
+| [gRPC API](api/) | Every service |
+| [SDKs](../sdk/) | Go and Python application clients |
 | [Configuration](configuration.md) | YAML and `CLUSDR_*` |
 | [Limits](limits.md) | Caps and non-goals of this version |
 | [Compatibility](compatibility.md) | What is tested |

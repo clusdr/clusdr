@@ -2,7 +2,7 @@
 
 Package `clusdr.v1alpha1`. Sources: `proto/clusdr/v1alpha1/`. Generated Go stubs: module `github.com/durguto/clusdr/api`.
 
-Applications should use the [SDKs](../../sdk/README.md). This section is the wire contract.
+Applications should use the [SDKs](../../sdk/). This section is the wire contract.
 
 All application RPCs go to the **Runtime** TCP server. Node-to-node uses the same server. There is no HTTP/JSON API.
 

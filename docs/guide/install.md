@@ -55,9 +55,9 @@ docker pull durguto/clusdr
 
 The image is distroless, non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, port **7947**. Map Raft **7946** if peers sit outside the container network.
 
-**From source** is for people changing the daemon: [CONTRIBUTING.md](../../CONTRIBUTING.md). `clusdr-bench` is not a release artifact.
+**From source** is for people changing the daemon: [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md). `clusdr-bench` is not a release artifact.
 
-**The SDK is not this install.** Apps: [SDKs](../sdk/README.md). First call in [step 5](from-your-app.md). They still need this daemon on the same machine.
+**The SDK is not this install.** Apps: [SDKs](../sdk/). First call in [step 5](from-your-app.md). They still need this daemon on the same machine.
 
 ## Next
 

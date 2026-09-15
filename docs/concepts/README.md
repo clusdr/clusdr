@@ -1,6 +1,6 @@
 # Concepts
 
-Guarantees and vocabulary. Learn the product in the [guide](../guide/README.md) first. Flags and RPCs live under [reference](../reference/README.md).
+Guarantees and vocabulary. Learn the product in the [guide](../guide/) first. Flags and RPCs live under [reference](../reference/).
 
 | Page | Question it answers |
 |---|---|

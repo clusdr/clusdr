@@ -12,5 +12,5 @@ A release binary prints the tag. A source build prints `dev` unless ldflags set 
 
 ## See also
 
-- [CLI index](README.md)
+- [CLI index](./)
 - [Compatibility](../compatibility.md)
