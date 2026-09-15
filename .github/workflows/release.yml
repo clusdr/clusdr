@@ -104,15 +104,6 @@ jobs:
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.commit }}
 
-      - name: Public GHCR package
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api --method PUT \
-            -H "Accept: application/vnd.github+json" \
-            /user/packages/container/clusdr/visibility \
-            -f visibility=public
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
