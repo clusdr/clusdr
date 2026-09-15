@@ -107,6 +107,8 @@ func ExampleCluster_TryLock() {
 		fmt.Println("held by", lk.Holder)
 		return
 	}
-	defer c.Unlock(ctx, "scheduler")
 	fmt.Println("acquired", lk.Token)
+	if err := c.Unlock(ctx, "scheduler"); err != nil {
+		log.Fatal(err)
+	}
 }
