@@ -5,6 +5,7 @@
 ### Changed
 
 - Go module path is `github.com/durguto/clusdr` (`sdk/`, `api/`). Proxy `v0.1.0` stays `github.com/odurgut/clusdr`.
+- Docker image is `durguto/clusdr`. Hub `v0.1.0` on `odurgut/clusdr` is leftover.
 
 ## 0.1.0 — 2026-09-14
 

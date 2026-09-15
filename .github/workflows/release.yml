@@ -86,8 +86,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            odurgut/clusdr:${{ steps.ver.outputs.tag }}
-            odurgut/clusdr:latest
+            durguto/clusdr:${{ steps.ver.outputs.tag }}
+            durguto/clusdr:latest
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}
             COMMIT=${{ steps.ver.outputs.commit }}

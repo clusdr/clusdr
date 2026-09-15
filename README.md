@@ -14,7 +14,7 @@
   <a href="https://github.com/durguto/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/durguto/clusdr" alt="Go version"></a>
   <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr" alt="Release"></a>
   <a href="https://pkg.go.dev/github.com/durguto/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/durguto/clusdr/sdk.svg" alt="Go Reference"></a>
-  <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=docker" alt="Docker"></a>
+  <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/v/durguto/clusdr?sort=semver&label=docker" alt="Docker"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
 </p>
 
@@ -32,7 +32,7 @@ Application → local SDK → local daemon → cluster
 curl -fsSL https://clusdr.io/install.sh | sh
 ```
 
-Linux amd64/arm64. Image: `odurgut/clusdr` on Docker Hub. Other channels: **[Install](docs/guide/install.md)**.
+Linux amd64/arm64. Image: `durguto/clusdr` on Docker Hub. Other channels: **[Install](docs/guide/install.md)**.
 
 ## Run
 

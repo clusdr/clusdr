@@ -26,10 +26,10 @@ TLS stays on. Do not set `CLUSDR_TLS=disabled` unless every node and every clien
 
 ## Docker Hub
 
-The pipeline publishes `odurgut/clusdr` (linux/amd64 and linux/arm64).
+The pipeline publishes `durguto/clusdr` (linux/amd64 and linux/arm64).
 
 ```bash
-docker pull odurgut/clusdr
+docker pull durguto/clusdr
 ```
 
 Image: distroless non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, exposes **7947**. Map **7946** if Raft peers sit outside the container network.

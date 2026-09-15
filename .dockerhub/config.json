@@ -1,5 +1,5 @@
 {
-  "repository": "odurgut/clusdr",
+  "repository": "durguto/clusdr",
   "short_description": "A runtime for the cluster. An SDK for the app.",
   "categories": [
     {"name": "Developer tools", "slug": "developer-tools"},

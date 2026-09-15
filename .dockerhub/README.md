@@ -10,7 +10,7 @@
 <p align="center">
   <a href="https://clusdr.io"><img src="https://img.shields.io/badge/docs-clusdr.io-0C0C10" alt="docs"></a>
   <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr?label=release" alt="release"></a>
-  <a href="https://hub.docker.com/r/odurgut/clusdr"><img src="https://img.shields.io/docker/v/odurgut/clusdr?sort=semver&label=image" alt="image"></a>
+  <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/v/durguto/clusdr?sort=semver&label=image" alt="image"></a>
   <a href="https://github.com/durguto/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
 </p>
 
@@ -46,19 +46,19 @@ Platforms: **linux/amd64**, **linux/arm64**. Distroless, non-root.
 The image `CMD` is `start`. It does **not** run `init`. Identity lives on the volume. Init once, then start.
 
 ```bash
-docker pull odurgut/clusdr
+docker pull durguto/clusdr
 docker volume create clusdr-data
 
 docker run --rm \
   -v clusdr-data:/var/lib/clusdr \
-  odurgut/clusdr init
+  durguto/clusdr init
 
 docker run --rm -d --name clusdr \
   -e CLUSDR_NODE_ADDR=127.0.0.1:7947 \
   -e CLUSDR_GRPC_ADDR=0.0.0.0:7947 \
   -p 7947:7947 \
   -v clusdr-data:/var/lib/clusdr \
-  odurgut/clusdr start --bootstrap
+  durguto/clusdr start --bootstrap
 ```
 
 `CLUSDR_NODE_ADDR` is the address stored in membership. Do not set it to `0.0.0.0`. Across machines, use a host IP every peer can dial, and map **7946** for Raft.
@@ -70,7 +70,7 @@ docker run --rm -d --name clusdr \
   -e CLUSDR_RAFT_ADDR=203.0.113.10:7946 \
   -p 7946:7946 -p 7947:7947 \
   -v clusdr-data:/var/lib/clusdr \
-  odurgut/clusdr start --bootstrap
+  durguto/clusdr start --bootstrap
 ```
 
 ## Image contract
@@ -94,7 +94,7 @@ In-tree `docker-compose.yml` is **one node** and does not run `init`. A healthch
 ```yaml
 services:
   clusdr:
-    image: odurgut/clusdr:v0.1.0
+    image: durguto/clusdr:v0.1.0
     restart: unless-stopped
     environment:
       CLUSDR_NODE_ADDR: "127.0.0.1:7947"
