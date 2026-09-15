@@ -23,7 +23,7 @@ Distributed runtime for cluster awareness. Applications talk to a **local daemon
 Not a database, queue, or Kubernetes. API is **v1alpha1**. TLS is on by default.
 
 ```text
-Application → local SDK → local daemon → cluster
+Application → local SDK → clusdr daemon → cluster
 ```
 
 ## Install

@@ -3,7 +3,7 @@
 The application talks to the **local daemon**. The daemon is the cluster member. The SDK does not join Raft and does not dial other nodes.
 
 ```text
-your process  ──►  clusdr on this host  ──►  the rest of the cluster
+your process  ──►  clusdr daemon on this host  ──►  the rest of the cluster
 ```
 
 Same split as a local Docker engine. Two apps on one machine share one daemon.
@@ -22,6 +22,7 @@ CPython 3.10+. Wire package `clusdr.v1alpha1`.
 - `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`
 - `Dial` / `dial(addr)` — tests and operators, not the default app path
 - Membership, leader, Watch, Publish
+- Optional Watch `topics` / `event_types` (same semantics as CLI `--topic` / `--type`)
 - Locks and leases with a fencing token and background renew
 - Retry `Unavailable` / `Aborted` / `ResourceExhausted` with bounded backoff
 - Watch reconnects with `last_seq`
@@ -32,7 +33,6 @@ TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` 
 ## What they do not do
 
 - Join, promote, or configure the cluster (CLI)
-- Filter Watch by topic (CLI `--topic` exists; the SDK stream is the full bus)
 - Store application data
 - Talk to a remote node's Runtime API as the normal path — put a daemon on that host
 

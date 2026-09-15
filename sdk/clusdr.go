@@ -19,7 +19,7 @@ import (
 type Cluster interface {
 	Members(ctx context.Context) ([]Member, error)
 	Leader(ctx context.Context) (Member, error)
-	Watch(ctx context.Context) (<-chan Event, error)
+	Watch(ctx context.Context, opts ...WatchOption) (<-chan Event, error)
 	Publish(ctx context.Context, topic string, payload []byte) error
 	// Lock blocks until name is acquired or ctx is done. ttl<=0 uses the daemon default.
 	Lock(ctx context.Context, name string, ttl time.Duration) (*Lock, error)

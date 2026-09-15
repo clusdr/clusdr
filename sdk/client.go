@@ -190,23 +190,33 @@ func (c *client) Publish(ctx context.Context, topic string, payload []byte) erro
 	return nil
 }
 
-func (c *client) Watch(ctx context.Context) (<-chan Event, error) {
+func (c *client) Watch(ctx context.Context, opts ...WatchOption) (<-chan Event, error) {
+	wo, err := applyWatchOptions(opts)
+	if err != nil {
+		return nil, err
+	}
 	ch := make(chan Event, defaultWatchBuffer)
-	go c.watchLoop(ctx, ch)
+	go c.watchLoop(ctx, ch, wo)
 	return ch, nil
 }
 
-func (c *client) watchLoop(ctx context.Context, ch chan Event) {
+func (c *client) watchLoop(ctx context.Context, ch chan Event, wo watchOptions) {
 	defer close(ch)
 	var lastSeq uint64
 	backoff := 50 * time.Millisecond
+	req := func(seq uint64) *pb.WatchRequest {
+		return &pb.WatchRequest{LastSeq: seq, Topics: wo.topics, EventTypes: wo.eventTypes}
+	}
 	for {
 		if ctx.Err() != nil {
 			return
 		}
-		stream, err := c.watch.Watch(ctx, &pb.WatchRequest{LastSeq: lastSeq})
+		stream, err := c.watch.Watch(ctx, req(lastSeq))
 		if err != nil {
 			if ctx.Err() != nil || status.Code(err) == codes.Canceled {
+				return
+			}
+			if status.Code(err) == codes.InvalidArgument {
 				return
 			}
 			if !sleepBackoff(ctx, backoff) {
@@ -220,6 +230,9 @@ func (c *client) watchLoop(ctx context.Context, ch chan Event) {
 			resp, err := stream.Recv()
 			if err != nil {
 				if ctx.Err() != nil || status.Code(err) == codes.Canceled {
+					return
+				}
+				if status.Code(err) == codes.InvalidArgument {
 					return
 				}
 				break

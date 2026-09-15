@@ -1,9 +1,9 @@
 # Examples
 
-Three small **applications** that talk to a local daemon. They do not join Raft, do not store data, and do not dial a remote Runtime API.
+Small **applications** that talk to a local daemon. They do not join Raft, do not store data, and do not dial a remote Runtime API.
 
 ```text
-your process  ──►  clusdr on this host  ──►  the rest of the cluster
+your process  ──►  clusdr daemon on this host  ──►  the rest of the cluster
 ```
 
 ## Prerequisite
@@ -22,6 +22,8 @@ Leave that process running. TLS is on; the SDK loads `ca.crt` / `node.crt` / `no
 | [who](who) | Go | Inventory: who is alive, who leads, then live `member.*` / `leader.changed` |
 | [scheduler](scheduler) | Go | One exclusive scheduler. Run two copies; only one holds the lock |
 | [watch](watch) | Python | Snapshot, a `custom.hello`, then the full Watch bus (cluster + gossip) |
+| [worker](worker) | Go | Hold a shard lease. A second copy fails immediately (no wait) |
+| [agent](agent) | Python | `custom.agent.task` pub/sub — signals, not a queue |
 
 ### who
 
@@ -74,6 +76,28 @@ You should see `custom.ping` on the bus. Custom events are 1-hop gossip, not Raf
 ```bash
 python3 examples/watch/main.py --name edge-1
 ```
+
+### worker
+
+Lease, not lock: Grant never blocks. Two processes, same `-name` — the first holds `shard-7`, the second exits with `clusdr: lease "shard-7": … (owner worker-a)`.
+
+```bash
+go run ./examples/worker -name shard-7 -owner worker-a
+go run ./examples/worker -name shard-7 -owner worker-b
+```
+
+Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the lease context, which only stops renew so the grant expires at its deadline.
+
+### agent
+
+Gossip between app processes through the local daemon. Not durable. The listener uses `watch(topics=["agent.task"])` so membership snapshot is omitted. Start a listener, then an emitter:
+
+```bash
+python3 examples/agent/main.py --mode listen
+python3 examples/agent/main.py --mode emit --from mapper
+```
+
+`--mode both` (default) emits and listens in one process so you can see round-trip on a single terminal.
 
 ## From this tree vs your app
 

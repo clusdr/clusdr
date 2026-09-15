@@ -4,7 +4,7 @@ The daemon you started in [step 2](first-member.md) is the cluster member. The a
 
 ```text
 app A ─┐
-app B ─┼─► daemon on this host ─► other daemons
+app B ─┼─► clusdr daemon on this host ─► other clusdr daemons
 cli   ─┘
 ```
 

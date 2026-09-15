@@ -3,7 +3,7 @@
 Clusdr is not a library you embed. It is a **daemon on this host**. Your app will talk only to that process. The daemon is the Raft member.
 
 ```text
-your app  ──►  clusdr on this machine  ──►  other clusdr daemons
+your app  ──►  clusdr daemon on this machine  ──►  other clusdr daemons
 ```
 
 Same idea as a local Docker engine: containers do not join a swarm by themselves; the engine does.

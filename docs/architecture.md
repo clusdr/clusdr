@@ -10,7 +10,7 @@ The **application** is not a Raft member. It uses the SDK against the daemon on 
 
 ```text
 app A ─┐
-app B ─┼─► daemon on this host ─► other daemons (Raft + gRPC)
+app B ─┼─► clusdr daemon on this host ─► other clusdr daemons (Raft + gRPC)
 cli   ─┘
 ```
 

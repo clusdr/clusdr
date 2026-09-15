@@ -6,7 +6,8 @@
 
 - GHCR mirror `ghcr.io/durguto/clusdr` (same tags as Docker Hub `durguto/clusdr`)
 - [Errors](errors.md) lookup: join token, TLS, dial, observer locks
-- [examples/](https://github.com/durguto/clusdr/tree/main/examples): Go `who` / `scheduler`, Python `watch`
+- [examples/](https://github.com/durguto/clusdr/tree/main/examples): Go `who` / `scheduler` / `worker`, Python `watch` / `agent`
+- SDK Watch topic / event-type filters (`WithTopics` / `watch(topics=…)`), same semantics as CLI `--topic` / `--type`
 
 ## 0.1.1 — 2026-09-15
 

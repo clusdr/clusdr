@@ -70,7 +70,7 @@ Every unary method also takes `timeout: float | None` to override `request_timeo
 ```text
 members(timeout=None) -> list[Member]
 leader(timeout=None) -> Member
-watch() -> Iterator[Event]
+watch(topics=None, event_types=None) -> Iterator[Event]
 publish(topic, payload=None, timeout=None) -> None
 lock(name, ttl=None, timeout=None) -> Lock
 try_lock(name, ttl=None, timeout=None) -> Lock | None
@@ -112,9 +112,14 @@ for event in c.watch():
 
 `watch()` is a blocking iterator. It reconnects with `last_seq` on drop (backoff 0.05s → 2s). `close()` cancels the in-flight RPC and ends the loop.
 
-There is **no** topic or type filter. You see the full bus. CLI `--topic` is a different client.
+`topics` / `event_types` match the CLI. Empty (default) is the full bus.
 
-Custom events are not replayed after `watch.gap`.
+```python
+for event in c.watch(topics=["deployment"]):
+    ...
+```
+
+Non-empty `topics`: only `custom.<topic>`; **membership snapshot is omitted**. Custom events are not replayed. Reconnects reuse the filter. Invalid topic → `ClusdrError` before the first event.
 
 `Event` (frozen): `type`, `source`, `payload` (`bytes`), `timestamp` (UTC `datetime`), `seq`.
 
@@ -219,8 +224,6 @@ Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.
 
 ## Not in this package
 
-- Watch topic / type filters
-- `list_locks` / `list_leases`
 - Join, promote, config
 - Async / `asyncio` client
 

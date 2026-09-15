@@ -49,7 +49,7 @@ If the caller context already has a deadline, that deadline wins.
 ```text
 Members(ctx) ([]Member, error)
 Leader(ctx) (Member, error)
-Watch(ctx) (<-chan Event, error)
+Watch(ctx, opts ...WatchOption) (<-chan Event, error)
 Publish(ctx, topic string, payload []byte) error
 Lock(ctx, name string, ttl time.Duration) (*Lock, error)
 TryLock(ctx, name string, ttl time.Duration) (lk *Lock, ok bool, err error)
@@ -102,11 +102,17 @@ for ev := range ch {
 }
 ```
 
-`Watch` returns immediately. A goroutine reads the stream. Cancel `ctx` to stop; the channel is then closed.
+`Watch` returns immediately. A goroutine reads the stream. Cancel `ctx` to stop; the channel is then closed. On disconnect the loop reconnects (backoff 50ms → 2s).
 
-The request is `last_seq` only. There is **no** topic or type filter in this SDK. You see the full bus (snapshot, `watch.sync`, live events). CLI `--topic` is a different client.
+Zero options is the full bus (snapshot, `watch.sync`, live events). `WithTopics` / `WithEventTypes` match the CLI:
 
-On disconnect the loop reconnects with the last `seq` it saw, backoff 50ms → 2s. Server may send the snapshot again and `watch.gap`. Custom events are not replayed.
+```go
+ch, err := c.Watch(ctx, clusdr.WithTopics("deployment"))
+```
+
+Non-empty topics: only `custom.<topic>` for those keys; **membership snapshot is omitted**. Pass `"deployment"` or `"custom.deployment"`. `WithEventTypes("member.join")` matches full type strings. Protocol events (`watch.sync`, `watch.gap`) always pass. Reconnects reuse the same filter and `last_seq`. Custom events are still not replayed. `last_seq` is bus-global, not per-topic.
+
+Invalid topic characters fail `Watch` before the stream starts (`clusdr: watch topic …`).
 
 Channel buffer is **64**. A slow receiver **blocks** the read loop (it does not drop on the client). The daemon bus still drops slow subscribers.
 
@@ -208,7 +214,6 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 
 ## Not in this package
 
-- Watch topic / type filters
 - `ListLocks` / `ListLeases`
 - Join, promote, config
 - A public `WithReadyTimeout`

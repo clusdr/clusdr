@@ -3,7 +3,7 @@
 Clusdr is a single-binary **cluster-awareness runtime**. Applications talk only to a daemon on the same host. That daemon is the Raft member.
 
 ```text
-Application  →  local SDK  →  local daemon  →  Clusdr cluster
+Application  →  local SDK  →  clusdr daemon  →  cluster
 ```
 
 API package: **`clusdr.v1alpha1`**. There is no tagged v1 release. TLS is on unless `CLUSDR_TLS=disabled`.

@@ -152,6 +152,61 @@ joined:
 	t.Fatal("live member.join for node-b not seen")
 }
 
+func TestSDK_WatchTopicsOmitsSnapshot(t *testing.T) {
+	addr, _, _ := startSDKServer(t)
+	c, err := clusdr.Dial(addr, clusdr.WithInsecure())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.Close() })
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	ch, err := c.Watch(ctx, clusdr.WithTopics("deployment"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Publish(ctx, "noise", []byte("x")); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Publish(ctx, "deployment", []byte("ok")); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		select {
+		case ev, ok := <-ch:
+			if !ok {
+				t.Fatal("watch closed")
+			}
+			if ev.Type == events.TypeMemberJoin {
+				t.Fatal("topic watch must omit membership snapshot")
+			}
+			if ev.Type == events.CustomType("noise") {
+				t.Fatal("topic watch must omit other custom topics")
+			}
+			if ev.Type == events.CustomType("deployment") {
+				return
+			}
+		case <-time.After(20 * time.Millisecond):
+		}
+	}
+	t.Fatal("did not see custom.deployment on filtered watch")
+}
+
+func TestSDK_WatchBadTopic(t *testing.T) {
+	addr, _, _ := startSDKServer(t)
+	c, err := clusdr.Dial(addr, clusdr.WithInsecure())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = c.Close() })
+	_, err = c.Watch(context.Background(), clusdr.WithTopics("bad topic"))
+	if err == nil {
+		t.Fatal("expected invalid topic")
+	}
+}
+
 func TestSDK_LocalUsesEnvAddr(t *testing.T) {
 	addr, _, _ := startSDKServer(t)
 	t.Setenv("CLUSDR_GRPC_ADDR", addr)

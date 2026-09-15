@@ -6,7 +6,7 @@ This is the same split as a local Docker engine: apps do not join the cluster; t
 
 ```text
 app A ─┐
-app B ─┼─► daemon on this host ─► other daemons (Raft + gRPC)
+app B ─┼─► clusdr daemon on this host ─► other clusdr daemons (Raft + gRPC)
 cli   ─┘
 ```
 
