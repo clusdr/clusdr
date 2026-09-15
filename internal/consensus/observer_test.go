@@ -6,6 +6,7 @@ import (
 
 	raftlib "github.com/hashicorp/raft"
 
+	"github.com/durguto/clusdr/internal/consensus"
 	"github.com/durguto/clusdr/internal/membership"
 )
 
@@ -16,13 +17,15 @@ func addObserver(t *testing.T, c *chaosCluster, id string) *chaosNode {
 		connectInmem(tr, n.trans)
 	}
 	obs := startChaosNode(t, id, false, tr)
-	c.nodes = append(c.nodes, obs)
-
-	lead := c.mustLeader()
-	if err := lead.node.AddNonvoter(obs.id, string(obs.trans.LocalAddr())); err != nil {
+	if err := c.withAnyLeader(func(lead *consensus.Node) error {
+		return lead.AddNonvoter(obs.id, string(obs.trans.LocalAddr()))
+	}); err != nil {
 		t.Fatalf("add nonvoter %s: %v", id, err)
 	}
-	if err := lead.node.ApplyAddMemberAs(obs.id, string(obs.trans.LocalAddr()), membership.RoleObserver); err != nil {
+	c.nodes = append(c.nodes, obs)
+	if err := c.withAnyLeader(func(lead *consensus.Node) error {
+		return lead.ApplyAddMemberAs(obs.id, string(obs.trans.LocalAddr()), membership.RoleObserver)
+	}); err != nil {
 		t.Fatalf("apply observer %s: %v", id, err)
 	}
 	return obs
@@ -111,11 +114,14 @@ func TestObserver_PromoteJoinsQuorum(t *testing.T) {
 	c.waitAlive("node-a", "node-b", "node-c", "node-obs")
 	c.waitRole("node-obs", membership.RoleObserver)
 
-	lead := c.mustLeader()
-	if err := lead.node.PromoteToVoter(obs.id); err != nil {
+	if err := c.withAnyLeader(func(lead *consensus.Node) error {
+		return lead.PromoteToVoter(obs.id)
+	}); err != nil {
 		t.Fatalf("PromoteToVoter: %v", err)
 	}
-	if err := lead.node.ApplyAddMemberAs(obs.id, string(obs.trans.LocalAddr()), membership.RoleVoter); err != nil {
+	if err := c.withAnyLeader(func(lead *consensus.Node) error {
+		return lead.ApplyAddMemberAs(obs.id, string(obs.trans.LocalAddr()), membership.RoleVoter)
+	}); err != nil {
 		t.Fatalf("apply voter: %v", err)
 	}
 	c.waitRole("node-obs", membership.RoleVoter)

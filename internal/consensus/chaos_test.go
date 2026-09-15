@@ -22,9 +22,11 @@ import (
 // Peers can be killed or partitioned without iptables; production still uses TCP.
 
 const (
-	chaosHeartbeat = 150 * time.Millisecond
-	chaosElection  = 150 * time.Millisecond
-	chaosLease     = 75 * time.Millisecond
+	// Generous vs production LAN (150/75ms): GitHub Actions + -race
+	// routinely misses the leader lease and flakes Apply.
+	chaosHeartbeat = 300 * time.Millisecond
+	chaosElection  = 300 * time.Millisecond
+	chaosLease     = 150 * time.Millisecond
 )
 
 type chaosNode struct {
@@ -106,22 +108,74 @@ func startTriad(t *testing.T) *chaosCluster {
 	}
 
 	waitLeader(t, c.nodes[0].node)
-	lead := c.mustLeader()
 	for _, n := range c.nodes[1:] {
-		if err := lead.node.AddVoter(n.id, string(n.trans.LocalAddr())); err != nil {
+		n := n
+		if err := c.withAnyLeader(func(lead *consensus.Node) error {
+			return lead.AddVoter(n.id, string(n.trans.LocalAddr()))
+		}); err != nil {
 			t.Fatalf("add voter %s: %v", n.id, err)
 		}
 	}
 	c.waitStableLeader()
 
-	lead = c.mustLeader()
 	for _, n := range c.nodes {
-		if err := lead.node.ApplyAddMember(n.id, string(n.trans.LocalAddr())); err != nil {
+		n := n
+		if err := c.withLeader(func(lead *consensus.Node) error {
+			return lead.ApplyAddMember(n.id, string(n.trans.LocalAddr()))
+		}); err != nil {
 			t.Fatalf("add member %s: %v", n.id, err)
 		}
 	}
 	c.waitAlive(ids...)
 	return c
+}
+
+func (c *chaosCluster) withAnyLeader(fn func(*consensus.Node) error) error {
+	c.t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	var last error
+	for time.Now().Before(deadline) {
+		var lead *chaosNode
+		for _, n := range c.live() {
+			if n.node.IsLeader() {
+				lead = n
+				break
+			}
+		}
+		if lead == nil {
+			time.Sleep(20 * time.Millisecond)
+			continue
+		}
+		err := fn(lead.node)
+		if err == nil {
+			return nil
+		}
+		last = err
+		if !transientLeadership(err) {
+			return err
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+	return last
+}
+
+func (c *chaosCluster) withLeader(fn func(*consensus.Node) error) error {
+	c.t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	var last error
+	for time.Now().Before(deadline) {
+		lead := c.waitStableLeader()
+		err := fn(lead.node)
+		if err == nil {
+			return nil
+		}
+		last = err
+		if !transientLeadership(err) {
+			return err
+		}
+		time.Sleep(30 * time.Millisecond)
+	}
+	return last
 }
 
 func (c *chaosCluster) live() []*chaosNode {
@@ -201,6 +255,7 @@ func (c *chaosCluster) waitLeaderAmong(ids ...string) *chaosNode {
 	c.t.Helper()
 	want := append([]string(nil), ids...)
 	deadline := time.Now().Add(10 * time.Second)
+	stable := 0
 	for time.Now().Before(deadline) {
 		var leaders []*chaosNode
 		for _, n := range c.live() {
@@ -224,9 +279,15 @@ func (c *chaosCluster) waitLeaderAmong(ids ...string) *chaosNode {
 				}
 			}
 			if agree {
-				return leaders[0]
+				stable++
+				if stable >= 3 {
+					return leaders[0]
+				}
+				time.Sleep(20 * time.Millisecond)
+				continue
 			}
 		}
+		stable = 0
 		time.Sleep(20 * time.Millisecond)
 	}
 	c.t.Fatalf("no stable leader among %v", ids)
