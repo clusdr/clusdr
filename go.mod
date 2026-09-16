@@ -3,8 +3,8 @@ module github.com/clusdr/clusdr
 go 1.27.0
 
 require (
-	github.com/clusdr/clusdr/api v0.1.3
-	github.com/clusdr/clusdr/sdk v0.1.3
+	github.com/clusdr/clusdr/api v0.1.4
+	github.com/clusdr/clusdr/sdk v0.1.4
 	github.com/hashicorp/go-hclog v1.6.2
 	github.com/hashicorp/raft v1.7.3
 	github.com/hashicorp/raft-boltdb/v2 v2.3.1

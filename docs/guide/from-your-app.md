@@ -16,7 +16,7 @@ Keep `clusdr start` running. Then pick a language:
 |---|---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = "0.1.3"` | [Rust SDK](../sdk/rust.md) |
+| Rust | `clusdr = "0.1.4"` | [Rust SDK](../sdk/rust.md) |
 | TypeScript | `npm install clusdr` | [TypeScript SDK](../sdk/typescript.md) |
 | Java | `io.clusdr:clusdr` | [Java SDK](../sdk/java.md) |
 

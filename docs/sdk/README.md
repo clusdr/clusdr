@@ -14,7 +14,7 @@ The [guide](../guide/from-your-app.md) is the first call. These pages are the wa
 |---|---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
-| Rust | `clusdr = "0.1.3"` | [Rust SDK](rust.md) |
+| Rust | `clusdr = "0.1.4"` | [Rust SDK](rust.md) |
 | TypeScript | `npm install clusdr` | [TypeScript SDK](typescript.md) |
 | Java | `io.clusdr:clusdr` | [Java SDK](java.md) |
 

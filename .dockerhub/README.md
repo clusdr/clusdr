@@ -28,8 +28,8 @@ Application → local SDK → this container → the rest of the cluster
 
 | Tag | What it is |
 |---|---|
-| `v0.1.3` | Current release |
-| `v0.1.2` | Previous |
+| `v0.1.4` | Current release |
+| `v0.1.3` | Previous |
 | `v0.1.1` | Go 1.27, `durguto/clusdr` |
 | `v0.1.0` | First release |
 | `latest` | Same image as the newest `vX.Y.Z` |
@@ -97,7 +97,7 @@ In-tree `docker-compose.yml` is **one node** and does not run `init`. A healthch
 ```yaml
 services:
   clusdr:
-    image: durguto/clusdr:v0.1.3
+    image: durguto/clusdr:v0.1.4
     restart: unless-stopped
     environment:
       CLUSDR_NODE_ADDR: "127.0.0.1:7947"
@@ -122,9 +122,9 @@ This image is the daemon, not the SDK.
 ```bash
 go get github.com/clusdr/clusdr/sdk
 pip install clusdr
-# Cargo.toml: clusdr = "0.1.3"
+# Cargo.toml: clusdr = "0.1.4"
 npm install clusdr
-# Maven: io.clusdr:clusdr:0.1.3
+# Maven: io.clusdr:clusdr:0.1.4
 ```
 
 The app still talks to the local Runtime on this host.

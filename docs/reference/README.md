@@ -11,4 +11,4 @@ Lookup pages. Learn the product in the [guide](../guide/).
 | [Errors](errors.md) | Join token, TLS, dial, locks, SDK, reboot/`join` |
 | [Limits](limits.md) | Caps and non-goals of this version |
 | [Compatibility](compatibility.md) | What is tested |
-| [Changelog](changelog.md) | Unreleased notes |
+| [Changelog](changelog.md) | Notable changes per release |

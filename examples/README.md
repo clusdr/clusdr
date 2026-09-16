@@ -184,14 +184,14 @@ npm install clusdr
 ```
 
 ```toml
-clusdr = "0.1.3"
+clusdr = "0.1.4"
 ```
 
 ```xml
 <dependency>
   <groupId>io.clusdr</groupId>
   <artifactId>clusdr</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 

@@ -4,7 +4,7 @@ Crate `clusdr`. Rust 1.82+. Tokio. Applications call the daemon on this host. Sh
 
 ```toml
 [dependencies]
-clusdr = "0.1.3"
+clusdr = "0.1.4"
 ```
 
 Same version train as the daemon.

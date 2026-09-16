@@ -6,7 +6,7 @@ Artifact `io.clusdr:clusdr`. Java 17+. Blocking gRPC client. Applications call t
 <dependency>
   <groupId>io.clusdr</groupId>
   <artifactId>clusdr</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
