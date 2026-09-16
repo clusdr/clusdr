@@ -14,7 +14,7 @@ What this version is built and tested against. Anything else is unclaimed.
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
 | Container | Docker Hub `durguto/clusdr` (linux/amd64, linux/arm64); GHCR mirror `ghcr.io/clusdr/clusdr` |
-| Release train | `0.1.2` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr`; crates.io `clusdr` `0.1.3` |
+| Release train | `0.1.3` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr`, crates.io `clusdr` |
 | Local storage | BoltDB under `data.dir` |
 | Consensus | Hashicorp Raft |
 | Default OS assumption | Linux (Unix control socket) |

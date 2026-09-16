@@ -2,9 +2,13 @@
 
 ## Unreleased
 
+## 0.1.3 — 2026-09-16
+
+Daemon, Go modules `sdk`/`api`, Python `clusdr`, and crates.io `clusdr` share `0.1.3`.
+
 ### Added
 
-- Rust SDK crate `clusdr` `0.1.3` on [crates.io](https://crates.io/crates/clusdr) ([docs](../sdk/rust.md), [github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
+- Rust SDK crate `clusdr` on [crates.io](https://crates.io/crates/clusdr) ([docs](../sdk/rust.md), [github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
 - [examples/](https://github.com/clusdr/clusdr/tree/main/examples): `who`, `scheduler`, `watch`, `worker`, and `agent` each in Go, Python, and Rust
 
 ### Changed
