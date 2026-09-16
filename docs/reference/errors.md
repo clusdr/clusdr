@@ -79,7 +79,7 @@ SDK errors are wrapped (`clusdr: daemon not ready at …`, `clusdr: lock "name":
 | `clusdr: publish rejected` / payload too large | Custom event over 64 KiB or invalid type | Shrink the payload. Publish is gossip, not Raft ([events](../concepts/events.md)) |
 | Watch reconnect misses `custom.*` | Not a bug | Custom events are ephemeral. Cluster events come back in the snapshot |
 
-Go: [SDK errors](../sdk/go.md#errors). Python: [SDK errors](../sdk/python.md#errors).
+Go: [SDK errors](../sdk/go.md#errors). Python: [SDK errors](../sdk/python.md#errors). Rust: [SDK errors](../sdk/rust.md#errors).
 
 ## Related
 
