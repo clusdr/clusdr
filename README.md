@@ -13,7 +13,7 @@
   <a href="https://github.com/clusdr/clusdr/actions/workflows/ci.yml"><img src="https://github.com/clusdr/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/clusdr/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/clusdr/clusdr" alt="Go version"></a>
   <a href="https://github.com/clusdr/clusdr/releases"><img src="https://img.shields.io/github/v/release/clusdr/clusdr" alt="Release"></a>
-  <a href="https://pkg.go.dev/github.com/durguto/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/durguto/clusdr/sdk.svg" alt="Go Reference"></a>
+  <a href="https://pkg.go.dev/github.com/clusdr/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/clusdr/clusdr/sdk.svg" alt="Go Reference"></a>
   <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/pulls/durguto/clusdr" alt="Docker"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/clusdr/clusdr" alt="License"></a>
 </p>
@@ -68,7 +68,7 @@ const c = await local();
 const members = await c.members();
 ```
 
-Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.3"`. TypeScript: `npm install clusdr`. Runnable copies: [examples/](examples/).
+Go: `go get github.com/clusdr/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.3"`. TypeScript: `npm install clusdr`. Java: `io.clusdr:clusdr`. Runnable copies: [examples/](examples/).
 
 ## Docs
 

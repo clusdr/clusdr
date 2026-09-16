@@ -2,7 +2,7 @@
 
 Small **applications** that talk to a local daemon. They do not join Raft, do not store data, and do not dial a remote Runtime API.
 
-Each program is the same story in **Go**, **Python**, **Rust**, and **TypeScript**. Languages live in their own package under the example folder (`go/`, `python/`, `rust/`, `typescript/`).
+Each program is the same story in **Go**, **Python**, **Rust**, **TypeScript**, and **Java**. Languages live in their own package under the example folder (`go/`, `python/`, `rust/`, `typescript/`, `java/`).
 
 ```text
 your process  ──►  clusdr daemon on this host  ──►  the rest of the cluster
@@ -17,9 +17,9 @@ clusdr start --bootstrap
 
 Leave that process running. TLS is on; the SDK loads `ca.crt` / `node.crt` / `node.key` from `CLUSDR_DATA_DIR` or `~/.clusdr`. If connect fails, [Errors](../docs/reference/errors.md).
 
-Python, Rust, and TypeScript require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
+Python, Rust, TypeScript, and Java require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
 
-Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo). TypeScript packages depend on sibling [`clusdr-js`](https://github.com/clusdr/clusdr-js) (`../clusdr-js`).
+Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo). TypeScript packages depend on sibling [`clusdr-js`](https://github.com/clusdr/clusdr-js) (`../clusdr-js`). Java examples depend on `mvn install` of sibling [`clusdr-java`](https://github.com/clusdr/clusdr-java) (`../clusdr-java`).
 
 ## Programs
 
@@ -40,6 +40,7 @@ go run ./examples/who/go
 python3 examples/who/python/main.py
 cargo run -p who --manifest-path examples/Cargo.toml
 npx tsx examples/who/typescript/main.ts
+mvn -q -f examples/who/java/pom.xml exec:java
 ```
 
 Snapshot only:
@@ -49,6 +50,7 @@ go run ./examples/who/go -once
 python3 examples/who/python/main.py --once
 cargo run -p who --manifest-path examples/Cargo.toml -- --once
 npx tsx examples/who/typescript/main.ts --once
+mvn -q -f examples/who/java/pom.xml exec:java -Dexec.args=--once
 ```
 
 ### scheduler
@@ -69,11 +71,14 @@ cargo run -p scheduler --manifest-path examples/Cargo.toml -- --holder replica-b
 
 npx tsx examples/scheduler/typescript/main.ts --holder replica-a
 npx tsx examples/scheduler/typescript/main.ts --holder replica-b
+
+mvn -q -f examples/scheduler/java/pom.xml exec:java -Dexec.args="--holder replica-a"
+mvn -q -f examples/scheduler/java/pom.xml exec:java -Dexec.args="--holder replica-b"
 ```
 
 One replica prints `held … token=…` and dispatches. The other prints `waiting`. Kill the holder; the waiter acquires. That is the product: exclusive work without the app joining the cluster.
 
-Go `TryLock` may include the current holder when the name is taken. Python, Rust, and TypeScript return `None` / `Ok(None)` / `null` with no holder object.
+Go `TryLock` may include the current holder when the name is taken. Python, Rust, TypeScript, and Java return `None` / `Ok(None)` / `null` / `Optional.empty()` with no holder object.
 
 Observer daemons reject lock RPCs (`FailedPrecondition`). Run this against a voter.
 
@@ -84,6 +89,7 @@ go run ./examples/watch/go
 python3 examples/watch/python/main.py
 cargo run -p watch --manifest-path examples/Cargo.toml
 npx tsx examples/watch/typescript/main.ts
+mvn -q -f examples/watch/java/pom.xml exec:java
 ```
 
 Another terminal, while it runs:
@@ -101,6 +107,7 @@ go run ./examples/watch/go -name edge-1
 python3 examples/watch/python/main.py --name edge-1
 cargo run -p watch --manifest-path examples/Cargo.toml -- --name edge-1
 npx tsx examples/watch/typescript/main.ts --name edge-1
+mvn -q -f examples/watch/java/pom.xml exec:java -Dexec.args="--name edge-1"
 ```
 
 ### worker
@@ -119,9 +126,12 @@ cargo run -p worker --manifest-path examples/Cargo.toml -- --name shard-7 --owne
 
 npx tsx examples/worker/typescript/main.ts --name shard-7 --owner worker-a
 npx tsx examples/worker/typescript/main.ts --name shard-7 --owner worker-b
+
+mvn -q -f examples/worker/java/pom.xml exec:java -Dexec.args="--name shard-7 --owner worker-a"
+mvn -q -f examples/worker/java/pom.xml exec:java -Dexec.args="--name shard-7 --owner worker-b"
 ```
 
-Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the Go lease context (or Python `stop_renew` / Rust `stop_renew` / TypeScript `stopRenew`), which only stops renew so the grant expires at its deadline.
+Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the Go lease context (or Python `stop_renew` / Rust `stop_renew` / TypeScript `stopRenew` / Java `stopRenew`), which only stops renew so the grant expires at its deadline.
 
 ### agent
 
@@ -139,13 +149,16 @@ cargo run -p agent --manifest-path examples/Cargo.toml -- --mode emit --from map
 
 npx tsx examples/agent/typescript/main.ts --mode listen
 npx tsx examples/agent/typescript/main.ts --mode emit --from mapper
+
+mvn -q -f examples/agent/java/pom.xml exec:java -Dexec.args="--mode listen"
+mvn -q -f examples/agent/java/pom.xml exec:java -Dexec.args="--mode emit --from mapper"
 ```
 
 `--mode both` (default) emits and listens in one process so you can see round-trip on a single terminal.
 
 ## From this tree vs your app
 
-This module `replace`s `github.com/durguto/clusdr/sdk` → `./sdk`. `go run ./examples/…/go` always matches the checkout.
+This module `replace`s `github.com/clusdr/clusdr/sdk` → `./sdk`. `go run ./examples/…/go` always matches the checkout.
 
 Python: `pip install clusdr` (or an editable `clusdr-python` checkout).
 
@@ -160,10 +173,12 @@ npx tsx who/typescript/main.ts
 
 From the daemon repo root, `npx tsx examples/who/typescript/main.ts` works after that install.
 
+Java: `mvn install` in sibling `clusdr-java`, then `mvn -q -f examples/who/java/pom.xml exec:java`.
+
 In your own module:
 
 ```bash
-go get github.com/durguto/clusdr/sdk
+go get github.com/clusdr/clusdr/sdk
 pip install clusdr
 npm install clusdr
 ```
@@ -172,6 +187,14 @@ npm install clusdr
 clusdr = "0.1.3"
 ```
 
-Copy the files. Keep `Local` / `local()` / `local`. `Dial` / `dial` is for tests and operators.
+```xml
+<dependency>
+  <groupId>io.clusdr</groupId>
+  <artifactId>clusdr</artifactId>
+  <version>0.1.3</version>
+</dependency>
+```
+
+Copy the files. Keep `Local` / `local()` / `Clusdr.local()`. `Dial` / `dial` is for tests and operators.
 
 Guide: [Use it from your app](../docs/guide/from-your-app.md).

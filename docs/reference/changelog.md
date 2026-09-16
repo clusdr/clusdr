@@ -6,6 +6,12 @@
 
 - TypeScript SDK package `clusdr` on npm ([docs](../sdk/typescript.md), [github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))
 - [examples/](https://github.com/clusdr/clusdr/tree/main/examples): TypeScript copies of `who`, `scheduler`, `watch`, `worker`, and `agent`
+- Java SDK artifact `io.clusdr:clusdr` ([docs](../sdk/java.md), [github.com/clusdr/clusdr-java](https://github.com/clusdr/clusdr-java))
+- [examples/](https://github.com/clusdr/clusdr/tree/main/examples): Java copies of `who`, `scheduler`, `watch`, `worker`, and `agent`
+
+### Changed
+
+- Go module path is `github.com/clusdr/clusdr` (was `github.com/durguto/clusdr`). Install: `go get github.com/clusdr/clusdr/sdk`. Docker Hub remains `durguto/clusdr`.
 
 ## 0.1.3 — 2026-09-16
 
