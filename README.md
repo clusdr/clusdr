@@ -61,7 +61,14 @@ let c = clusdr::local(clusdr::Options::new()).await?;
 let members = c.members().await?;
 ```
 
-Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.3"`. Runnable copies: [examples/](examples/).
+```ts
+import { local } from "clusdr";
+
+const c = await local();
+const members = await c.members();
+```
+
+Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.3"`. TypeScript: `npm install clusdr`. Runnable copies: [examples/](examples/).
 
 ## Docs
 

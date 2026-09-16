@@ -38,9 +38,9 @@ TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
 | You see | Cause | What to do |
 |---|---|---|
 | Certificate / handshake errors after join | One side plaintext, the other mTLS; or different CAs | Same `tls.mode` everywhere. Apps load `ca.crt` / `node.crt` / `node.key` from **that host’s** `data.dir` |
-| Python: `clusdr: TLS enabled but ca.crt/node.crt/node.key missing in …` | No PEMs in `data_dir` / `CLUSDR_DATA_DIR` / `~/.clusdr` | Point `data_dir` at the daemon’s data dir, or `CLUSDR_TLS=disabled` / `insecure=True` (dev only). Python does **not** skip-verify like Go bootstrap TLS ([Python SDK](../sdk/python.md)) |
-| Python: `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` | No `server_name`, env, or CN on `node.crt` | Set `server_name=` or `CLUSDR_TLS_SERVER_NAME` to the **peer node id** |
-| Go SDK connects, Python does not | Go falls back to bootstrap TLS when PEMs are missing | Give Python the PEMs or disable TLS on both |
+| Python / Rust / TypeScript: `clusdr: TLS enabled but ca.crt/node.crt/node.key missing in …` | No PEMs in `data_dir` / `dataDir` / `CLUSDR_DATA_DIR` / `~/.clusdr` | Point `data_dir` / `dataDir` at the daemon’s data dir, or `CLUSDR_TLS=disabled` / `insecure` (dev only). These clients do **not** skip-verify like Go bootstrap TLS ([Python](../sdk/python.md), [Rust](../sdk/rust.md), [TypeScript](../sdk/typescript.md)) |
+| Python / Rust / TypeScript: `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` | No `server_name` / `serverName`, env, or CN on `node.crt` | Set `server_name` / `serverName` or `CLUSDR_TLS_SERVER_NAME` to the **peer node id** |
+| Go SDK connects, Python / Rust / TypeScript does not | Go falls back to bootstrap TLS when PEMs are missing | Give those clients the PEMs or disable TLS on both |
 
 `clusdr certs show` prints the CA fingerprint. Compare it across nodes. Server identity is the node id (SAN), not the dial hostname.
 
@@ -79,7 +79,7 @@ SDK errors are wrapped (`clusdr: daemon not ready at …`, `clusdr: lock "name":
 | `clusdr: publish rejected` / payload too large | Custom event over 64 KiB or invalid type | Shrink the payload. Publish is gossip, not Raft ([events](../concepts/events.md)) |
 | Watch reconnect misses `custom.*` | Not a bug | Custom events are ephemeral. Cluster events come back in the snapshot |
 
-Go: [SDK errors](../sdk/go.md#errors). Python: [SDK errors](../sdk/python.md#errors). Rust: [SDK errors](../sdk/rust.md#errors).
+Go: [SDK errors](../sdk/go.md#errors). Python: [SDK errors](../sdk/python.md#errors). Rust: [SDK errors](../sdk/rust.md#errors). TypeScript: [SDK errors](../sdk/typescript.md#errors).
 
 ## Related
 

@@ -21,4 +21,4 @@ Snapshot events use `seq = 0`. Then `watch.sync`. Optional `watch.gap` if `last_
 ## See also
 
 - [Watch](../../concepts/watch.md)
-- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md)
+- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md) · [TypeScript SDK](../../sdk/typescript.md)

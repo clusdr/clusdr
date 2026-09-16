@@ -6,3 +6,9 @@ contact_links:
   - name: Python SDK
     url: https://github.com/clusdr/clusdr-python/issues/new/choose
     about: Bugs in `pip install clusdr`, not the daemon.
+  - name: Rust SDK
+    url: https://github.com/clusdr/clusdr-rust/issues/new/choose
+    about: Bugs in crate `clusdr`, not the daemon.
+  - name: TypeScript SDK
+    url: https://github.com/clusdr/clusdr-js/issues/new/choose
+    about: Bugs in `npm install clusdr`, not the daemon.

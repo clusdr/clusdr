@@ -2,7 +2,7 @@
 
 Small **applications** that talk to a local daemon. They do not join Raft, do not store data, and do not dial a remote Runtime API.
 
-Each program is the same story in **Go**, **Python**, and **Rust**. Languages live in their own package under the example folder (`go/`, `python/`, `rust/`).
+Each program is the same story in **Go**, **Python**, **Rust**, and **TypeScript**. Languages live in their own package under the example folder (`go/`, `python/`, `rust/`, `typescript/`).
 
 ```text
 your process  ──►  clusdr daemon on this host  ──►  the rest of the cluster
@@ -17,9 +17,9 @@ clusdr start --bootstrap
 
 Leave that process running. TLS is on; the SDK loads `ca.crt` / `node.crt` / `node.key` from `CLUSDR_DATA_DIR` or `~/.clusdr`. If connect fails, [Errors](../docs/reference/errors.md).
 
-Python and Rust require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
+Python, Rust, and TypeScript require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
 
-Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo).
+Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo). TypeScript packages depend on sibling [`clusdr-js`](https://github.com/clusdr/clusdr-js) (`../clusdr-js`).
 
 ## Programs
 
@@ -39,6 +39,7 @@ Prints the membership table, then stays on Watch until Ctrl-C. Cluster events ar
 go run ./examples/who/go
 python3 examples/who/python/main.py
 cargo run -p who --manifest-path examples/Cargo.toml
+npx tsx examples/who/typescript/main.ts
 ```
 
 Snapshot only:
@@ -47,6 +48,7 @@ Snapshot only:
 go run ./examples/who/go -once
 python3 examples/who/python/main.py --once
 cargo run -p who --manifest-path examples/Cargo.toml -- --once
+npx tsx examples/who/typescript/main.ts --once
 ```
 
 ### scheduler
@@ -64,11 +66,14 @@ python3 examples/scheduler/python/main.py --holder replica-b
 
 cargo run -p scheduler --manifest-path examples/Cargo.toml -- --holder replica-a
 cargo run -p scheduler --manifest-path examples/Cargo.toml -- --holder replica-b
+
+npx tsx examples/scheduler/typescript/main.ts --holder replica-a
+npx tsx examples/scheduler/typescript/main.ts --holder replica-b
 ```
 
 One replica prints `held … token=…` and dispatches. The other prints `waiting`. Kill the holder; the waiter acquires. That is the product: exclusive work without the app joining the cluster.
 
-Go `TryLock` may include the current holder when the name is taken. Python and Rust return `None` / `Ok(None)` with no holder object.
+Go `TryLock` may include the current holder when the name is taken. Python, Rust, and TypeScript return `None` / `Ok(None)` / `null` with no holder object.
 
 Observer daemons reject lock RPCs (`FailedPrecondition`). Run this against a voter.
 
@@ -78,6 +83,7 @@ Observer daemons reject lock RPCs (`FailedPrecondition`). Run this against a vot
 go run ./examples/watch/go
 python3 examples/watch/python/main.py
 cargo run -p watch --manifest-path examples/Cargo.toml
+npx tsx examples/watch/typescript/main.ts
 ```
 
 Another terminal, while it runs:
@@ -94,6 +100,7 @@ You should see `custom.ping` on the bus. Custom events are 1-hop gossip, not Raf
 go run ./examples/watch/go -name edge-1
 python3 examples/watch/python/main.py --name edge-1
 cargo run -p watch --manifest-path examples/Cargo.toml -- --name edge-1
+npx tsx examples/watch/typescript/main.ts --name edge-1
 ```
 
 ### worker
@@ -109,9 +116,12 @@ python3 examples/worker/python/main.py --name shard-7 --owner worker-b
 
 cargo run -p worker --manifest-path examples/Cargo.toml -- --name shard-7 --owner worker-a
 cargo run -p worker --manifest-path examples/Cargo.toml -- --name shard-7 --owner worker-b
+
+npx tsx examples/worker/typescript/main.ts --name shard-7 --owner worker-a
+npx tsx examples/worker/typescript/main.ts --name shard-7 --owner worker-b
 ```
 
-Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the Go lease context (or Python `stop_renew` / Rust `stop_renew`), which only stops renew so the grant expires at its deadline.
+Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the Go lease context (or Python `stop_renew` / Rust `stop_renew` / TypeScript `stopRenew`), which only stops renew so the grant expires at its deadline.
 
 ### agent
 
@@ -126,6 +136,9 @@ python3 examples/agent/python/main.py --mode emit --from mapper
 
 cargo run -p agent --manifest-path examples/Cargo.toml -- --mode listen
 cargo run -p agent --manifest-path examples/Cargo.toml -- --mode emit --from mapper
+
+npx tsx examples/agent/typescript/main.ts --mode listen
+npx tsx examples/agent/typescript/main.ts --mode emit --from mapper
 ```
 
 `--mode both` (default) emits and listens in one process so you can see round-trip on a single terminal.
@@ -138,11 +151,21 @@ Python: `pip install clusdr` (or an editable `clusdr-python` checkout).
 
 Rust: the `rust/` directory under each example is its own crate. `examples/Cargo.toml` is the workspace. It path-depends on sibling `clusdr-rust`.
 
+TypeScript: `examples/package.json` path-depends on sibling `clusdr-js`. From `examples/`:
+
+```bash
+npm install
+npx tsx who/typescript/main.ts
+```
+
+From the daemon repo root, `npx tsx examples/who/typescript/main.ts` works after that install.
+
 In your own module:
 
 ```bash
 go get github.com/durguto/clusdr/sdk
 pip install clusdr
+npm install clusdr
 ```
 
 ```toml

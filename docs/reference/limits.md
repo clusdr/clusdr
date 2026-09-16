@@ -41,4 +41,5 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 - Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/clusdr/clusdr`)
 - Python SDK: `pip install clusdr`
 - Rust SDK: crate `clusdr` ([github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
+- TypeScript SDK: `npm install clusdr` ([github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))
 - Apache-2.0 ([LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE))

@@ -1,0 +1,11 @@
+{
+  "name": "clusdr-examples",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "clusdr": "file:../../clusdr-js"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5"
+  }
+}

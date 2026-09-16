@@ -123,6 +123,7 @@ This image is the daemon, not the SDK.
 go get github.com/durguto/clusdr/sdk
 pip install clusdr
 # Cargo.toml: clusdr = "0.1.3"
+npm install clusdr
 ```
 
 The app still talks to the local Runtime on this host.

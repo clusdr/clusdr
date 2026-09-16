@@ -36,3 +36,7 @@ __pycache__/
 # Rust example packages
 examples/target/
 examples/Cargo.lock
+
+# TypeScript example packages
+examples/node_modules/
+examples/package-lock.json

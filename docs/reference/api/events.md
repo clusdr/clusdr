@@ -13,4 +13,4 @@ Not Raft-replicated.
 ## See also
 
 - [Custom events](../../concepts/events.md)
-- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md)
+- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md) · [TypeScript SDK](../../sdk/typescript.md)

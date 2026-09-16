@@ -17,6 +17,7 @@ Keep `clusdr start` running. Then pick a language:
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
 | Rust | `clusdr = "0.1.3"` | [Rust SDK](../sdk/rust.md) |
+| TypeScript | `npm install clusdr` | [TypeScript SDK](../sdk/typescript.md) |
 
 ```go
 c, err := clusdr.Local()
@@ -38,11 +39,19 @@ let members = c.members().await?;
 let lk = c.lock("scheduler", Some(std::time::Duration::from_secs(15))).await?;
 ```
 
+```ts
+import { local } from "clusdr";
+
+const c = await local();
+const members = await c.members();
+const lk = await c.lock("scheduler", 15);
+```
+
 `Local` / `local()` dial `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.
 
 What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
 
-Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, and Rust): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, Rust, and TypeScript): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
 
 ## Next
 

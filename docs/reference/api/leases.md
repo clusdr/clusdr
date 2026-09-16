@@ -14,5 +14,5 @@ Presence leases use the name `presence.<nodeID>`.
 ## See also
 
 - [Leases](../../concepts/leases.md)
-- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md)
+- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md) · [TypeScript SDK](../../sdk/typescript.md)
 - [Presence](../../concepts/presence.md)

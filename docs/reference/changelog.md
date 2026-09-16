@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- TypeScript SDK package `clusdr` on npm ([docs](../sdk/typescript.md), [github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))
+- [examples/](https://github.com/clusdr/clusdr/tree/main/examples): TypeScript copies of `who`, `scheduler`, `watch`, `worker`, and `agent`
+
 ## 0.1.3 — 2026-09-16
 
 Daemon, Go modules `sdk`/`api`, Python `clusdr`, and crates.io `clusdr` share `0.1.3`.
