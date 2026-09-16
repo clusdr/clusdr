@@ -1,4 +1,4 @@
-# 2. Start the first member
+# Start the first member
 
 Clusdr is not a library you embed. It is a **daemon on this host**. Your app will talk only to that process. The daemon is the Raft member.
 

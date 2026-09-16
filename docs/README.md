@@ -1,4 +1,4 @@
-# Clusdr documentation
+# Documentation
 
 Clusdr is a single-binary **cluster-awareness runtime**. Applications talk only to a daemon on the same host. That daemon is the Raft member.
 

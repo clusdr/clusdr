@@ -1,4 +1,4 @@
-# 1. Install the binary
+# Install the binary
 
 You need one program: `clusdr`. It is the daemon and the CLI. Do not clone the repository to run a cluster.
 

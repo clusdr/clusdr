@@ -1,4 +1,4 @@
-# 3. Grow the cluster
+# Grow the cluster
 
 You have one running seed from [step 2](first-member.md) and the join token from `init`. Now add another daemon.
 

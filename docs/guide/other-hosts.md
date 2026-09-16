@@ -1,4 +1,4 @@
-# 6. Run on other hosts
+# Run on other hosts
 
 [Step 2](first-member.md) and [step 3](grow.md) used `127.0.0.1`. That cannot form a cluster across machines. You now point every peer at addresses they can actually dial.
 

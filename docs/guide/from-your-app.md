@@ -1,4 +1,4 @@
-# 5. Use it from your app
+# Use it from your app
 
 The daemon you started in [step 2](first-member.md) is the cluster member. The application is a client of the daemon **on the same host**.
 

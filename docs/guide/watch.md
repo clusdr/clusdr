@@ -1,4 +1,4 @@
-# 4. Watch and publish
+# Watch and publish
 
 You have at least the seed from [step 2](first-member.md), better two members from [step 3](grow.md). Now look at the stream those daemons already emit, then put your own signal on it.
 
