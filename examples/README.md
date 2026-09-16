@@ -146,7 +146,7 @@ pip install clusdr
 ```
 
 ```toml
-clusdr = "0.1.2"
+clusdr = "0.1.3"
 ```
 
 Copy the files. Keep `Local` / `local()` / `local`. `Dial` / `dial` is for tests and operators.

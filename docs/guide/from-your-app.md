@@ -16,7 +16,7 @@ Keep `clusdr start` running. Then pick a language:
 |---|---|---|
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = "0.1.2"` | [Rust SDK](../sdk/rust.md) |
+| Rust | `clusdr = "0.1.3"` | [Rust SDK](../sdk/rust.md) |
 
 ```go
 c, err := clusdr.Local()

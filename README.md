@@ -61,7 +61,7 @@ let c = clusdr::local(clusdr::Options::new()).await?;
 let members = c.members().await?;
 ```
 
-Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.2"`. Runnable copies: [examples/](examples/).
+Go: `go get github.com/durguto/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.3"`. Runnable copies: [examples/](examples/).
 
 ## Docs
 
