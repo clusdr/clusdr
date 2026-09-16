@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/durguto/clusdr/internal/uid"
+	"github.com/clusdr/clusdr/internal/uid"
 )
 
 func TestNew_Format(t *testing.T) {

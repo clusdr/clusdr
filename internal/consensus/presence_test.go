@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/consensus"
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/leases"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/internal/presence"
+	"github.com/clusdr/clusdr/internal/consensus"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/presence"
 )
 
 func TestPresenceLeaseExpire_MemberLeft(t *testing.T) {

@@ -192,7 +192,7 @@ const file_clusdr_v1alpha1_events_proto_rawDesc = "" +
 	"\bevent_id\x18\x03 \x01(\tR\aeventId\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type2k\n" +
 	"\fEventService\x12[\n" +
-	"\fPublishEvent\x12$.clusdr.v1alpha1.PublishEventRequest\x1a%.clusdr.v1alpha1.PublishEventResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\fPublishEvent\x12$.clusdr.v1alpha1.PublishEventRequest\x1a%.clusdr.v1alpha1.PublishEventResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_events_proto_rawDescOnce sync.Once

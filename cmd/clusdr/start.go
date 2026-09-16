@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/durguto/clusdr/internal/app"
+	"github.com/clusdr/clusdr/internal/app"
 )
 
 func newStartCmd(f *rootFlags) *cobra.Command {

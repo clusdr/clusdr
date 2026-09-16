@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/durguto/clusdr/internal/config"
+	"github.com/clusdr/clusdr/internal/config"
 )
 
 // rootFlags holds persistent flags available to all subcommands.

@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"testing"
 
-	"github.com/durguto/clusdr/internal/pki"
+	"github.com/clusdr/clusdr/internal/pki"
 )
 
 func TestGenerate_CAAndNodeCert(t *testing.T) {

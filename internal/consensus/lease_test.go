@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/consensus"
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/consensus"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/leases"
 )
 
 func TestLeases_GrantExpireThenOtherWins(t *testing.T) {

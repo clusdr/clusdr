@@ -11,9 +11,9 @@ ARG BUILD_TIME=unknown
 
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags "-s -w \
-      -X github.com/durguto/clusdr/internal/version.Version=${VERSION} \
-      -X github.com/durguto/clusdr/internal/version.Commit=${COMMIT} \
-      -X github.com/durguto/clusdr/internal/version.BuildTime=${BUILD_TIME}" \
+      -X github.com/clusdr/clusdr/internal/version.Version=${VERSION} \
+      -X github.com/clusdr/clusdr/internal/version.Commit=${COMMIT} \
+      -X github.com/clusdr/clusdr/internal/version.BuildTime=${BUILD_TIME}" \
     -o /clusdr \
     ./cmd/clusdr
 

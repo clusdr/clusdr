@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"testing"
 
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/membership"
 )
 
 func nopLog() *slog.Logger {

@@ -8,9 +8,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
-	"github.com/durguto/clusdr/internal/grpcserver"
-	"github.com/durguto/clusdr/internal/membership"
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
+	"github.com/clusdr/clusdr/internal/grpcserver"
+	"github.com/clusdr/clusdr/internal/membership"
 )
 
 func startMembershipServer(t *testing.T, lister grpcserver.MemberLister) pb.MembershipServiceClient {

@@ -19,11 +19,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	proto "github.com/durguto/clusdr/api/clusdr/v1alpha1"
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/grpcserver"
-	"github.com/durguto/clusdr/internal/membership"
+	proto "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/grpcserver"
+	"github.com/clusdr/clusdr/internal/membership"
 )
 
 // startE2EServer starts a WatchService backed by a live membership engine and

@@ -10,12 +10,12 @@ import (
 
 	raftlib "github.com/hashicorp/raft"
 
-	"github.com/durguto/clusdr/internal/consensus"
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/leases"
-	"github.com/durguto/clusdr/internal/locks"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/internal/presence"
+	"github.com/clusdr/clusdr/internal/consensus"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/locks"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/presence"
 )
 
 // Chaos tests run a real 3-voter Raft cluster on an in-memory transport.

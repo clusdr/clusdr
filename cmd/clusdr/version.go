@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/durguto/clusdr/internal/version"
+	"github.com/clusdr/clusdr/internal/version"
 )
 
 func newVersionCmd() *cobra.Command {

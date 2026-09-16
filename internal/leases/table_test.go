@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/leases"
 )
 
 func TestGrant_SecondOwnerLoses(t *testing.T) {

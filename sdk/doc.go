@@ -9,7 +9,7 @@
 //
 // # Install
 //
-//	go get github.com/durguto/clusdr/sdk
+//	go get github.com/clusdr/clusdr/sdk
 //
 // Use the same version train as the daemon. A running daemon is required:
 //

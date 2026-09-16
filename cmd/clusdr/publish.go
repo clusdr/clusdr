@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
 )
 
 func newPublishCmd(f *rootFlags) *cobra.Command {

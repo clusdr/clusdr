@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/leases"
 )
 
 func TestRunExpirer_ReleasesDueLease(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
 )
 
 func peerCertUnaryInterceptor() grpc.UnaryServerInterceptor {

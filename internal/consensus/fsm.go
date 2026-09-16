@@ -9,9 +9,9 @@ import (
 
 	raftlib "github.com/hashicorp/raft"
 
-	"github.com/durguto/clusdr/internal/leases"
-	"github.com/durguto/clusdr/internal/locks"
-	"github.com/durguto/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/locks"
+	"github.com/clusdr/clusdr/internal/membership"
 )
 
 // MemberApplier is the subset of membership.Engine used by the FSM.

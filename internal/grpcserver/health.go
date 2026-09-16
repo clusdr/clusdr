@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
 )
 
 // NodeInfo holds the identifying information the health service reports.

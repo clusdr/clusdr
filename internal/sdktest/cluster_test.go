@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/grpcserver"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/sdk"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/grpcserver"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/sdk"
 )
 
 func nopLog() *slog.Logger {

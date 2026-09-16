@@ -142,7 +142,7 @@ const file_clusdr_v1alpha1_health_proto_rawDesc = "" +
 	"\x04role\x18\x03 \x01(\tR\x04role\x12\x18\n" +
 	"\ahealthy\x18\x04 \x01(\bR\ahealthy2Z\n" +
 	"\rHealthService\x12I\n" +
-	"\x06Health\x12\x1e.clusdr.v1alpha1.HealthRequest\x1a\x1f.clusdr.v1alpha1.HealthResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\x06Health\x12\x1e.clusdr.v1alpha1.HealthRequest\x1a\x1f.clusdr.v1alpha1.HealthResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_health_proto_rawDescOnce sync.Once

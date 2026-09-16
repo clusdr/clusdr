@@ -47,7 +47,7 @@ make proto
 make proto-python   # writes ../clusdr-python/src
 ```
 
-Rust and TypeScript load `.proto` files at runtime. Copy them in the sibling trees (`make proto` in `clusdr-rust` / `clusdr-js`).
+Rust and TypeScript load `.proto` files at runtime. Copy them in the sibling trees (`make proto` in `clusdr-rust` / `clusdr-js`). Java compiles `.proto` at build time (`make proto` then `mvn test` in `clusdr-java`).
 
 `gofmt` on changed Go files.
 
@@ -60,11 +60,11 @@ If you change configuration, CLI, proto, SDK, or defaults, update the matching p
 ```text
 cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
-examples/           small programs against a local daemon; each example has go/, python/, rust/, typescript/ packages
+examples/           small programs against a local daemon; each example has go/, python/, rust/, typescript/, java/ packages
 internal/           daemon
 proto/              .proto sources
-api/                generated Go stubs (module github.com/durguto/clusdr/api)
-sdk/                application SDK (module github.com/durguto/clusdr/sdk)
+api/                generated Go stubs (module github.com/clusdr/clusdr/api)
+sdk/                application SDK (module github.com/clusdr/clusdr/sdk)
 ```
 
 Sibling checkouts:
@@ -72,5 +72,6 @@ Sibling checkouts:
 - [`clusdr-python`](https://github.com/clusdr/clusdr-python) — Python SDK
 - [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) — Rust SDK
 - [`clusdr-js`](https://github.com/clusdr/clusdr-js) — TypeScript SDK
+- [`clusdr-java`](https://github.com/clusdr/clusdr-java) — Java SDK
 - [`clusdr-site`](https://github.com/clusdr/clusdr-site) — clusdr.io
 

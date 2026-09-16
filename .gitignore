@@ -40,3 +40,6 @@ examples/Cargo.lock
 # TypeScript example packages
 examples/node_modules/
 examples/package-lock.json
+
+# Java example packages
+examples/**/java/target/

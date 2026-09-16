@@ -3,8 +3,8 @@ package presence_test
 import (
 	"testing"
 
-	"github.com/durguto/clusdr/internal/events"
-	"github.com/durguto/clusdr/internal/presence"
+	"github.com/clusdr/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/presence"
 )
 
 func TestLeaseName_RoundTrip(t *testing.T) {

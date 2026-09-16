@@ -1,12 +1,12 @@
 # Go SDK
 
-Module [`github.com/durguto/clusdr/sdk`](https://pkg.go.dev/github.com/durguto/clusdr/sdk), package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](./).
+Module [`github.com/clusdr/clusdr/sdk`](https://pkg.go.dev/github.com/clusdr/clusdr/sdk), package `clusdr`. Applications call the daemon on this host. Shared model: [SDKs](./).
 
 ```bash
-go get github.com/durguto/clusdr/sdk
+go get github.com/clusdr/clusdr/sdk
 ```
 
-Same version train as the daemon. Wire types live in `github.com/durguto/clusdr/api`.
+Same version train as the daemon. Wire types live in `github.com/clusdr/clusdr/api`.
 
 **pkg.go.dev** is the API reference (package comment, examples, every exported type). This page is the walkthrough. A running daemon is required ([guide: first member](../guide/first-member.md)).
 
@@ -17,7 +17,7 @@ import (
     "context"
     "time"
 
-    "github.com/durguto/clusdr/sdk"
+    "github.com/clusdr/clusdr/sdk"
 )
 
 c, err := clusdr.Local()
@@ -226,4 +226,4 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 - Join, promote, config
 - A public `WithReadyTimeout`
 
-Wire shapes: [gRPC API](../reference/api/). Python: [Python SDK](python.md). Rust: [Rust SDK](rust.md). TypeScript: [TypeScript SDK](typescript.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+Wire shapes: [gRPC API](../reference/api/). Python: [Python SDK](python.md). Rust: [Rust SDK](rust.md). TypeScript: [TypeScript SDK](typescript.md). Java: [Java SDK](java.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

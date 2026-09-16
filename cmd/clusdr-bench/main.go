@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/durguto/clusdr/internal/bench"
+	"github.com/clusdr/clusdr/internal/bench"
 )
 
 func main() {

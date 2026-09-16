@@ -42,4 +42,5 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 - Python SDK: `pip install clusdr`
 - Rust SDK: crate `clusdr` ([github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
 - TypeScript SDK: `npm install clusdr` ([github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))
+- Java SDK: `io.clusdr:clusdr` ([github.com/clusdr/clusdr-java](https://github.com/clusdr/clusdr-java))
 - Apache-2.0 ([LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE))

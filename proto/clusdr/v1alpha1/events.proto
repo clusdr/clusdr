@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package clusdr.v1alpha1;
 
-option go_package = "github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
+option go_package = "github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1";
 
 // EventService publishes custom cluster-wide events.
 //

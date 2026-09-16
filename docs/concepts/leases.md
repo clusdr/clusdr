@@ -22,5 +22,5 @@ Observers still grant and renew leases (presence must work). They only reject **
 
 - [Locks](locks.md)
 - [Presence](presence.md)
-- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md) · [TypeScript SDK](../sdk/typescript.md)
+- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md) · [TypeScript SDK](../sdk/typescript.md) · [Java SDK](../sdk/java.md)
 - [LeaseService](../reference/api/leases.md)

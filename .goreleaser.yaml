@@ -13,9 +13,9 @@ builds:
     goarch: [amd64, arm64]
     ldflags:
       - -s -w
-      - -X github.com/durguto/clusdr/internal/version.Version={{.Version}}
-      - -X github.com/durguto/clusdr/internal/version.Commit={{.ShortCommit}}
-      - -X github.com/durguto/clusdr/internal/version.BuildTime={{.Date}}
+      - -X github.com/clusdr/clusdr/internal/version.Version={{.Version}}
+      - -X github.com/clusdr/clusdr/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/clusdr/clusdr/internal/version.BuildTime={{.Date}}
 
 archives:
   - formats: [tar.gz]

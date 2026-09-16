@@ -20,7 +20,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/durguto/clusdr/sdk"
+	"github.com/clusdr/clusdr/sdk"
 )
 
 func main() {

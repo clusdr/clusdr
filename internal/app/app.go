@@ -19,15 +19,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/durguto/clusdr/internal/config"
-	"github.com/durguto/clusdr/internal/consensus"
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/grpcserver"
-	"github.com/durguto/clusdr/internal/heartbeat"
-	"github.com/durguto/clusdr/internal/leases"
-	"github.com/durguto/clusdr/internal/locks"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/internal/store"
+	"github.com/clusdr/clusdr/internal/config"
+	"github.com/clusdr/clusdr/internal/consensus"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/grpcserver"
+	"github.com/clusdr/clusdr/internal/heartbeat"
+	"github.com/clusdr/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/locks"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/store"
 )
 
 const fallbackShutdown = 15 * time.Second

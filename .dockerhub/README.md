@@ -120,10 +120,11 @@ Init the volume before the first `start --bootstrap`.
 This image is the daemon, not the SDK.
 
 ```bash
-go get github.com/durguto/clusdr/sdk
+go get github.com/clusdr/clusdr/sdk
 pip install clusdr
 # Cargo.toml: clusdr = "0.1.3"
 npm install clusdr
+# Maven: io.clusdr:clusdr:0.1.3
 ```
 
 The app still talks to the local Runtime on this host.

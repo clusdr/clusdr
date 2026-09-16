@@ -626,7 +626,7 @@ const file_clusdr_v1alpha1_join_proto_rawDesc = "" +
 	"\aPromote\x12\x1f.clusdr.v1alpha1.PromoteRequest\x1a .clusdr.v1alpha1.PromoteResponse2\xcd\x01\n" +
 	"\x0eControlService\x12X\n" +
 	"\vRequestJoin\x12#.clusdr.v1alpha1.RequestJoinRequest\x1a$.clusdr.v1alpha1.RequestJoinResponse\x12a\n" +
-	"\x0eRequestPromote\x12&.clusdr.v1alpha1.RequestPromoteRequest\x1a'.clusdr.v1alpha1.RequestPromoteResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\x0eRequestPromote\x12&.clusdr.v1alpha1.RequestPromoteRequest\x1a'.clusdr.v1alpha1.RequestPromoteResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_join_proto_rawDescOnce sync.Once

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/bench"
+	"github.com/clusdr/clusdr/internal/bench"
 )
 
 func discard() *slog.Logger {

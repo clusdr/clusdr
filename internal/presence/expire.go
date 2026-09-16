@@ -1,6 +1,6 @@
 package presence
 
-import "github.com/durguto/clusdr/internal/events"
+import "github.com/clusdr/clusdr/internal/events"
 
 // OnExpired turns a presence lease.expired event into a membership leave.
 // Non-presence leases, self, and non-leaders are ignored. remove is typically

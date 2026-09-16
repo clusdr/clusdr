@@ -3,7 +3,7 @@ package presence
 import (
 	"context"
 
-	"github.com/durguto/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/eventbus"
 )
 
 // WatchExpired reads the bus and calls OnExpired for each event until ctx is done.

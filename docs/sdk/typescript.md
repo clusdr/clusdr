@@ -223,4 +223,4 @@ Server name: `serverName`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.c
 - Join, promote, config
 - A blocking (non-async) client
 
-Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md). Python: [Python SDK](python.md). Rust: [Rust SDK](rust.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md). Python: [Python SDK](python.md). Rust: [Rust SDK](rust.md). Java: [Java SDK](java.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

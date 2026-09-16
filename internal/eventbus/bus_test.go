@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/events"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/events"
 )
 
 func TestBus_PubSubBasic(t *testing.T) {

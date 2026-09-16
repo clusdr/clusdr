@@ -14,9 +14,9 @@ import (
 
 	"google.golang.org/grpc/credentials"
 
-	pb "github.com/durguto/clusdr/api/clusdr/v1alpha1"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/internal/mtls"
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/mtls"
 )
 
 // Config holds liveness probe parameters.

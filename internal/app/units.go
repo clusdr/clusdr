@@ -16,18 +16,18 @@ import (
 
 	"google.golang.org/grpc/credentials"
 
-	"github.com/durguto/clusdr/internal/config"
-	"github.com/durguto/clusdr/internal/consensus"
-	"github.com/durguto/clusdr/internal/eventbus"
-	"github.com/durguto/clusdr/internal/grpcserver"
-	"github.com/durguto/clusdr/internal/heartbeat"
-	"github.com/durguto/clusdr/internal/leases"
-	"github.com/durguto/clusdr/internal/locks"
-	"github.com/durguto/clusdr/internal/membership"
-	"github.com/durguto/clusdr/internal/mtls"
-	"github.com/durguto/clusdr/internal/presence"
-	"github.com/durguto/clusdr/internal/store"
-	"github.com/durguto/clusdr/internal/version"
+	"github.com/clusdr/clusdr/internal/config"
+	"github.com/clusdr/clusdr/internal/consensus"
+	"github.com/clusdr/clusdr/internal/eventbus"
+	"github.com/clusdr/clusdr/internal/grpcserver"
+	"github.com/clusdr/clusdr/internal/heartbeat"
+	"github.com/clusdr/clusdr/internal/leases"
+	"github.com/clusdr/clusdr/internal/locks"
+	"github.com/clusdr/clusdr/internal/membership"
+	"github.com/clusdr/clusdr/internal/mtls"
+	"github.com/clusdr/clusdr/internal/presence"
+	"github.com/clusdr/clusdr/internal/store"
+	"github.com/clusdr/clusdr/internal/version"
 )
 
 // Named unit vars for cmd/clusdr. Declare them here so the command file

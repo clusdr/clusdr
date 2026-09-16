@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/durguto/clusdr/sdk"
+	"github.com/clusdr/clusdr/sdk"
 )
 
 // These examples need a local daemon (clusdr init && clusdr start --bootstrap).

@@ -611,7 +611,7 @@ const file_clusdr_v1alpha1_leases_proto_rawDesc = "" +
 	"\x05Renew\x12\".clusdr.v1alpha1.RenewLeaseRequest\x1a#.clusdr.v1alpha1.RenewLeaseResponse\x12S\n" +
 	"\x06Revoke\x12#.clusdr.v1alpha1.RevokeLeaseRequest\x1a$.clusdr.v1alpha1.RevokeLeaseResponse\x12U\n" +
 	"\n" +
-	"ListLeases\x12\".clusdr.v1alpha1.ListLeasesRequest\x1a#.clusdr.v1alpha1.ListLeasesResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"ListLeases\x12\".clusdr.v1alpha1.ListLeasesRequest\x1a#.clusdr.v1alpha1.ListLeasesResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_leases_proto_rawDescOnce sync.Once

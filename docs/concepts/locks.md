@@ -32,5 +32,5 @@ Go `TryLock` when held: `(nil, false, nil)` — not an error. Python `try_lock` 
 ## Related
 
 - [Leases](leases.md)
-- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md) · [TypeScript SDK](../sdk/typescript.md)
+- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md) · [TypeScript SDK](../sdk/typescript.md) · [Java SDK](../sdk/java.md)
 - [LockService](../reference/api/locks.md)

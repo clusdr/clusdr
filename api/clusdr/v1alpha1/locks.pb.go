@@ -613,7 +613,7 @@ const file_clusdr_v1alpha1_locks_proto_rawDesc = "" +
 	"\aTryLock\x12\x1c.clusdr.v1alpha1.LockRequest\x1a\x1d.clusdr.v1alpha1.LockResponse\x12I\n" +
 	"\x06Unlock\x12\x1e.clusdr.v1alpha1.UnlockRequest\x1a\x1f.clusdr.v1alpha1.UnlockResponse\x12N\n" +
 	"\x05Renew\x12!.clusdr.v1alpha1.RenewLockRequest\x1a\".clusdr.v1alpha1.RenewLockResponse\x12R\n" +
-	"\tListLocks\x12!.clusdr.v1alpha1.ListLocksRequest\x1a\".clusdr.v1alpha1.ListLocksResponseB>Z<github.com/durguto/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\tListLocks\x12!.clusdr.v1alpha1.ListLocksRequest\x1a\".clusdr.v1alpha1.ListLocksResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_locks_proto_rawDescOnce sync.Once

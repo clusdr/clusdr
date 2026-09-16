@@ -1,9 +1,9 @@
-module github.com/durguto/clusdr/sdk
+module github.com/clusdr/clusdr/sdk
 
 go 1.27.0
 
 require (
-	github.com/durguto/clusdr/api v0.1.3
+	github.com/clusdr/clusdr/api v0.1.3
 	google.golang.org/grpc v1.83.2
 )
 
@@ -15,4 +15,4 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-replace github.com/durguto/clusdr/api => ../api
+replace github.com/clusdr/clusdr/api => ../api

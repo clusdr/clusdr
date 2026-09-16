@@ -12,9 +12,9 @@ import (
 	"github.com/spf13/cobra"
 	bolterr "go.etcd.io/bbolt/errors"
 
-	"github.com/durguto/clusdr/internal/mtls"
-	"github.com/durguto/clusdr/internal/pki"
-	"github.com/durguto/clusdr/internal/store"
+	"github.com/clusdr/clusdr/internal/mtls"
+	"github.com/clusdr/clusdr/internal/pki"
+	"github.com/clusdr/clusdr/internal/store"
 )
 
 func newCertsCmd(f *rootFlags) *cobra.Command {
