@@ -28,6 +28,7 @@ Applications talk to the local daemon. Not the operator path.
 - [Application SDK](sdk/)
 - [Go](sdk/go.md)
 - [Python](sdk/python.md)
+- [Rust](sdk/rust.md)
 
 ## Then
 

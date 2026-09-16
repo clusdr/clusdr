@@ -10,6 +10,7 @@ What this version is built and tested against. Anything else is unclaimed.
 | Application protocol | gRPC, package `clusdr.v1alpha1` |
 | Go SDK module | `github.com/durguto/clusdr/sdk` — [docs](../sdk/go.md) |
 | Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md) |
+| Rust SDK | crate `clusdr`, Rust 1.82+ — [docs](../sdk/rust.md) |
 | Published daemon | `https://clusdr.io/download/` (GitHub Releases behind it) |
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
 | Container | Docker Hub `durguto/clusdr` (linux/amd64, linux/arm64); GHCR mirror `ghcr.io/clusdr/clusdr` |

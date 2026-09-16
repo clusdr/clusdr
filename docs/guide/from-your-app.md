@@ -16,6 +16,7 @@ Keep `clusdr start` running. Then pick a language:
 |---|---|---|
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
+| Rust | `clusdr = { git = "https://github.com/clusdr/clusdr-rust" }` | [Rust SDK](../sdk/rust.md) |
 
 ```go
 c, err := clusdr.Local()
@@ -29,6 +30,12 @@ from clusdr import local
 c = local()
 members = c.members()
 lk = c.lock("scheduler", ttl=15)
+```
+
+```rust
+let c = clusdr::local(clusdr::Options::new()).await?;
+let members = c.members().await?;
+let lk = c.lock("scheduler", Some(std::time::Duration::from_secs(15))).await?;
 ```
 
 `Local` / `local()` dial `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.

@@ -14,10 +14,11 @@ The [guide](../guide/from-your-app.md) is the first call. These pages are the wa
 |---|---|---|
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
+| Rust | `clusdr = { git = "https://github.com/clusdr/clusdr-rust" }` | [Rust SDK](rust.md) |
 
-CPython 3.10+. Wire package `clusdr.v1alpha1`.
+CPython 3.10+. Rust 1.82+ (Tokio). Wire package `clusdr.v1alpha1`.
 
-## What both SDKs do
+## What the SDKs do
 
 - `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`
 - `Dial` / `dial(addr)` — tests and operators, not the default app path
@@ -43,10 +44,10 @@ TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` 
 | `CLUSDR_GRPC_ADDR` | Both | Runtime address. Default `127.0.0.1:7947` |
 | `CLUSDR_TLS` | Both | `disabled` / `off` / `false` / `0` → plaintext |
 | `CLUSDR_DATA_DIR` | Both | Directory with PEMs. Else `~/.clusdr` |
-| `CLUSDR_TLS_SERVER_NAME` | **Python only** | TLS server name override (peer node id) |
+| `CLUSDR_TLS_SERVER_NAME` | Python, Rust | TLS server name override (peer node id) |
 
 ## Holder
 
 Each connection has a lock/lease identity. Empty → generated `sdk-<hex>`. Two apps on the same host cannot unlock each other unless they share `WithHolder` / `holder=`.
 
-One Go `Cluster` is safe from many goroutines (same holder: `Unlock` is process-wide for that name). Python: unary calls are fine from several threads; run one `watch()` loop per `Cluster` — `close()` cancels the last in-flight Watch RPC.
+One Go or Rust `Cluster` is safe from many tasks (same holder: `Unlock` / `unlock` is process-wide for that name). Several Watch streams on one client are fine. Python: unary calls are fine from several threads; run one `watch()` loop per `Cluster` — `close()` cancels the last in-flight Watch RPC.

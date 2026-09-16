@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Rust SDK crate `clusdr` ([docs](../sdk/rust.md), [github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
+
 ### Changed
 
 - GitHub repositories moved to the `clusdr` organization. Browse and clone `github.com/clusdr/clusdr`. Go module path stays `github.com/durguto/clusdr`. New GHCR tags publish to `ghcr.io/clusdr/clusdr`; Docker Hub remains `durguto/clusdr`.
