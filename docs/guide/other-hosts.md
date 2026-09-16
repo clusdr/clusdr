@@ -30,7 +30,7 @@ TLS stays on. Do not set `CLUSDR_TLS=disabled` unless every node and every clien
 
 ## Docker Hub
 
-The pipeline publishes `durguto/clusdr` (linux/amd64 and linux/arm64). GHCR carries the same tags as `ghcr.io/durguto/clusdr`.
+The pipeline publishes `durguto/clusdr` (linux/amd64 and linux/arm64). GHCR carries the same tags as `ghcr.io/clusdr/clusdr`.
 
 ```bash
 docker pull durguto/clusdr

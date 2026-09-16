@@ -20,4 +20,4 @@ Read these pages **in order**. Each one leaves a cluster you use on the next pag
 
 After the guide: [Overview](../overview.md) if you are still deciding, [concepts](../concepts/) for guarantees, [reference](../reference/) for a flag or RPC. Something failed: [Errors](../reference/errors.md).
 
-Contributor builds stay in [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md).
+Contributor builds stay in [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md).

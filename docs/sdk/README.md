@@ -8,7 +8,7 @@ your process  ──►  clusdr daemon on this host  ──►  the rest of the 
 
 Same split as a local Docker engine. Two apps on one machine share one daemon.
 
-The [guide](../guide/from-your-app.md) is the first call. These pages are the walkthrough. Go API on [pkg.go.dev](https://pkg.go.dev/github.com/durguto/clusdr/sdk). Runnable copies: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
+The [guide](../guide/from-your-app.md) is the first call. These pages are the walkthrough. Go API on [pkg.go.dev](https://pkg.go.dev/github.com/durguto/clusdr/sdk). Runnable copies: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
 
 | Language | Install | Start here |
 |---|---|---|

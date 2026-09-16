@@ -40,4 +40,4 @@ Applications talk to the local daemon. Not the operator path.
 | A flag or RPC | [Reference](reference/) |
 | Join token, TLS, dial, locks | [Errors](reference/errors.md) |
 
-Contributor workflow (build, proto, tests) is in [CONTRIBUTING.md](https://github.com/durguto/clusdr/blob/main/CONTRIBUTING.md), not in this tree.
+Contributor workflow (build, proto, tests) is in [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md), not in this tree.

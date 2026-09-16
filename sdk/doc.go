@@ -51,5 +51,5 @@
 //
 // First daemon: https://clusdr.io/docs/guide/first-member
 //
-// Examples in this module and https://github.com/durguto/clusdr/tree/main/examples
+// Examples in this module and https://github.com/clusdr/clusdr/tree/main/examples
 package clusdr

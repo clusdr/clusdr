@@ -3,7 +3,7 @@
 # Detects OS/arch, downloads the matching release archive, installs clusdr to BINDIR.
 set -eu
 
-REPO="durguto/clusdr"
+REPO="clusdr/clusdr"
 PROJECT="clusdr"
 DEFAULT_ORIGIN="https://clusdr.io/download"
 GITHUB_LATEST="https://github.com/${REPO}/releases/latest/download"

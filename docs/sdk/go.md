@@ -226,4 +226,4 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 - Join, promote, config
 - A public `WithReadyTimeout`
 
-Wire shapes: [gRPC API](../reference/api/). Runnable programs: [examples/](https://github.com/durguto/clusdr/tree/main/examples).
+Wire shapes: [gRPC API](../reference/api/). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

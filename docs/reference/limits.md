@@ -38,6 +38,6 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 ## Distribution
 
 - Release binaries embed the tag via ldflags. Source builds print `dev`
-- Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/durguto/clusdr`)
+- Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/clusdr/clusdr`)
 - Python SDK: `pip install clusdr`
-- Apache-2.0 ([LICENSE](https://github.com/durguto/clusdr/blob/main/LICENSE))
+- Apache-2.0 ([LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE))

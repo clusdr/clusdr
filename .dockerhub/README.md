@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://clusdr.io">
-    <img src="https://raw.githubusercontent.com/durguto/clusdr/main/docs/assets/logo-512.png" alt="clusdr" width="96" height="96">
+    <img src="https://raw.githubusercontent.com/clusdr/clusdr/main/docs/assets/logo-512.png" alt="clusdr" width="96" height="96">
   </a>
 </p>
 
@@ -9,9 +9,9 @@
 
 <p align="center">
   <a href="https://clusdr.io"><img src="https://img.shields.io/badge/docs-clusdr.io-0C0C10" alt="docs"></a>
-  <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr?label=release" alt="release"></a>
+  <a href="https://github.com/clusdr/clusdr/releases"><img src="https://img.shields.io/github/v/release/clusdr/clusdr?label=release" alt="release"></a>
   <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/pulls/durguto/clusdr" alt="image"></a>
-  <a href="https://github.com/durguto/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
+  <a href="https://github.com/clusdr/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/clusdr/clusdr" alt="License"></a>
 </p>
 
 ---
@@ -35,12 +35,12 @@ Application → local SDK → this container → the rest of the cluster
 
 Platforms: **linux/amd64**, **linux/arm64**. Distroless, non-root.
 
-[Dockerfile](https://github.com/durguto/clusdr/blob/main/Dockerfile)
+[Dockerfile](https://github.com/clusdr/clusdr/blob/main/Dockerfile)
 
 ## Quick reference
 
 - **Docs:** [clusdr.io](https://clusdr.io) · [Install](https://clusdr.io/docs/guide/install) · [Other hosts](https://clusdr.io/docs/guide/other-hosts)
-- **Source / issues:** [github.com/durguto/clusdr](https://github.com/durguto/clusdr)
+- **Source / issues:** [github.com/clusdr/clusdr](https://github.com/clusdr/clusdr)
 - **Host install (no Docker):** `curl -fsSL https://clusdr.io/install.sh | sh` (Linux amd64/arm64)
 
 ## How to use this image

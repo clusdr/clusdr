@@ -146,10 +146,10 @@ jobs:
           tags: |
             durguto/clusdr:${{ steps.ver.outputs.tag }}
             durguto/clusdr:latest
-            ghcr.io/durguto/clusdr:${{ steps.ver.outputs.tag }}
-            ghcr.io/durguto/clusdr:latest
+            ghcr.io/clusdr/clusdr:${{ steps.ver.outputs.tag }}
+            ghcr.io/clusdr/clusdr:latest
           labels: |
-            org.opencontainers.image.source=https://github.com/durguto/clusdr
+            org.opencontainers.image.source=https://github.com/clusdr/clusdr
             org.opencontainers.image.licenses=Apache-2.0
           build-args: |
             VERSION=${{ steps.ver.outputs.version }}

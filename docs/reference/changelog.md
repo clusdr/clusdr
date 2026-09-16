@@ -4,6 +4,7 @@
 
 ### Changed
 
+- GitHub repositories moved to the `clusdr` organization. Browse and clone `github.com/clusdr/clusdr`. Go module path stays `github.com/durguto/clusdr`. New GHCR tags publish to `ghcr.io/clusdr/clusdr`; Docker Hub remains `durguto/clusdr`.
 - Release workflow publishes GitHub archives and Hub/GHCR images only after lint and tests succeed
 
 ## 0.1.2 — 2026-09-15
@@ -14,7 +15,7 @@ Daemon, Go modules `sdk`/`api`, and Python `clusdr` share `0.1.2`.
 
 - GHCR mirror `ghcr.io/durguto/clusdr` (same tags as Docker Hub `durguto/clusdr`)
 - [Errors](errors.md) lookup: join token, TLS, dial, observer locks
-- [examples/](https://github.com/durguto/clusdr/tree/main/examples): Go `who` / `scheduler` / `worker`, Python `watch` / `agent`
+- [examples/](https://github.com/clusdr/clusdr/tree/main/examples): Go `who` / `scheduler` / `worker`, Python `watch` / `agent`
 - SDK Watch topic / event-type filters (`WithTopics` / `watch(topics=…)`), same semantics as CLI `--topic` / `--type`
 - [Configuration](configuration.md): what `init` writes, how to edit, laptop vs server paths
 - [Presence](../concepts/presence.md): reboot vs `join`, default 3s TTL, what to set on a server

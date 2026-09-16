@@ -10,12 +10,12 @@
 <p align="center">A runtime for the cluster. An SDK for the app.</p>
 
 <p align="center">
-  <a href="https://github.com/durguto/clusdr/actions/workflows/ci.yml"><img src="https://github.com/durguto/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/durguto/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/durguto/clusdr" alt="Go version"></a>
-  <a href="https://github.com/durguto/clusdr/releases"><img src="https://img.shields.io/github/v/release/durguto/clusdr" alt="Release"></a>
+  <a href="https://github.com/clusdr/clusdr/actions/workflows/ci.yml"><img src="https://github.com/clusdr/clusdr/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/clusdr/clusdr/blob/main/go.mod"><img src="https://img.shields.io/github/go-mod/go-version/clusdr/clusdr" alt="Go version"></a>
+  <a href="https://github.com/clusdr/clusdr/releases"><img src="https://img.shields.io/github/v/release/clusdr/clusdr" alt="Release"></a>
   <a href="https://pkg.go.dev/github.com/durguto/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/durguto/clusdr/sdk.svg" alt="Go Reference"></a>
   <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/pulls/durguto/clusdr" alt="Docker"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/durguto/clusdr" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/clusdr/clusdr" alt="License"></a>
 </p>
 
 Distributed runtime for cluster awareness. Applications talk to a **local daemon**; the daemon is the cluster member.
@@ -32,7 +32,7 @@ Application → local SDK → clusdr daemon → cluster
 curl -fsSL https://clusdr.io/install.sh | sh
 ```
 
-Linux amd64/arm64. Image: `durguto/clusdr` on Docker Hub (`ghcr.io/durguto/clusdr` is the same image). Other channels: **[Install](docs/guide/install.md)**.
+Linux amd64/arm64. Image: `durguto/clusdr` on Docker Hub (`ghcr.io/clusdr/clusdr` is the same image). Other channels: **[Install](docs/guide/install.md)**.
 
 ## Run
 
