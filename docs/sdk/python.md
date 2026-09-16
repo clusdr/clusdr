@@ -229,4 +229,4 @@ Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.
 - Join, promote, config
 - Async / `asyncio` client
 
-Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md).
+Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md). Rust: [Rust SDK](rust.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

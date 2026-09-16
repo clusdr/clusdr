@@ -1,15 +1,16 @@
-// Command who prints cluster membership and then follows Watch.
-//
-// The process is an application. It does not vote. It talks only to the
-// daemon on this host (CLUSDR_GRPC_ADDR or 127.0.0.1:7947).
+// Command watch prints a membership snapshot, holds a worker lease, publishes
+// custom.hello, then follows the full Watch bus.
 //
 //	clusdr init && clusdr start --bootstrap
-//	go run ./examples/who
-//	go run ./examples/who -once
+//	go run ./examples/watch/go
+//	go run ./examples/watch/go -name edge-1
+//
+// In another terminal: clusdr publish ping '{"from":"cli"}'
 package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -17,13 +18,13 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"text/tabwriter"
 	"time"
 
 	"github.com/durguto/clusdr/sdk"
 )
 
 func main() {
+	name := flag.String("name", fmt.Sprintf("pid-%d", os.Getpid()), "lease name suffix (worker.<name>)")
 	once := flag.Bool("once", false, "print members and the leader, then exit")
 	flag.Parse()
 
@@ -47,7 +48,33 @@ func main() {
 		return
 	}
 
-	fmt.Fprintln(os.Stderr, "watching cluster events (Ctrl-C to stop)")
+	leaseName := "worker." + *name
+	ls, err := c.Lease(ctx, leaseName, 15*time.Second)
+	if err != nil {
+		log.Error("lease", "err", err)
+		os.Exit(1)
+	}
+	until := "?"
+	if d := ls.Deadline(); !d.IsZero() {
+		until = d.UTC().Format(time.RFC3339)
+	}
+	fmt.Printf("lease %s owner=%s token=%d until %s\n", ls.Name, ls.Owner, ls.Token, until)
+
+	payload, err := json.Marshal(map[string]any{
+		"worker": *name,
+		"pid":    os.Getpid(),
+		"lease":  leaseName,
+	})
+	if err != nil {
+		log.Error("payload", "err", err)
+		os.Exit(1)
+	}
+	if err := c.Publish(ctx, "hello", payload); err != nil {
+		log.Error("publish", "err", err)
+		os.Exit(1)
+	}
+
+	fmt.Fprintln(os.Stderr, "watching (Ctrl-C to stop); try: clusdr publish ping '{\"from\":\"cli\"}'")
 	ch, err := c.Watch(ctx)
 	if err != nil {
 		log.Error("watch", "err", err)
@@ -66,28 +93,20 @@ func snapshot(ctx context.Context, c clusdr.Cluster) error {
 	if err != nil {
 		return err
 	}
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tADDRESS\tSTATUS\tROLE\tLEADER")
+	fmt.Printf("%-24s %-22s %-8s %-10s LEADER\n", "ID", "ADDRESS", "STATUS", "ROLE")
 	for _, m := range members {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%v\n", m.ID, m.Address, m.Status, role(m), m.Leader)
+		role := m.Role
+		if role == "" {
+			role = "voter"
+		}
+		fmt.Printf("%-24s %-22s %-8s %-10s %v\n", m.ID, m.Address, m.Status, role, m.Leader)
 	}
-	if err := w.Flush(); err != nil {
-		return err
-	}
-
 	leader, err := c.Leader(q)
 	if err != nil {
 		return fmt.Errorf("leader: %w", err)
 	}
 	fmt.Printf("leader %s at %s\n", leader.ID, leader.Address)
 	return nil
-}
-
-func role(m clusdr.Member) string {
-	if m.Role == "" {
-		return "voter"
-	}
-	return m.Role
 }
 
 func printEvent(ev clusdr.Event) {
@@ -100,9 +119,13 @@ func printEvent(ev clusdr.Event) {
 	case ev.Type == "watch.sync", ev.Type == "watch.gap":
 		kind = "watch"
 	}
+	ts := ""
+	if !ev.Timestamp.IsZero() {
+		ts = ev.Timestamp.UTC().Format("15:04:05")
+	}
 	payload := ""
 	if len(ev.Payload) > 0 {
 		payload = " " + string(ev.Payload)
 	}
-	fmt.Printf("%s seq=%d %s src=%s%s\n", kind, ev.Seq, ev.Type, ev.Source, payload)
+	fmt.Printf("%s %s seq=%d %s src=%s%s\n", kind, ts, ev.Seq, ev.Type, ev.Source, payload)
 }

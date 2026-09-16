@@ -16,7 +16,7 @@ Keep `clusdr start` running. Then pick a language:
 |---|---|---|
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = { git = "https://github.com/clusdr/clusdr-rust" }` | [Rust SDK](../sdk/rust.md) |
+| Rust | `clusdr = "0.1.2"` | [Rust SDK](../sdk/rust.md) |
 
 ```go
 c, err := clusdr.Local()
@@ -42,7 +42,7 @@ let lk = c.lock("scheduler", Some(std::time::Duration::from_secs(15))).await?;
 
 What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
 
-Model, env, holder, both languages: **[SDKs](../sdk/)**. Copy-paste programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, and Rust): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
 
 ## Next
 

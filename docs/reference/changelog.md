@@ -4,7 +4,8 @@
 
 ### Added
 
-- Rust SDK crate `clusdr` ([docs](../sdk/rust.md), [github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
+- Rust SDK crate `clusdr` `0.1.2` on [crates.io](https://crates.io/crates/clusdr) ([docs](../sdk/rust.md), [github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
+- [examples/](https://github.com/clusdr/clusdr/tree/main/examples): `who`, `scheduler`, `watch`, `worker`, and `agent` each in Go, Python, and Rust
 
 ### Changed
 

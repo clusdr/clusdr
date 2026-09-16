@@ -8,7 +8,7 @@ RPCs: `Grant`, `Renew`, `Revoke`, `ListLeases`.
 
 ## SDK
 
-Background renew until context cancel (Go), `stop` Event (Python), `Revoke`, or `Close`.
+Background renew until context cancel (Go), `stop` Event (Python), `stop_renew` (Rust), `Revoke`, or `Close`.
 
 Cancelling the Go `Lease` context **stops renew**. The grant then expires. It does not revoke.
 
@@ -22,5 +22,5 @@ Observers still grant and renew leases (presence must work). They only reject **
 
 - [Locks](locks.md)
 - [Presence](presence.md)
-- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md)
+- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md)
 - [LeaseService](../reference/api/leases.md)

@@ -14,7 +14,7 @@ The [guide](../guide/from-your-app.md) is the first call. These pages are the wa
 |---|---|---|
 | Go | `go get github.com/durguto/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
-| Rust | `clusdr = { git = "https://github.com/clusdr/clusdr-rust" }` | [Rust SDK](rust.md) |
+| Rust | `clusdr = "0.1.2"` | [Rust SDK](rust.md) |
 
 CPython 3.10+. Rust 1.82+ (Tokio). Wire package `clusdr.v1alpha1`.
 

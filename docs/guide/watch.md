@@ -33,7 +33,7 @@ clusdr watch --topic deployment
 
 `--topic` means only `custom.deployment`. The membership snapshot is omitted. `--type` matches full type strings. Protocol events (`watch.sync`, `watch.gap`) always pass.
 
-Same filters on the SDKs: `Watch(ctx, clusdr.WithTopics("deployment"))` and `c.watch(topics=["deployment"])`.
+Same filters on the SDKs: Go `Watch(ctx, clusdr.WithTopics("deployment"))`, Python `c.watch(topics=["deployment"])`, Rust `c.watch(WatchFilter::new().topics(["deployment"]))`.
 
 Event types you will see: `member.join`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, plus the two protocol events.
 

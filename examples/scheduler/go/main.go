@@ -7,8 +7,8 @@
 // The app still does not join the cluster. Close() unlocks.
 //
 //	clusdr init && clusdr start --bootstrap
-//	go run ./examples/scheduler -holder replica-a
-//	go run ./examples/scheduler -holder replica-b
+//	go run ./examples/scheduler/go -holder replica-a
+//	go run ./examples/scheduler/go -holder replica-b
 package main
 
 import (

@@ -5,8 +5,8 @@
 // grant until Ctrl-C. Close() revokes.
 //
 //	clusdr init && clusdr start --bootstrap
-//	go run ./examples/worker -name shard-7 -owner worker-a
-//	go run ./examples/worker -name shard-7 -owner worker-b
+//	go run ./examples/worker/go -name shard-7 -owner worker-a
+//	go run ./examples/worker/go -name shard-7 -owner worker-b
 package main
 
 import (

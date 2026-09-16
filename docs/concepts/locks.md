@@ -27,10 +27,10 @@ An observer **rejects** Lock / TryLock / Unlock / Renew (`FailedPrecondition`). 
 
 The SDK renews in the background (about TTL/3). `Close` unlocks what this connection holds. Empty holder becomes a generated `sdk-<hex>` so two apps cannot unlock each other.
 
-Go `TryLock` when held: `(nil, false, nil)` — not an error.
+Go `TryLock` when held: `(nil, false, nil)` — not an error. Python `try_lock` / Rust `try_lock` return `None` / `Ok(None)`.
 
 ## Related
 
 - [Leases](leases.md)
-- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md)
+- [Go SDK](../sdk/go.md) · [Python SDK](../sdk/python.md) · [Rust SDK](../sdk/rust.md)
 - [LockService](../reference/api/locks.md)

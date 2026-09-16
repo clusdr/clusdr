@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = [
+    "who/rust",
+    "scheduler/rust",
+    "watch/rust",
+    "worker/rust",
+    "agent/rust",
+]
+
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+rust-version = "1.82"
+
+[workspace.dependencies]
+clusdr = { path = "../../clusdr-rust" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+tokio-stream = "0.1"

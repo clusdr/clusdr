@@ -4,7 +4,7 @@ Crate `clusdr`. Rust 1.82+. Tokio. Applications call the daemon on this host. Sh
 
 ```toml
 [dependencies]
-clusdr = { git = "https://github.com/clusdr/clusdr-rust" }
+clusdr = "0.1.2"
 ```
 
 Same version train as the daemon.
@@ -199,4 +199,4 @@ Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.
 - Join, promote, config
 - A blocking (non-Tokio) client
 
-Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md). Python: [Python SDK](python.md).
+Wire shapes: [gRPC API](../reference/api/). Go surface: [Go SDK](go.md). Python: [Python SDK](python.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

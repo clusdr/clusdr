@@ -5,8 +5,8 @@ that connects later will not see old custom events.
 
     clusdr init && clusdr start --bootstrap
     pip install clusdr
-    python3 examples/agent/main.py --mode listen
-    python3 examples/agent/main.py --mode emit --from mapper
+    python3 examples/agent/python/main.py --mode listen
+    python3 examples/agent/python/main.py --mode emit --from mapper
 """
 
 from __future__ import annotations

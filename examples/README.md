@@ -2,6 +2,8 @@
 
 Small **applications** that talk to a local daemon. They do not join Raft, do not store data, and do not dial a remote Runtime API.
 
+Each program is the same story in **Go**, **Python**, and **Rust**. Languages live in their own package under the example folder (`go/`, `python/`, `rust/`).
+
 ```text
 your process  ──►  clusdr daemon on this host  ──►  the rest of the cluster
 ```
@@ -15,28 +17,36 @@ clusdr start --bootstrap
 
 Leave that process running. TLS is on; the SDK loads `ca.crt` / `node.crt` / `node.key` from `CLUSDR_DATA_DIR` or `~/.clusdr`. If connect fails, [Errors](../docs/reference/errors.md).
 
+Python and Rust require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
+
+Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo).
+
 ## Programs
 
-| Path | Language | Story |
-|---|---|---|
-| [who](who) | Go | Inventory: who is alive, who leads, then live `member.*` / `leader.changed` |
-| [scheduler](scheduler) | Go | One exclusive scheduler. Run two copies; only one holds the lock |
-| [watch](watch) | Python | Snapshot, a `custom.hello`, then the full Watch bus (cluster + gossip) |
-| [worker](worker) | Go | Hold a shard lease. A second copy fails immediately (no wait) |
-| [agent](agent) | Python | `custom.agent.task` pub/sub — signals, not a queue |
+| Path | Story |
+|---|---|
+| [who](who) | Inventory: who is alive, who leads, then live `member.*` / `leader.changed` |
+| [scheduler](scheduler) | One exclusive scheduler. Run two copies; only one holds the lock |
+| [watch](watch) | Snapshot, a worker lease, a `custom.hello`, then the full Watch bus |
+| [worker](worker) | Hold a shard lease. A second copy fails immediately (no wait) |
+| [agent](agent) | `custom.agent.task` pub/sub — signals, not a queue |
 
 ### who
 
 Prints the membership table, then stays on Watch until Ctrl-C. Cluster events are labeled; `custom.*` is gossip and is not replayed after a reconnect.
 
 ```bash
-go run ./examples/who
+go run ./examples/who/go
+python3 examples/who/python/main.py
+cargo run -p who --manifest-path examples/Cargo.toml
 ```
 
 Snapshot only:
 
 ```bash
-go run ./examples/who -once
+go run ./examples/who/go -once
+python3 examples/who/python/main.py --once
+cargo run -p who --manifest-path examples/Cargo.toml -- --once
 ```
 
 ### scheduler
@@ -46,21 +56,28 @@ Loop: try to acquire `scheduler`, do a short “dispatch” while holding the fe
 Terminal A and B, same lock name:
 
 ```bash
-go run ./examples/scheduler -holder replica-a
-go run ./examples/scheduler -holder replica-b
+go run ./examples/scheduler/go -holder replica-a
+go run ./examples/scheduler/go -holder replica-b
+
+python3 examples/scheduler/python/main.py --holder replica-a
+python3 examples/scheduler/python/main.py --holder replica-b
+
+cargo run -p scheduler --manifest-path examples/Cargo.toml -- --holder replica-a
+cargo run -p scheduler --manifest-path examples/Cargo.toml -- --holder replica-b
 ```
 
-One replica prints `held … token=…` and dispatches. The other prints `waiting (held by replica-a token=…)`. Kill the holder; the waiter acquires. That is the product: exclusive work without the app joining the cluster.
+One replica prints `held … token=…` and dispatches. The other prints `waiting`. Kill the holder; the waiter acquires. That is the product: exclusive work without the app joining the cluster.
+
+Go `TryLock` may include the current holder when the name is taken. Python and Rust return `None` / `Ok(None)` with no holder object.
 
 Observer daemons reject lock RPCs (`FailedPrecondition`). Run this against a voter.
 
 ### watch
 
-Python is stricter about TLS than Go: missing PEMs raise `ClusdrError` instead of bootstrap TLS.
-
 ```bash
-pip install clusdr
-python3 examples/watch/main.py
+go run ./examples/watch/go
+python3 examples/watch/python/main.py
+cargo run -p watch --manifest-path examples/Cargo.toml
 ```
 
 Another terminal, while it runs:
@@ -71,37 +88,55 @@ clusdr publish ping '{"from":"cli"}'
 
 You should see `custom.ping` on the bus. Custom events are 1-hop gossip, not Raft. `member.left` is.
 
-`--name` sets the lease this process holds (`worker.<name>`). `close()` revokes it. Two processes with the same `--name` — the second fails to grant.
+`--name` / `-name` sets the lease this process holds (`worker.<name>`). Close revokes it. Two processes with the same name — the second fails to grant.
 
 ```bash
-python3 examples/watch/main.py --name edge-1
+go run ./examples/watch/go -name edge-1
+python3 examples/watch/python/main.py --name edge-1
+cargo run -p watch --manifest-path examples/Cargo.toml -- --name edge-1
 ```
 
 ### worker
 
-Lease, not lock: Grant never blocks. Two processes, same `-name` — the first holds `shard-7`, the second exits with `clusdr: lease "shard-7": … (owner worker-a)`.
+Lease, not lock: Grant never blocks. Two processes, same name — the first holds `shard-7`, the second exits with `clusdr: lease "shard-7": … (owner worker-a)`.
 
 ```bash
-go run ./examples/worker -name shard-7 -owner worker-a
-go run ./examples/worker -name shard-7 -owner worker-b
+go run ./examples/worker/go -name shard-7 -owner worker-a
+go run ./examples/worker/go -name shard-7 -owner worker-b
+
+python3 examples/worker/python/main.py --name shard-7 --owner worker-a
+python3 examples/worker/python/main.py --name shard-7 --owner worker-b
+
+cargo run -p worker --manifest-path examples/Cargo.toml -- --name shard-7 --owner worker-a
+cargo run -p worker --manifest-path examples/Cargo.toml -- --name shard-7 --owner worker-b
 ```
 
-Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the lease context, which only stops renew so the grant expires at its deadline.
+Ctrl-C closes the client and **revokes** the lease. That is different from cancelling the Go lease context (or Python `stop_renew` / Rust `stop_renew`), which only stops renew so the grant expires at its deadline.
 
 ### agent
 
-Gossip between app processes through the local daemon. Not durable. The listener uses `watch(topics=["agent.task"])` so membership snapshot is omitted. Start a listener, then an emitter:
+Gossip between app processes through the local daemon. Not durable. The listener uses a topic filter so the membership snapshot is omitted. Start a listener, then an emitter:
 
 ```bash
-python3 examples/agent/main.py --mode listen
-python3 examples/agent/main.py --mode emit --from mapper
+go run ./examples/agent/go -mode listen
+go run ./examples/agent/go -mode emit -from mapper
+
+python3 examples/agent/python/main.py --mode listen
+python3 examples/agent/python/main.py --mode emit --from mapper
+
+cargo run -p agent --manifest-path examples/Cargo.toml -- --mode listen
+cargo run -p agent --manifest-path examples/Cargo.toml -- --mode emit --from mapper
 ```
 
 `--mode both` (default) emits and listens in one process so you can see round-trip on a single terminal.
 
 ## From this tree vs your app
 
-This module `replace`s `github.com/durguto/clusdr/sdk` → `./sdk`. `go run ./examples/…` always matches the checkout.
+This module `replace`s `github.com/durguto/clusdr/sdk` → `./sdk`. `go run ./examples/…/go` always matches the checkout.
+
+Python: `pip install clusdr` (or an editable `clusdr-python` checkout).
+
+Rust: the `rust/` directory under each example is its own crate. `examples/Cargo.toml` is the workspace. It path-depends on sibling `clusdr-rust`.
 
 In your own module:
 
@@ -110,6 +145,10 @@ go get github.com/durguto/clusdr/sdk
 pip install clusdr
 ```
 
-Copy the files. Keep `clusdr.Local()` / `local()`. `Dial` / `dial` is for tests and operators.
+```toml
+clusdr = "0.1.2"
+```
+
+Copy the files. Keep `Local` / `local()` / `local`. `Dial` / `dial` is for tests and operators.
 
 Guide: [Use it from your app](../docs/guide/from-your-app.md).

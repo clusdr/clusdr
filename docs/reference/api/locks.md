@@ -17,4 +17,4 @@ Leader commits; followers forward. An **observer** rejects Lock / TryLock / Unlo
 ## See also
 
 - [Locks](../../concepts/locks.md)
-- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md)
+- [Go SDK](../../sdk/go.md) · [Python SDK](../../sdk/python.md) · [Rust SDK](../../sdk/rust.md)

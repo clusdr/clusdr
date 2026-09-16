@@ -8,12 +8,12 @@ It does not skip-verify the way the Go SDK does on a missing data dir.
 
     clusdr init && clusdr start --bootstrap
     pip install clusdr
-    python3 examples/watch/main.py --name edge-1
+    python3 examples/watch/python/main.py --name edge-1
 
 In another terminal:
 
     clusdr publish ping '{"from":"cli"}'
-    python3 examples/watch/main.py --name edge-2
+    python3 examples/watch/python/main.py --name edge-2
 
 custom.* is gossip (not Raft, not replayed). member.left is cluster state.
 close() revokes the worker lease.
