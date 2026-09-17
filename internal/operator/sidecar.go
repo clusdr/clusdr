@@ -165,7 +165,7 @@ func MemberStatefulSet(ns, crName, uid string, spec Spec) *appsv1.StatefulSet {
 		},
 		Spec: appsv1.StatefulSetSpec{
 			ServiceName:         svc,
-			Replicas:            ptr.To(int32(spec.VoterCount)),
+			Replicas:            ptr.To(i32(spec.VoterCount)),
 			PodManagementPolicy: appsv1.OrderedReadyPodManagement,
 			Selector:            &metav1.LabelSelector{MatchLabels: sel},
 			Template: corev1.PodTemplateSpec{

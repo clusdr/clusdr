@@ -19,8 +19,8 @@ import (
 type Status string
 
 const (
-	StatusAlive   Status = "alive"
-	StatusDead    Status = "dead"
+	StatusAlive Status = "alive"
+	StatusDead  Status = "dead"
 	// StatusLeaving is legacy. Readers treat it as dead; nothing writes it.
 	StatusLeaving Status = "leaving"
 )

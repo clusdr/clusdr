@@ -1,6 +1,8 @@
 package operator
 
 import (
+	"math"
+
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -65,6 +67,16 @@ func (s Spec) topology() string {
 		return topoDaemon
 	}
 	return s.Topology
+}
+
+func i32(n int) int32 {
+	if n < 0 {
+		return 0
+	}
+	if n > math.MaxInt32 {
+		return math.MaxInt32
+	}
+	return int32(n)
 }
 
 func initJobName(cr string) string     { return cr + "-seed-init" }

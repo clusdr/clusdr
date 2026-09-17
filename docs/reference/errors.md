@@ -52,7 +52,7 @@ TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
 | Frequent elections, flapping leader | Peer RTT larger than Raft timers | Defaults are 150ms heartbeat/election. Raise them ([limits](limits.md), [configuration](configuration.md)) |
 | `member.dead` while the process still exists | Presence lease `presence.<nodeID>` expired (default 3s) | Process wedged or partitioned. Heartbeats are the slower backup. Raft id stays ([presence](../concepts/presence.md)) |
 | After every reboot I must `join` again | Someone ran `clusdr leave`, or this is a new `data.dir` | Same `data.dir` + `clusdr start` if still a member. `join` only after leave ([presence](../concepts/presence.md)) |
-| `member.dead` after crash / SIGKILL / reboot | Liveness, not leave. No `disconnect` event | Expected. `clusdr start` with the same `data.dir`. `join` only after [`clusdr leave`](../cli/leave.md) |
+| `member.dead` after crash / SIGKILL / reboot | Liveness, not leave. No `disconnect` event | Expected. `clusdr start` with the same `data.dir`. `join` only after [`clusdr leave`](cli/leave.md) |
 | `node … is not a cluster member; run clusdr join` | This id was left (or never joined) | `clusdr join --token … <seed-runtime>` |
 | Extra elections on Docker / two hosts | `node.addr` is `0.0.0.0` or `127.0.0.1` on a remote peer | Advertise a host:port **peers can dial** ([other hosts](../guide/other-hosts.md)) |
 | `Health.healthy` is always true | Not a bug | `Health.role` is always `standalone` in this version. Use `members` |

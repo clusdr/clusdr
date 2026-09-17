@@ -22,11 +22,13 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v8
         with:
-          version-file: .golangci-lint-version
-          install-only: true
+          version: v2.13.2
 
-      - name: golangci-lint
-        run: make lint
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.13.2
+          working-directory: sdk
+          args: --config=${{ github.workspace }}/.golangci.yml
 
   test:
     name: Test
