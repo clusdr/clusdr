@@ -1,0 +1,14 @@
+{{- if .Values.namespace.create }}
+# Created before the init hook. Use --create-namespace as well so Helm has a
+# target ns. helm.sh/resource-policy keep: uninstall does not delete the ns.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    {{- include "clusdr.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-weight: "-10"
+    helm.sh/resource-policy: keep
+{{- end }}

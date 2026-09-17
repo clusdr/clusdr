@@ -15,8 +15,9 @@ Use: regional apps that want a local daemon, dashboards, cross-AZ visibility.
 Hashicorp Raft **Nonvoter** (`AddNonvoter`).
 
 - Gets membership, locks, leases (same FSM as voters)
-- Dies or joins: quorum unchanged
-- Leave: `RemoveServer` + `remove_member` (same path as a voter)
+- Dies or joins: quorum unchanged (observers never counted)
+- Crash: presence marks not-alive; the Raft id stays (same as a voter)
+- Leave: `clusdr leave` is `RemoveServer` + `remove_member` (same path as a voter)
 
 Join: `clusdr join --observer` (same token, same CA). Promote: `clusdr promote [id]` (`AddVoter` on the existing Raft id).
 
@@ -28,7 +29,7 @@ ListLocks, Watch, Publish, and leases (including presence) still work.
 
 After promote, the node is a voter. Locks work again (forward, or local if it later leads).
 
-`Members()` lists voters and observers. Status stays `alive` / `leaving` / `dead`.
+`Members()` lists voters and observers. Status is `alive` or `dead`.
 
 ## Events
 
@@ -36,7 +37,7 @@ Custom events stay off the Raft log. Observers do not change that. Watch of `cus
 
 ## Presence
 
-Observers hold `presence.<id>` like voters so they disappear from the list when they die.
+Observers hold `presence.<id>` like voters so they disappear from the **alive** list when they die. That is not `RemoveServer`. Restart with the same `data.dir` is `clusdr start`.
 
 ## Not this
 
@@ -47,5 +48,7 @@ Observers hold `presence.<id>` like voters so they disappear from the list when 
 
 - [Grow the cluster](../guide/grow.md)
 - [Membership](membership.md)
+- [Presence](presence.md)
 - [`clusdr join`](../reference/cli/join.md)
 - [`clusdr promote`](../reference/cli/promote.md)
+- [`clusdr leave`](../reference/cli/leave.md)

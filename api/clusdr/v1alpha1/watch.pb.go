@@ -25,7 +25,7 @@ const (
 type WatchRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// If non-empty, only events whose type matches one of these strings are
-	// forwarded.  Supported types: "member.join", "member.left",
+	// forwarded.  Supported types: "member.join", "member.dead", "member.left",
 	// "leader.changed".  An empty list means "all events".
 	// Protocol events (watch.sync, watch.gap) are always delivered.
 	EventTypes []string `protobuf:"bytes,1,rep,name=event_types,json=eventTypes,proto3" json:"event_types,omitempty"`
@@ -98,8 +98,8 @@ func (x *WatchRequest) GetTopics() []string {
 // WatchResponse carries a single cluster event.
 type WatchResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// type is a dot-separated event kind: "member.join", "member.left",
-	// "leader.changed".
+	// type is a dot-separated event kind: "member.join", "member.dead",
+	// "member.left", "leader.changed".
 	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
 	// source is the node ID that caused the event.
 	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`

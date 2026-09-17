@@ -70,7 +70,7 @@ func TestPresenceLeaseExpire_MemberLeft(t *testing.T) {
 	deadline = time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
 		for _, m := range mem.Members() {
-			if m.ID == "node-b" && m.Status == membership.StatusLeaving {
+			if m.ID == "node-b" && m.Status == membership.StatusDead {
 				return
 			}
 		}

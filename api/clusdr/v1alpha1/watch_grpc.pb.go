@@ -29,9 +29,10 @@ const (
 // WatchService streams cluster events to connected clients.
 //
 // On every new stream the server sends a snapshot of current cluster state
-// (alive members + current leader as synthetic events) and then forwards
-// live events from the internal event bus.  This means a client that
-// reconnects always receives the full current picture before any live delta.
+// (listed members as member.join if alive or member.dead if dead, plus the
+// current leader) and then forwards live events from the internal event bus.
+// A client that reconnects always receives the full current picture first.
+// Left ids are absent.
 type WatchServiceClient interface {
 	Watch(ctx context.Context, in *WatchRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[WatchResponse], error)
 }
@@ -70,9 +71,10 @@ type WatchService_WatchClient = grpc.ServerStreamingClient[WatchResponse]
 // WatchService streams cluster events to connected clients.
 //
 // On every new stream the server sends a snapshot of current cluster state
-// (alive members + current leader as synthetic events) and then forwards
-// live events from the internal event bus.  This means a client that
-// reconnects always receives the full current picture before any live delta.
+// (listed members as member.join if alive or member.dead if dead, plus the
+// current leader) and then forwards live events from the internal event bus.
+// A client that reconnects always receives the full current picture first.
+// Left ids are absent.
 type WatchServiceServer interface {
 	Watch(*WatchRequest, grpc.ServerStreamingServer[WatchResponse]) error
 	mustEmbedUnimplementedWatchServiceServer()

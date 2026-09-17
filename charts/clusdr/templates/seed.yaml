@@ -1,0 +1,78 @@
+# One seed voter. Same node and hostPath as the init hook. --bootstrap only here.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clusdr.fullname" . }}-seed
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clusdr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: seed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "clusdr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: seed
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "clusdr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: seed
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.seed.nodeName }}
+      nodeName: {{ . | quote }}
+      {{- end }}
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: clusdr
+          image: {{ include "clusdr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["start", "--bootstrap", "--config", "{{ .Values.dataDir }}/clusdr.yaml"]
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: CLUSDR_DATA_DIR
+              value: {{ .Values.dataDir | quote }}
+            - name: CLUSDR_CONTROL_SOCKET
+              value: {{ printf "%s/clusdr.sock" .Values.dataDir | quote }}
+            - name: CLUSDR_GRPC_ADDR
+              value: 0.0.0.0:7947
+            - name: CLUSDR_NODE_ADDR
+              value: "$(NODE_IP):7947"
+            - name: CLUSDR_RAFT_ADDR
+              value: "$(NODE_IP):7946"
+            - name: CLUSDR_LOG_FORMAT
+              value: {{ .Values.log.format | quote }}
+            - name: CLUSDR_LOG_LEVEL
+              value: {{ .Values.log.level | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.dataDir }}
+          ports:
+            - name: grpc
+              containerPort: 7947
+              protocol: TCP
+            - name: raft
+              containerPort: 7946
+              protocol: TCP
+          {{- include "clusdr.probes" . | nindent 10 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.dataDir }}
+            type: DirectoryOrCreate

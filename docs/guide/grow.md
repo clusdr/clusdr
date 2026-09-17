@@ -92,7 +92,7 @@ clusdr --config obs.yaml join --observer --token <token-from-init> 127.0.0.1:794
 clusdr members
 ```
 
-Role column shows `observer`. That daemon **rejects locks** (`FailedPrecondition`). Watch, publish, and leases still work — presence must, or a dead observer would stay in the list.
+Role column shows `observer`. That daemon **rejects locks** (`FailedPrecondition`). Watch, publish, and leases still work — presence must, or a dead observer would stay listed as alive.
 
 Promote later if you want a vote:
 
@@ -106,9 +106,9 @@ There is no demote in this version.
 
 ## What “alive” means
 
-Each daemon holds a presence lease `presence.<nodeID>`. If it expires, the leader **removes that Raft server** and you see `member.left`. Heartbeats are the slower backup.
+Each daemon holds a presence lease `presence.<nodeID>`. If it expires, Watch shows `member.dead` and the member stays listed as `dead`. The Raft server **stays**. Heartbeats are the slower backup. `clusdr leave` is the only remove (`member.left`, gone from the list).
 
-Default TTL is **3s** (fine for this laptop kill-and-watch). On real hosts that reboot, raise `lease.presence_ttl` and treat `join` as first add / after removal — not every boot. Full operator path: [presence](../concepts/presence.md).
+Default TTL is **3s** (how fast `member.dead` after a laptop kill). A reboot of the same `data.dir` is `clusdr start`, not another `join`. Full operator path: [presence](../concepts/presence.md).
 
 Kill the observer: the voter list and quorum stay put. Kill a voter in a 3-node cluster: the other two elect.
 

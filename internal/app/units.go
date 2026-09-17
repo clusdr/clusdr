@@ -13,9 +13,14 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 
+	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
 	"github.com/clusdr/clusdr/internal/config"
 	"github.com/clusdr/clusdr/internal/consensus"
 	"github.com/clusdr/clusdr/internal/eventbus"
@@ -44,6 +49,7 @@ var (
 	UnitGRPC       = Unit{Name: "grpc", InitFn: InitGRPC, CloseFn: CloseGRPC}
 	UnitHeartbeat  = Unit{Name: "heartbeat", InitFn: InitHeartbeat, CloseFn: CloseHeartbeat}
 	UnitPresence   = Unit{Name: "presence", InitFn: InitPresence, CloseFn: ClosePresence}
+	UnitAnnounce   = Unit{Name: "announce", InitFn: InitAnnounce}
 
 	// Future units:
 	//   UnitStore      = Unit{Name: "store",      InitFn: InitStore,      CloseFn: CloseStore}
@@ -70,6 +76,7 @@ func DefaultUnits() []Unit {
 		UnitGRPC,      // needs the Raft node and heartbeat port already bound
 		UnitHeartbeat,
 		UnitPresence, // presence lease; after gRPC so followers can Grant on the leader
+		UnitAnnounce, // mark self alive if still in Raft (crash ≠ leave)
 	}
 }
 
@@ -324,22 +331,20 @@ func ClosePresence(_ context.Context, a *App) error {
 	return nil
 }
 
-// removeDeadMember commits a Raft leave for id. Leader-only; no-op for self.
+// removeDeadMember marks id not-alive in membership. Leader-only; no-op for
+// self. Does not RemoveServer — crash is not leave.
 func (a *App) removeDeadMember(id string) {
 	if id == "" || a.Consensus == nil || !a.Consensus.IsLeader() {
 		if a.Log != nil {
-			a.Log.Debug("peer unreachable; waiting for leader leave commit", "node_id", id)
+			a.Log.Debug("peer unreachable; waiting for leader liveness commit", "node_id", id)
 		}
 		return
 	}
 	if a.Membership != nil && id == a.Membership.SelfID() {
 		if a.Log != nil {
-			a.Log.Warn("refusing to remove self from cluster", "node_id", id)
+			a.Log.Warn("refusing to mark self not-alive via expiry", "node_id", id)
 		}
 		return
-	}
-	if err := a.Consensus.RemoveVoter(id); err != nil && a.Log != nil {
-		a.Log.Warn("remove raft voter failed", "node_id", id, "err", err)
 	}
 	if err := a.Consensus.ApplyRemoveMember(id); err != nil && a.Log != nil {
 		a.Log.Warn("apply remove_member failed", "node_id", id, "err", err)
@@ -383,6 +388,124 @@ func (p *presenceCtl) stop() {
 	if p.keeper != nil {
 		p.keeper.Stop()
 	}
+}
+
+const announceWait = 10 * time.Second
+
+// InitAnnounce marks this node alive if it is still a Raft server (restart
+// after crash). If the operator already ran clusdr leave, start fails so they
+// join again. An empty configuration is a daemon waiting for its first join.
+func InitAnnounce(_ context.Context, a *App) error {
+	if a.Consensus == nil {
+		return nil
+	}
+	id := a.Cfg.Node.ID
+	if !a.Consensus.HasServer(id) {
+		if a.Consensus.ServerCount() > 0 {
+			return fmt.Errorf("node %s is not a cluster member; run clusdr join", id)
+		}
+		return nil
+	}
+	deadline := time.Now().Add(announceWait)
+	for time.Now().Before(deadline) {
+		err := a.announceSelfOnce()
+		if err == nil {
+			return nil
+		}
+		if isNotRaftMember(err) {
+			return fmt.Errorf("node %s is not a cluster member; run clusdr join", id)
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	go a.announceUntil(a.Consensus.Ctx())
+	return nil
+}
+
+func (a *App) announceUntil(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		err := a.announceSelfOnce()
+		if err == nil {
+			return
+		}
+		if isNotRaftMember(err) {
+			a.Log.Error("not a cluster member; run clusdr join", "node_id", a.Cfg.Node.ID, "err", err)
+			return
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(500 * time.Millisecond):
+		}
+	}
+}
+
+func (a *App) announceSelfOnce() error {
+	id := a.Cfg.Node.ID
+	if a.Consensus == nil || !a.Consensus.HasServer(id) {
+		if a.Consensus != nil && a.Consensus.ServerCount() > 0 {
+			return fmt.Errorf("node %s is not a cluster member; run clusdr join", id)
+		}
+		return nil
+	}
+	addr := a.Cfg.GRPC.Addr
+	if a.Cfg.Node.Addr != "" {
+		addr = a.Cfg.Node.Addr
+	}
+	role := membership.RoleVoter
+	if a.Membership != nil {
+		for _, m := range a.Membership.Members() {
+			if m.ID == id {
+				role = membership.NormalizeRole(m.Role)
+				break
+			}
+		}
+	}
+	if a.Consensus.IsLeader() {
+		return a.Consensus.ApplyAddMemberAs(id, addr, role)
+	}
+	if a.Membership == nil {
+		return fmt.Errorf("waiting for leader")
+	}
+	leader, ok := a.Membership.Leader()
+	if !ok || leader.Address == "" || leader.ID == id {
+		return fmt.Errorf("waiting for leader")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	conn, err := mtls.Dial(leader.Address, a.peerTransportCreds())
+	if err != nil {
+		return fmt.Errorf("dial leader %s: %w", leader.ID, err)
+	}
+	defer conn.Close()
+	resp, err := pb.NewJoinServiceClient(conn).Rejoin(ctx, &pb.RejoinRequest{
+		NodeId:  id,
+		Address: addr,
+		Role:    role,
+		Relay:   true,
+	})
+	if err != nil {
+		return err
+	}
+	if !resp.GetRejoined() {
+		return fmt.Errorf("rejoin rejected: %s", resp.GetMessage())
+	}
+	return nil
+}
+
+func isNotRaftMember(err error) bool {
+	if err == nil {
+		return false
+	}
+	st, ok := status.FromError(err)
+	if ok && st.Code() == codes.FailedPrecondition && strings.Contains(st.Message(), "not a raft member") {
+		return true
+	}
+	return strings.Contains(err.Error(), "not a cluster member")
 }
 
 // InitBus creates the event bus and wires it into the membership engine so that

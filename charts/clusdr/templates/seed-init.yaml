@@ -1,0 +1,55 @@
+# Seed init once. Helm hook so the seed Deployment does not start empty.
+# Idempotent if data.dir already has identity. Not run on DaemonSet pods.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "clusdr.fullname" . }}-seed-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clusdr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: seed
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        {{- include "clusdr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: seed
+    spec:
+      restartPolicy: Never
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.seed.nodeName }}
+      nodeName: {{ . | quote }}
+      {{- end }}
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: init
+          image: {{ include "clusdr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/clusdr", "init"]
+          args: ["--config", "{{ .Values.dataDir }}/clusdr.yaml"]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: {{ .Values.dataDir | quote }}
+            - name: CLUSDR_LOG_FORMAT
+              value: {{ .Values.log.format | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.dataDir }}
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.dataDir }}
+            type: DirectoryOrCreate

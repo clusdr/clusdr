@@ -1,0 +1,54 @@
+# Example only. Not a Helm chart, not an Operator.
+# Seed voter: init (once) then start --bootstrap. Pin to one node via nodeName
+# after you know where the Job landed, or set both nodeName fields together.
+#
+# Image: published Linux image. Pin a tag you run (example uses 0.2.0).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clusdr-seed-init
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: seed
+    app.kubernetes.io/part-of: clusdr
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr
+        app.kubernetes.io/component: seed
+    spec:
+      restartPolicy: Never
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      # Uncomment and set to the same node as seed.yaml.
+      # nodeName: kind-worker
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: init
+          image: durguto/clusdr:0.2.0
+          imagePullPolicy: IfNotPresent
+          command: ["/clusdr", "init"]
+          args: ["--config", "/var/lib/clusdr/clusdr.yaml"]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            - name: CLUSDR_LOG_FORMAT
+              value: json
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/clusdr
+            type: DirectoryOrCreate

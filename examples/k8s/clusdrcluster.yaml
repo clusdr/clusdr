@@ -1,0 +1,22 @@
+# Example ClusdrCluster. Requires the CRD:
+#   kubectl apply -f config/crd/clusdr.io_clusdrclusters.yaml
+#
+# Applying this object with clusdr-operator running forms the DaemonSet cluster
+# (init once, one --bootstrap, join). Without the Operator it is spec only.
+# Sidecar: examples/k8s/clusdrcluster-sidecar.yaml (not both in one namespace
+# unless you mean two clusters). spec.leave is clusdr leave (not a vanished pod).
+apiVersion: clusdr.io/v1alpha1
+kind: ClusdrCluster
+metadata:
+  name: clusdr
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/part-of: clusdr
+spec:
+  topology: DaemonSet
+  voterCount: 3
+  image: durguto/clusdr:0.2.0
+  dataDir: /var/lib/clusdr
+  # seedNodeName: kind-worker
+  # leave: []   # clusdr node.id to RemoveServer — not a vanished pod

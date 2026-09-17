@@ -101,7 +101,7 @@ type Member struct {
 	ID string
 	// Address is the advertised Runtime API (node.addr).
 	Address string
-	// Status is alive, leaving, or dead.
+	// Status is liveness: alive or dead. Legacy "leaving" is read as dead.
 	Status string
 	// Leader is true if this id is the current Raft leader.
 	Leader bool
@@ -111,7 +111,8 @@ type Member struct {
 
 // Event is a cluster or custom event from the Watch stream.
 type Event struct {
-	// Type is member.join, leader.changed, custom.<topic>, watch.sync, …
+	// Type is member.join, member.dead, member.left, leader.changed,
+	// custom.<topic>, watch.sync, …
 	Type string
 	// Source is usually a node id; lock/lease events use the name.
 	Source string

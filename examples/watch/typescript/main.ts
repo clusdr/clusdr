@@ -8,7 +8,8 @@
  *
  *     clusdr publish ping '{"from":"cli"}'
  *
- * custom.* is gossip (not Raft, not replayed). member.left is cluster state.
+ * custom.* is gossip (not Raft, not replayed). member.dead is crash (still listed).
+ * member.left is clusdr leave (gone).
  * close() revokes the worker lease.
  */
 
@@ -76,8 +77,12 @@ async function printMembers(c: Cluster): Promise<void> {
 
 function formatEvent(ev: Event): string {
   let kind = "bus";
-  if (ev.type === "member.join" || ev.type === "member.left" || ev.type === "leader.changed") {
+  if (ev.type === "member.join" || ev.type === "leader.changed") {
     kind = "cluster";
+  } else if (ev.type === "member.dead") {
+    kind = "dead";
+  } else if (ev.type === "member.left") {
+    kind = "left";
   } else if (ev.type.startsWith("custom.")) {
     kind = "gossip";
   } else if (ev.type === "watch.sync" || ev.type === "watch.gap") {

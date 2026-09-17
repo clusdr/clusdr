@@ -4,7 +4,7 @@
 
 ## Protocol
 
-1. Snapshot of current alive members and the leader (`seq = 0`)
+1. Snapshot of listed members (`member.join` if alive, `member.dead` if dead) and the leader (`seq = 0`)
 2. `watch.sync` (bus high-water mark)
 3. Live events
 
@@ -16,7 +16,9 @@ Reconnect with `last_seq`. If the bus moved past that cursor, the server sends t
 
 ## Event types
 
-`member.join`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, `watch.sync`, `watch.gap`.
+`member.join`, `member.dead`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, `watch.sync`, `watch.gap`.
+
+Crash/miss is `member.dead` (still listed). Operator leave is `member.left` (gone). There is no `member.leave`.
 
 ## Backpressure
 

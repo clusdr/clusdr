@@ -32,7 +32,7 @@ is sent so the client knows it missed events while disconnected.
 
 Examples:
   clusdr watch
-  clusdr watch --type member.join --type member.left
+  clusdr watch --type member.join --type member.dead --type member.left
   clusdr watch --topic deployment
   clusdr watch --last-seq 42`,
 		Args: cobra.NoArgs,

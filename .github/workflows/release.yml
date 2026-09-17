@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing git tag to publish Hub and GHCR images for
+        description: Existing git tag to publish Hub and GHCR images (daemon + operator)
         required: true
-        default: v0.1.4
+        default: v0.2.0
 
 permissions:
   contents: write
@@ -102,6 +102,90 @@ jobs:
           EOF
           gh release upload "$tag" latest.json --clobber
 
+  chart:
+    name: Helm chart
+    needs: [lint, test, goreleaser]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (needs.goreleaser.result == 'success' || needs.goreleaser.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+
+      - name: Package and push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          ver="${tag#v}"
+          chmod +x scripts/package-chart.sh
+          tgz=$(./scripts/package-chart.sh "$ver" dist)
+          echo "$GH_TOKEN" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          helm push "$tgz" oci://ghcr.io/clusdr/charts
+          gh release upload "$tag" "$tgz" --clobber --repo clusdr/clusdr
+
+      - uses: oras-project/setup-oras@v1
+
+      - name: Artifact Hub repo metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          echo "$GH_TOKEN" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          oras push \
+            ghcr.io/clusdr/charts/clusdr:artifacthub.io \
+            --config /dev/null:application/vnd.cncf.artifacthub.config.v1+yaml \
+            charts/clusdr/artifacthub-repo.yml:application/vnd.cncf.artifacthub.repository-metadata.layer.v1.yaml
+
+  manifests:
+    name: Operator YAML
+    needs: [lint, test, goreleaser]
+    if: |
+      always() &&
+      needs.lint.result == 'success' &&
+      needs.test.result == 'success' &&
+      (needs.goreleaser.result == 'success' || needs.goreleaser.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - name: Package YAML
+        id: yaml
+        run: |
+          set -euo pipefail
+          tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          ver="${tag#v}"
+          chmod +x scripts/package-operator-yaml.sh
+          mkdir -p dist
+          ./scripts/package-operator-yaml.sh "$ver" dist
+          echo "ver=$ver" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.yaml.outputs.tag }}"
+          ver="${{ steps.yaml.outputs.ver }}"
+          gh release upload "$tag" \
+            "dist/clusdr-crds.yaml" \
+            "dist/clusdr-crds-${ver}.yaml" \
+            "dist/clusdr-operator.yaml" \
+            "dist/clusdr-operator-${ver}.yaml" \
+            --clobber --repo clusdr/clusdr
+
   docker:
     name: Images
     needs: [lint, test, goreleaser]
@@ -148,6 +232,26 @@ jobs:
             durguto/clusdr:latest
             ghcr.io/clusdr/clusdr:${{ steps.ver.outputs.tag }}
             ghcr.io/clusdr/clusdr:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/clusdr/clusdr
+            org.opencontainers.image.licenses=Apache-2.0
+          build-args: |
+            VERSION=${{ steps.ver.outputs.version }}
+            COMMIT=${{ steps.ver.outputs.commit }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.operator
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            durguto/clusdr-operator:${{ steps.ver.outputs.tag }}
+            durguto/clusdr-operator:${{ steps.ver.outputs.version }}
+            durguto/clusdr-operator:latest
+            ghcr.io/clusdr/clusdr-operator:${{ steps.ver.outputs.tag }}
+            ghcr.io/clusdr/clusdr-operator:${{ steps.ver.outputs.version }}
+            ghcr.io/clusdr/clusdr-operator:latest
           labels: |
             org.opencontainers.image.source=https://github.com/clusdr/clusdr
             org.opencontainers.image.licenses=Apache-2.0

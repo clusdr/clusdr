@@ -12,4 +12,5 @@ In this version `healthy` is always `true` and `role` is always `standalone` (se
 
 ## See also
 
+- [`clusdr health`](../../reference/cli/health.md)
 - [Run on other hosts](../../guide/other-hosts.md) (health checks)

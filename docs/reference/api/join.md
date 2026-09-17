@@ -20,6 +20,18 @@ Followers forward to the leader unless `relay` is already set.
 
 **Request:** `node_id`, `relay`. Turns an observer into a voter on the leader (`AddVoter` + membership role). Followers forward.
 
+## `Leave`
+
+**Signature:** `Leave(LeaveRequest) returns (LeaveResponse)`
+
+**Request:** `node_id`, `relay`. The only Raft `RemoveServer`. Unknown id → `NotFound`. Already gone → `left = true`. Followers forward.
+
+## `Rejoin`
+
+**Signature:** `Rejoin(RejoinRequest) returns (RejoinResponse)`
+
+**Request:** `node_id`, `address`, optional `role`, `relay`. Marks an existing Raft server alive (`ApplyAddMember` only — no `AddVoter`, no join token). Not in the configuration → `FailedPrecondition` (use `Join`). Followers forward.
+
 ## See also
 
 - [ControlService](control.md)

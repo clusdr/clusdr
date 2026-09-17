@@ -1,0 +1,87 @@
+# Example only. Not a Helm chart, not an Operator.
+#
+# Seed for the sidecar StatefulSet: pre-create PVC-0, init once, start
+# --bootstrap until Raft is on disk. Delete this Job before the StatefulSet
+# mounts the same RWO volume. Token is in the init container logs.
+#
+# Do not run this next to the DaemonSet example unless you mean two clusters.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-clusdr-sidecar-0
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: sidecar
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: clusdr-sidecar-bootstrap
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: sidecar-bootstrap
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr
+        app.kubernetes.io/component: sidecar-bootstrap
+    spec:
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 20
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      initContainers:
+        - name: init
+          image: durguto/clusdr:0.2.0
+          imagePullPolicy: IfNotPresent
+          command: ["/clusdr", "init"]
+          args: ["--config", "/var/lib/clusdr/clusdr.yaml"]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            - name: CLUSDR_LOG_FORMAT
+              value: json
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+      containers:
+        - name: clusdr
+          image: durguto/clusdr:0.2.0
+          imagePullPolicy: IfNotPresent
+          args: ["start", "--bootstrap", "--config", "/var/lib/clusdr/clusdr.yaml"]
+          env:
+            # Must match STS ordinal 0 (CLUSDR_NODE_ID=$(POD_NAME) there).
+            # Init writes its own ids; start env wins for the Raft server id.
+            - name: CLUSDR_NODE_ID
+              value: clusdr-sidecar-0
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            - name: CLUSDR_CONTROL_SOCKET
+              value: /var/lib/clusdr/clusdr.sock
+            - name: CLUSDR_GRPC_ADDR
+              value: 0.0.0.0:7947
+            - name: CLUSDR_NODE_ADDR
+              value: clusdr-sidecar-0.clusdr-sidecar.clusdr.svc.cluster.local:7947
+            - name: CLUSDR_RAFT_ADDR
+              value: clusdr-sidecar-0.clusdr-sidecar.clusdr.svc.cluster.local:7946
+            - name: CLUSDR_LOG_FORMAT
+              value: json
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-clusdr-sidecar-0

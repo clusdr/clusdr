@@ -46,7 +46,7 @@ type HeartbeatConfig struct {
 	Interval time.Duration `yaml:"interval"`
 	// Timeout is the per-ping deadline. Default: 1s.
 	Timeout time.Duration `yaml:"timeout"`
-	// MaxMisses is consecutive failures before a peer is marked leaving. Default: 3.
+	// MaxMisses is consecutive failures before a peer is marked dead. Default: 3.
 	MaxMisses int `yaml:"max_misses"`
 }
 

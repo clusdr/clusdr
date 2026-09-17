@@ -98,7 +98,7 @@ Another terminal, while it runs:
 clusdr publish ping '{"from":"cli"}'
 ```
 
-You should see `custom.ping` on the bus. Custom events are 1-hop gossip, not Raft. `member.left` is.
+You should see `custom.ping` on the bus. Custom events are 1-hop gossip, not Raft. `member.dead` (crash) and `member.left` (leave) are.
 
 `--name` / `-name` sets the lease this process holds (`worker.<name>`). Close revokes it. Two processes with the same name — the second fails to grant.
 
@@ -184,17 +184,19 @@ npm install clusdr
 ```
 
 ```toml
-clusdr = "0.1.4"
+clusdr = "0.2.0"
 ```
 
 ```xml
 <dependency>
   <groupId>io.clusdr</groupId>
   <artifactId>clusdr</artifactId>
-  <version>0.1.4</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
 Copy the files. Keep `Local` / `local()` / `Clusdr.local()`. `Dial` / `dial` is for tests and operators.
 
 Guide: [Use it from your app](../docs/guide/from-your-app.md).
+
+Daemon on Kubernetes (not an app): [k8s/](k8s/). Optional Operator: [`config/operator`](../config/operator).

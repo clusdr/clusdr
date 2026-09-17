@@ -16,7 +16,7 @@ Keep `clusdr start` running. Then pick a language:
 |---|---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](../sdk/go.md) |
 | Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = "0.1.4"` | [Rust SDK](../sdk/rust.md) |
+| Rust | `clusdr = "0.2.0"` | [Rust SDK](../sdk/rust.md) |
 | TypeScript | `npm install clusdr` | [TypeScript SDK](../sdk/typescript.md) |
 | Java | `io.clusdr:clusdr` | [Java SDK](../sdk/java.md) |
 
@@ -58,6 +58,8 @@ try (Cluster c = Clusdr.local()) {
 `Local` / `local()` / `Clusdr.local()` dial `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.
 
 What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
+
+On Kubernetes the host is the **node**. Set `CLUSDR_GRPC_ADDR` to that node's Runtime (`status.hostIP:7947`). `127.0.0.1` inside the pod is the pod — unless the app shares a pod with a [clusdr sidecar](kubernetes-sidecar.md). [Apps on the node](kubernetes.md#apps-on-the-node).
 
 Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, Rust, TypeScript, and Java): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
 

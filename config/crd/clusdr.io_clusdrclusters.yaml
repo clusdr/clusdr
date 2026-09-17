@@ -1,0 +1,132 @@
+# ClusdrCluster — desired host topology. Not membership (Raft is).
+# Applying this CRD lets `kubectl get clusdrcluster` work. The Operator
+# (clusdr-operator) forms a DaemonSet cluster; applying the CR alone does not.
+#
+# kubectl apply -f config/crd/clusdr.io_clusdrclusters.yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: clusdrclusters.clusdr.io
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/part-of: clusdr
+spec:
+  group: clusdr.io
+  names:
+    kind: ClusdrCluster
+    listKind: ClusdrClusterList
+    plural: clusdrclusters
+    singular: clusdrcluster
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      additionalPrinterColumns:
+        - name: Topology
+          type: string
+          jsonPath: .spec.topology
+        - name: Voters
+          type: integer
+          jsonPath: .spec.voterCount
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Leader
+          type: string
+          jsonPath: .status.leader
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: >
+            Desired host topology for a clusdr cluster. Status.members is a
+            mirror of Members() once an Operator exists; it is not the source
+            of truth and not EndpointSlice. Apps still Local() — there is no
+            Service field to Dial.
+          properties:
+            spec:
+              type: object
+              required:
+                - voterCount
+              properties:
+                topology:
+                  type: string
+                  description: >
+                    DaemonSet is the default (one daemon per node). Sidecar is
+                    the elected-StatefulSet exception (replica is the member).
+                  enum:
+                    - DaemonSet
+                    - Sidecar
+                  default: DaemonSet
+                voterCount:
+                  type: integer
+                  description: Odd voter target. Extra nodes are observers. Helm/Operator do not join on Deployment scale.
+                  minimum: 1
+                  x-kubernetes-validations:
+                    - rule: self % 2 == 1
+                      message: voterCount must be odd
+                image:
+                  type: string
+                  description: Published daemon image (example pin durguto/clusdr:0.2.0).
+                  default: durguto/clusdr:0.2.0
+                dataDir:
+                  type: string
+                  description: Node-local data.dir (hostPath or PVC). Identity lives here (crash ≠ leave).
+                  default: /var/lib/clusdr
+                seedNodeName:
+                  type: string
+                  description: Kubernetes node name for seed init + start --bootstrap (shared hostPath).
+                leave:
+                  type: array
+                  description: >
+                    clusdr node.id values to remove with clusdr leave
+                    (member.left). A missing or restarted pod is not leave.
+                  items:
+                    type: string
+                    minLength: 1
+            status:
+              type: object
+              description: Filled by clusdr-operator from the Runtime (Members / Health), not from kube Ready or EndpointSlice.
+              properties:
+                clusterID:
+                  type: string
+                leader:
+                  type: string
+                  description: clusdr node.id of the Raft leader, if any.
+                members:
+                  type: array
+                  description: Mirror of Members(). Raft remains the list. Status is liveness (alive|dead).
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      address:
+                        type: string
+                        description: Advertised node.addr (Runtime), not a ClusterIP.
+                      status:
+                        type: string
+                        description: Liveness only.
+                        enum:
+                          - alive
+                          - dead
+                      role:
+                        type: string
+                        description: Raft suffrage (leader is a voter that currently leads).
+                        enum:
+                          - voter
+                          - observer
+                          - leader
+                observedGeneration:
+                  type: integer
+                  format: int64
+                phase:
+                  type: string
+                  description: Operator view (Pending, Ready, Error, Unsupported). Not kube Ready.
+                message:
+                  type: string

@@ -20,7 +20,7 @@ Config file vs data dir vs socket, laptop vs `/etc` + `/var/lib`: [Configuration
 Seed: `clusdr init`, then `clusdr start --bootstrap`.  
 Others: `clusdr start` without bootstrap, then `clusdr join --token … <seed-runtime>`.
 
-After that, a reboot of the **same** `data.dir` is `clusdr start` again if the node is still in Raft. Default presence TTL is 3s, which ejects a host that takes longer to come back — raise `lease.presence_ttl` on servers ([presence](../concepts/presence.md)). Do not `init` a second time.
+After that, a reboot of the **same** `data.dir` is `clusdr start` again. Presence expiry does not eject the Raft server. `join` only after [`clusdr leave`](../reference/cli/leave.md) or a new `data.dir`. Do not `init` a second time.
 
 Prefer 3 or 5 **voters**. Extra machines that only need a local API: `join --observer` ([step 3](grow.md)).
 
@@ -48,14 +48,16 @@ These checks are not interchangeable.
 |---|---|
 | `clusdr version` | Binary runs |
 | `clusdr status` | Control socket **file** exists (default `$HOME/.clusdr/clusdr.sock`) |
-| `Health` RPC | Process is serving gRPC. In this version `healthy` is always `true` and `role` is always `standalone` |
+| `clusdr health` / Health RPC | Process is serving gRPC. In this version `healthy` is always `true` and `role` is always `standalone` |
 | `clusdr members` | Membership + Runtime API |
 
-Prefer `members` (or Health / Members over Runtime TCP). Do not use `status` as a Kubernetes-style readiness probe unless you control the socket path.
+Prefer `members` or `health` over Runtime TCP. Do not use `status` as a Kubernetes readiness probe ([Kubernetes](kubernetes.md)).
 
 ## You are done with the guide
 
 You installed a binary, bootstrapped a member, grew the cluster, watched the stream, called it from an app, and pointed it at real addresses.
+
+The same host model on a Kubernetes node: [Run on Kubernetes](kubernetes.md). Helm / Operator / Sidecar are their own pages. Example YAML: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s).
 
 - Still deciding if this is the right tool: [Overview](../overview.md)
 - Guarantees (what is on Raft, how presence works): [concepts](../concepts/)

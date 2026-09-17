@@ -1,0 +1,5 @@
+# Artifact Hub repository metadata for oci://ghcr.io/clusdr/charts/clusdr
+# owners.email must match the Artifact Hub login (ownership claim).
+repositoryID: a9be3636-a739-4c79-b9bc-6ae4f362c49d
+owners:
+  - name: clusdr

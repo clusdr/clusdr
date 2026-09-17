@@ -1,0 +1,47 @@
+# Example chart. Not an Operator. Not a CRD. Sidecar is not this chart
+# (see examples/k8s/sidecar-statefulset.yaml).
+#
+# helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version <x.y.z>
+# Contributor: helm install clusdr charts/clusdr
+# Then join DaemonSet pods with clusdr join (NOTES).
+
+nameOverride: ""
+fullnameOverride: ""
+
+namespace:
+  # Also set --namespace / --create-namespace so resources land here.
+  create: true
+
+image:
+  repository: durguto/clusdr
+  # Empty uses Chart.appVersion (the daemon tag). Override to pin another image.
+  # probes.type=exec needs `clusdr health` (this chart). type=tcp is port 7947.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# hostPath on each node. Distroless uid 65532; hostPath is not chowned by fsGroup.
+dataDir: /var/lib/clusdr
+
+# Odd voter target. Helm does not join. After install: join DaemonSet pods as
+# voters until this count (seed is already 1), then join --observer on extras.
+voterCount: 3
+
+seed:
+  # Pin Job + Deployment to the same node (required so they share hostPath).
+  # kubectl get nodes
+  nodeName: ""
+
+# Runtime Health RPC. type=exec needs `clusdr health`. type=tcp is port 7947.
+probes:
+  type: exec
+
+resources:
+  requests:
+    cpu: 20m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+log:
+  format: json
+  level: info

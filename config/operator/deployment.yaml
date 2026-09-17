@@ -1,0 +1,40 @@
+# Separate image from the distroless daemon. replicas: 1 — HA would use the
+# Kubernetes Lease API, not clusdr, if added later.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusdr-operator
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr-operator
+    app.kubernetes.io/part-of: clusdr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusdr-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr-operator
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      serviceAccountName: clusdr-operator
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        runAsNonRoot: true
+      containers:
+        - name: operator
+          image: durguto/clusdr-operator:0.2.0
+          imagePullPolicy: IfNotPresent
+          args: []
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi

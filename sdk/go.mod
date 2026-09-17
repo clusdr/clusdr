@@ -3,7 +3,7 @@ module github.com/clusdr/clusdr/sdk
 go 1.27.0
 
 require (
-	github.com/clusdr/clusdr/api v0.1.4
+	github.com/clusdr/clusdr/api v0.2.0
 	google.golang.org/grpc v1.83.2
 )
 

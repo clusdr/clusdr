@@ -10,7 +10,7 @@ clusdr watch
 
 On connect the server sends:
 
-1. A snapshot of current alive members and the leader (`seq = 0`)
+1. A snapshot of listed members (`member.join` if alive, `member.dead` if dead) and the leader (`seq = 0`)
 2. `watch.sync` (bus high-water mark)
 3. Live events
 
@@ -27,7 +27,7 @@ If the bus moved past that cursor you get the snapshot again and `watch.gap`. Cu
 Filter live events:
 
 ```bash
-clusdr watch --type member.join --type member.left
+clusdr watch --type member.join --type member.dead --type member.left
 clusdr watch --topic deployment
 ```
 
@@ -35,7 +35,7 @@ clusdr watch --topic deployment
 
 Same filters on the SDKs: Go `Watch(ctx, clusdr.WithTopics("deployment"))`, Python `c.watch(topics=["deployment"])`, Rust `c.watch(WatchFilter::new().topics(["deployment"]))`.
 
-Event types you will see: `member.join`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, plus the two protocol events.
+Event types you will see: `member.join`, `member.dead`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, plus the two protocol events. Crash is `member.dead`; leave is `member.left`.
 
 The bus is bounded. A slow subscriber **drops** events. The cluster does not wait.
 

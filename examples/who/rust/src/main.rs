@@ -107,11 +107,12 @@ fn role(m: &Member) -> &str {
 }
 
 fn print_event(ev: &Event) {
-    let kind = if matches!(
-        ev.event_type.as_str(),
-        "member.join" | "member.left" | "leader.changed"
-    ) {
+    let kind = if matches!(ev.event_type.as_str(), "member.join" | "leader.changed") {
         "cluster"
+    } else if ev.event_type == "member.dead" {
+        "dead"
+    } else if ev.event_type == "member.left" {
+        "left"
     } else if ev.event_type.starts_with("custom.") {
         "gossip"
     } else if matches!(ev.event_type.as_str(), "watch.sync" | "watch.gap") {

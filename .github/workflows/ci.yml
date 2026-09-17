@@ -66,13 +66,31 @@ jobs:
       - name: Build binary
         run: |
           make build VERSION=ci COMMIT=${{ github.sha }}
+          make build-operator VERSION=ci COMMIT=${{ github.sha }}
           make bench
 
       - name: Verify binary runs
-        run: ./bin/clusdr version
+        run: |
+          ./bin/clusdr version
+          ./bin/clusdr-operator version
 
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: "~> v2"
           args: check
+
+  helm:
+    name: Helm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+
+      - name: helm lint and template
+        run: |
+          make helm
+          make manifests

@@ -39,6 +39,7 @@ make test    # go test -race ./... and sdk/
 make vet
 make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
+make build-operator
 ```
 
 `proto/api` is the application wire (`buf.build/clusdr/api`). `proto/internal` is join/heartbeat (`buf.build/clusdr/internal`). After editing either:
@@ -68,6 +69,10 @@ If you change configuration, CLI, proto, SDK, or defaults, update the matching p
 ```text
 cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
+cmd/clusdr-operator Kubernetes operator (ClusdrCluster → DaemonSet)
+config/crd          ClusdrCluster CRD
+config/operator     operator RBAC + Deployment
+charts/clusdr       Helm chart (DaemonSet example; does not join)
 examples/           small programs against a local daemon; each example has go/, python/, rust/, typescript/, java/ packages
 internal/           daemon
 proto/api           application .proto (BSR buf.build/clusdr/api)
@@ -85,4 +90,18 @@ Sibling checkouts:
 - [`clusdr-js`](https://github.com/clusdr/clusdr-js) — TypeScript SDK
 - [`clusdr-java`](https://github.com/clusdr/clusdr-java) — Java SDK
 - [`clusdr-site`](https://github.com/clusdr/clusdr-site) — clusdr.io
+
+## Releases
+
+A `v*` tag runs GoReleaser (GitHub Release). `clusdr.io/download/<file>` 302s there. The same tag (and image `workflow_dispatch`) pushes `durguto/clusdr` and `durguto/clusdr-operator` to Docker Hub, with GHCR mirrors `ghcr.io/clusdr/clusdr` and `ghcr.io/clusdr/clusdr-operator`. The chart is `helm package`d and `helm push`ed to `oci://ghcr.io/clusdr/charts` (`clusdr-<version>.tgz` also lands on the GitHub Release). Do not push the chart to `ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**. The same job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
+
+One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml` and `clusdr-operator.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there.
+
+Repo secrets (not in git):
+
+- `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`
+
+Create the Hub repo `durguto/clusdr-operator` (the daemon repo `durguto/clusdr` already exists). To republish images, chart, and YAML for an existing tag: Release `workflow_dispatch`.
+
+`docker build -f Dockerfile.operator` and `kubectl apply -k config/operator` stay the contributor path.
 

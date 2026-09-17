@@ -1,0 +1,85 @@
+# One daemon per remaining node (not the seed's node). Helm does not join.
+# Join as voters until voterCount, then join --observer. See NOTES.txt.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "clusdr.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clusdr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: member
+  annotations:
+    clusdr.io/voter-count: {{ include "clusdr.voterCount" . | quote }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "clusdr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: member
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "clusdr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: member
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "clusdr.selectorLabels" . | nindent 18 }}
+                  app.kubernetes.io/component: seed
+              topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: clusdr
+          image: {{ include "clusdr.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["start"]
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: CLUSDR_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CLUSDR_DATA_DIR
+              value: {{ .Values.dataDir | quote }}
+            - name: CLUSDR_CONTROL_SOCKET
+              value: {{ printf "%s/clusdr.sock" .Values.dataDir | quote }}
+            - name: CLUSDR_GRPC_ADDR
+              value: 0.0.0.0:7947
+            - name: CLUSDR_NODE_ADDR
+              value: "$(NODE_IP):7947"
+            - name: CLUSDR_RAFT_ADDR
+              value: "$(NODE_IP):7946"
+            - name: CLUSDR_LOG_FORMAT
+              value: {{ .Values.log.format | quote }}
+            - name: CLUSDR_LOG_LEVEL
+              value: {{ .Values.log.level | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.dataDir }}
+          ports:
+            - name: grpc
+              containerPort: 7947
+              protocol: TCP
+            - name: raft
+              containerPort: 7946
+              protocol: TCP
+          {{- include "clusdr.probes" . | nindent 10 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.dataDir }}
+            type: DirectoryOrCreate

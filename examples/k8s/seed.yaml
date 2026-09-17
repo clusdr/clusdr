@@ -1,0 +1,96 @@
+# Example only. Not a Helm chart, not an Operator.
+# One seed voter. Same node and hostPath as seed-init.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusdr-seed
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: seed
+    app.kubernetes.io/part-of: clusdr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusdr
+      app.kubernetes.io/component: seed
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr
+        app.kubernetes.io/component: seed
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      # Uncomment and set to the same node as seed-init.yaml.
+      # nodeName: kind-worker
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: clusdr
+          image: durguto/clusdr:0.2.0
+          imagePullPolicy: IfNotPresent
+          args: ["start", "--bootstrap", "--config", "/var/lib/clusdr/clusdr.yaml"]
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            - name: CLUSDR_CONTROL_SOCKET
+              value: /var/lib/clusdr/clusdr.sock
+            - name: CLUSDR_GRPC_ADDR
+              value: 0.0.0.0:7947
+            - name: CLUSDR_NODE_ADDR
+              value: "$(NODE_IP):7947"
+            - name: CLUSDR_RAFT_ADDR
+              value: "$(NODE_IP):7946"
+            - name: CLUSDR_LOG_FORMAT
+              value: json
+            - name: CLUSDR_LOG_LEVEL
+              value: info
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+          ports:
+            - name: grpc
+              containerPort: 7947
+              protocol: TCP
+            - name: raft
+              containerPort: 7946
+              protocol: TCP
+          # Runtime Health RPC (not clusdr status). Needs a binary that has
+          # `clusdr health`. Else tcpSocket 7947.
+          livenessProbe:
+            exec:
+              command: ["/clusdr", "health"]
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["/clusdr", "health"]
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/clusdr
+            type: DirectoryOrCreate

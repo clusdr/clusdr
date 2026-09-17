@@ -18,7 +18,9 @@ import (
 type MemberApplier interface {
 	Join(id, addr string) (bool, error)
 	JoinAs(id, addr, role string) (bool, error)
-	MarkLeaving(id string)
+	MarkDead(id string)
+	Drop(id string)
+	RestoreMember(id, addr, role string, status membership.Status) error
 	Members() []membership.Member
 }
 
@@ -82,8 +84,12 @@ func (f *FSM) Apply(entry *raftlib.Log) interface{} {
 		f.log.Debug("fsm applied add_member", "index", entry.Index, "node_id", cmd.ID, "role", role)
 
 	case CmdRemoveMember:
-		f.applier.MarkLeaving(cmd.ID)
-		f.log.Debug("fsm applied remove_member", "index", entry.Index, "node_id", cmd.ID)
+		f.applier.MarkDead(cmd.ID)
+		f.log.Debug("fsm applied mark_dead", "index", entry.Index, "node_id", cmd.ID)
+
+	case CmdDropMember:
+		f.applier.Drop(cmd.ID)
+		f.log.Debug("fsm applied drop_member", "index", entry.Index, "node_id", cmd.ID)
 
 	case CmdLockAcquire:
 		if f.locks == nil {
@@ -189,18 +195,18 @@ type memberEntry struct {
 	ID      string `json:"id"`
 	Address string `json:"address"`
 	Role    string `json:"role,omitempty"`
+	Status  string `json:"status,omitempty"`
 }
 
 func (f *FSM) Snapshot() (raftlib.FSMSnapshot, error) {
 	payload := snapshotPayload{}
 	for _, m := range f.applier.Members() {
-		if m.Status == membership.StatusAlive {
-			payload.Members = append(payload.Members, memberEntry{
-				ID:      m.ID,
-				Address: m.Address,
-				Role:    membership.NormalizeRole(m.Role),
-			})
-		}
+		payload.Members = append(payload.Members, memberEntry{
+			ID:      m.ID,
+			Address: m.Address,
+			Role:    membership.NormalizeRole(m.Role),
+			Status:  string(membership.NormalizeStatus(m.Status)),
+		})
 	}
 	if f.locks != nil {
 		snap := f.locks.SnapshotCopy()
@@ -226,8 +232,8 @@ func (f *FSM) Restore(rc io.ReadCloser) error {
 		return fmt.Errorf("snapshot decode: %w", err)
 	}
 	for _, m := range payload.Members {
-		if _, err := f.applier.JoinAs(m.ID, m.Address, membership.NormalizeRole(m.Role)); err != nil {
-			f.log.Error("fsm restore: join failed", "node_id", m.ID, "err", err)
+		if err := f.applier.RestoreMember(m.ID, m.Address, membership.NormalizeRole(m.Role), membership.Status(m.Status)); err != nil {
+			f.log.Error("fsm restore: member failed", "node_id", m.ID, "err", err)
 		}
 	}
 	if f.locks != nil {

@@ -1,8 +1,7 @@
 // Package heartbeat implements peer liveness detection.
 //
 // Monitor ticks on a configurable interval and pings all known alive peers.
-// Consecutive failures beyond MaxMisses cause the peer to be marked leaving
-// via membership.Engine.Leave — which emits member.left.
+// Consecutive failures beyond MaxMisses mark the peer dead (member.dead).
 package heartbeat
 
 import (
@@ -26,10 +25,10 @@ type Config struct {
 	MaxMisses int
 }
 
-// Leaver is the subset of membership.Engine used by the monitor.
-type Leaver interface {
+// Liveness is the subset of membership.Engine used by the monitor.
+type Liveness interface {
 	Members() []membership.Member
-	Leave(id string)
+	MarkDead(id string)
 	SelfID() string
 }
 
@@ -37,15 +36,15 @@ type Leaver interface {
 // It is safe for concurrent use.
 type Monitor struct {
 	cfg    Config
-	engine Leaver
+	engine Liveness
 	log    *slog.Logger
 
 	mu     sync.Mutex
 	misses map[string]int // node_id → consecutive miss count
 	creds  func() credentials.TransportCredentials
-	// reportDead, when set, is called instead of engine.Leave. Production
-	// wiring commits remove_member on the Raft leader; unit tests leave this
-	// nil so the engine is updated directly.
+	// reportDead, when set, is called instead of engine.MarkDead. Production
+	// wiring commits mark_dead on the Raft leader; unit tests leave this nil
+	// so the engine is updated directly.
 	reportDead func(id string)
 
 	cancel context.CancelFunc
@@ -53,7 +52,7 @@ type Monitor struct {
 }
 
 // New creates a Monitor. Call Start to begin pinging.
-func New(cfg Config, engine Leaver, log *slog.Logger) *Monitor {
+func New(cfg Config, engine Liveness, log *slog.Logger) *Monitor {
 	return &Monitor{
 		cfg:    cfg,
 		engine: engine,
@@ -69,7 +68,7 @@ func (m *Monitor) SetPeerCreds(fn func() credentials.TransportCredentials) {
 	m.creds = fn
 }
 
-// SetReportDead sets the callback invoked after MaxMisses. nil → engine.Leave.
+// SetReportDead sets the callback invoked after MaxMisses. nil → engine.MarkDead.
 func (m *Monitor) SetReportDead(fn func(id string)) {
 	m.reportDead = fn
 }
@@ -132,14 +131,14 @@ func (m *Monitor) tick(ctx context.Context) {
 				"err", err,
 			)
 			if m.misses[mem.ID] >= m.cfg.MaxMisses {
-				m.log.Warn("peer unreachable, marking leaving",
+				m.log.Warn("peer unreachable, marking dead",
 					"node_id", mem.ID,
 					"misses", m.misses[mem.ID],
 				)
 				if m.reportDead != nil {
 					m.reportDead(mem.ID)
 				} else {
-					m.engine.Leave(mem.ID)
+					m.engine.MarkDead(mem.ID)
 				}
 				delete(m.misses, mem.ID)
 			}

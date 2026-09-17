@@ -15,7 +15,7 @@ Prefer `clusdr members` when you want to know if the Runtime API is up. `clusdr 
 | log `node identity not found in store` / hint `run 'clusdr init'` | `start` without `init` | The process runs, but it is not a cluster. Run `init`, then `start --bootstrap` on the seed ([first member](../guide/first-member.md)) |
 | Two daemons, shared `data.dir` | BoltDB and certs are per process | Separate directories. Sharing a dir is undefined |
 
-`clusdr status` exit 1 when the socket is missing is intentional for scripts. It is not a readiness probe for Kubernetes unless you control that path ([other hosts](../guide/other-hosts.md)).
+`clusdr status` exit 1 when the socket is missing is intentional for scripts. It is not a readiness probe for Kubernetes ([Kubernetes](../guide/kubernetes.md), [other hosts](../guide/other-hosts.md)).
 
 ## Join
 
@@ -50,9 +50,10 @@ TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
 |---|---|---|
 | `clusdr leader` / SDK `Unavailable` | No current leader | One voter: that process must be up. Three voters: majority must be up ([leadership](../concepts/leadership.md)) |
 | Frequent elections, flapping leader | Peer RTT larger than Raft timers | Defaults are 150ms heartbeat/election. Raise them ([limits](limits.md), [configuration](configuration.md)) |
-| `member.left` while the process still exists | Presence lease `presence.<nodeID>` expired (default 3s) | Process wedged or partitioned. Heartbeats are the slower backup ([presence](../concepts/presence.md)) |
-| After every reboot I must `join` again | Default `presence_ttl` 3s elapsed while the host was down; the leader **removed** the Raft server | Raise `lease.presence_ttl` above reboot time. Same `data.dir` + `clusdr start` if still a member. `join` only after removal ([presence](../concepts/presence.md)) |
-| `member.left` after crash / SIGKILL / reboot | Same path as a leave. No `disconnect` event | Expected. Rejoin with the same token and `node.id` only if the TTL already fired |
+| `member.dead` while the process still exists | Presence lease `presence.<nodeID>` expired (default 3s) | Process wedged or partitioned. Heartbeats are the slower backup. Raft id stays ([presence](../concepts/presence.md)) |
+| After every reboot I must `join` again | Someone ran `clusdr leave`, or this is a new `data.dir` | Same `data.dir` + `clusdr start` if still a member. `join` only after leave ([presence](../concepts/presence.md)) |
+| `member.dead` after crash / SIGKILL / reboot | Liveness, not leave. No `disconnect` event | Expected. `clusdr start` with the same `data.dir`. `join` only after [`clusdr leave`](../cli/leave.md) |
+| `node … is not a cluster member; run clusdr join` | This id was left (or never joined) | `clusdr join --token … <seed-runtime>` |
 | Extra elections on Docker / two hosts | `node.addr` is `0.0.0.0` or `127.0.0.1` on a remote peer | Advertise a host:port **peers can dial** ([other hosts](../guide/other-hosts.md)) |
 | `Health.healthy` is always true | Not a bug | `Health.role` is always `standalone` in this version. Use `members` |
 
@@ -66,7 +67,7 @@ TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
 | `too many locks` / `too many leases (max 4096)` | Table full | Release unused names. Cap is [limits](limits.md) |
 | Name rejected | Illegal characters or length | `1–128` of `A–Z a–z 0–9 . _ -` |
 
-Observers **can** hold application leases. Presence still runs on observers so a dead observer leaves the member list.
+Observers **can** hold application leases. Presence still runs on observers so a dead observer is marked not-alive.
 
 ## Applications
 
@@ -74,7 +75,7 @@ SDK errors are wrapped (`clusdr: daemon not ready at …`, `clusdr: lock "name":
 
 | You see | Cause | What to do |
 |---|---|---|
-| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member ([from your app](../guide/from-your-app.md)) |
+| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member. On Kubernetes set `CLUSDR_GRPC_ADDR` to this node's Runtime, not `127.0.0.1` — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../guide/kubernetes.md#apps-on-the-node)) |
 | `clusdr: empty dial address` | `Dial("")` | Use `Local()` / `local()`, or pass `CLUSDR_GRPC_ADDR` |
 | `clusdr: publish rejected` / payload too large | Custom event over 64 KiB or invalid type | Shrink the payload. Publish is gossip, not Raft ([events](../concepts/events.md)) |
 | Watch reconnect misses `custom.*` | Not a bug | Custom events are ephemeral. Cluster events come back in the snapshot |

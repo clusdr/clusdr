@@ -1,0 +1,43 @@
+This chart is the DaemonSet example (one daemon per node). It is not an Operator
+and it does not join Raft. Sidecar StatefulSet is not this chart
+(examples/k8s/sidecar-statefulset.yaml).
+
+1. hostPath is not chowned by fsGroup. Distroless uid 65532:
+
+   for n in $(kind get nodes --name clusdr); do
+     docker exec "$n" mkdir -p {{ .Values.dataDir }}
+     docker exec "$n" chown 65532:65532 {{ .Values.dataDir }}
+   done
+
+2. Pin seed Job + Deployment to the same node (--set seed.nodeName=...).
+
+3. Join token (once) from the init hook:
+
+   kubectl logs -n {{ .Release.Namespace }} job/{{ include "clusdr.fullname" . }}-seed-init
+
+4. Seed Runtime is $(NODE_IP):7947 on the seed node
+   (kubectl get pod -n {{ .Release.Namespace }} -o wide).
+
+   SEED=<seed-node-ip>:7947
+   TOKEN=<token-from-init>
+   VOTERS={{ include "clusdr.voterCount" . }}
+
+   Seed is already 1 voter. Join DaemonSet pods as voters until you have $VOTERS.
+   Extra nodes: join --observer.
+
+   i=1
+   for p in $(kubectl get pods -n {{ .Release.Namespace }} -l app.kubernetes.io/component=member -o name); do
+     i=$((i+1))
+     if [ "$i" -le "$VOTERS" ]; then
+       kubectl exec -n {{ .Release.Namespace }} "$p" -- /clusdr join --token "$TOKEN" "$SEED"
+     else
+       kubectl exec -n {{ .Release.Namespace }} "$p" -- /clusdr join --observer --token "$TOKEN" "$SEED"
+     fi
+   done
+
+5. kubectl exec -n {{ .Release.Namespace }} deploy/{{ include "clusdr.fullname" . }}-seed -- /clusdr members
+
+   Scaling a workload Deployment does not add members. Restart with intact
+   {{ .Values.dataDir }} is clusdr start, not another join.
+
+Guide: https://clusdr.io/docs/guide/kubernetes-helm

@@ -72,3 +72,6 @@ Quorum is majority. Three voters tolerate one failure. Prefer odd voter counts.
 - [Daemon and application](concepts/daemon.md)
 - [Consistency](concepts/consistency.md)
 - [Run on other hosts](guide/other-hosts.md)
+- [Run on Kubernetes](guide/kubernetes.md)
+- [Helm](guide/kubernetes-helm.md)
+- [Operator](guide/kubernetes-operator.md)

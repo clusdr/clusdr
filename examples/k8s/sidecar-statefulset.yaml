@@ -1,0 +1,141 @@
+# Example only. Not a Helm chart, not an Operator.
+#
+# Exception topology: the replica is the Raft member (scheduler-style).
+# Default remains DaemonSet (one daemon per node). Do not apply this next
+# to that DaemonSet unless you mean two clusters.
+#
+# Distroless has no shell: one pod template cannot mix seed --bootstrap
+# and joiner start. Bootstrap PVC-0 with sidecar-bootstrap.yaml, delete
+# that Job, then apply this file. Join ordinals 1 and 2. Never clusdr init
+# on every ordinal (that is a new cluster.id each). Never emptyDir.
+#
+# Scaling this StatefulSet scales Raft. A Deployment sidecar is the same
+# mistake. Shared netns → app Local() at 127.0.0.1:7947.
+apiVersion: v1
+kind: Service
+metadata:
+  name: clusdr-sidecar
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: sidecar
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: sidecar
+  ports:
+    - name: grpc
+      port: 7947
+      targetPort: 7947
+    - name: raft
+      port: 7946
+      targetPort: 7946
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clusdr-sidecar
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: sidecar
+    app.kubernetes.io/part-of: clusdr
+spec:
+  serviceName: clusdr-sidecar
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusdr
+      app.kubernetes.io/component: sidecar
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr
+        app.kubernetes.io/component: sidecar
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      securityContext:
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+      containers:
+        - name: app
+          # Replace with your app. Pause keeps the pod Ready so you can
+          # form membership without a private registry.
+          image: registry.k8s.io/pause:3.10
+          env:
+            - name: CLUSDR_GRPC_ADDR
+              value: 127.0.0.1:7947
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+              readOnly: true
+        - name: clusdr
+          image: durguto/clusdr:0.2.0
+          imagePullPolicy: IfNotPresent
+          args: ["start", "--config", "/var/lib/clusdr/clusdr.yaml"]
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CLUSDR_NODE_ID
+              value: "$(POD_NAME)"
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            - name: CLUSDR_CONTROL_SOCKET
+              value: /var/lib/clusdr/clusdr.sock
+            - name: CLUSDR_GRPC_ADDR
+              value: 0.0.0.0:7947
+            - name: CLUSDR_NODE_ADDR
+              value: "$(POD_NAME).clusdr-sidecar.clusdr.svc.cluster.local:7947"
+            - name: CLUSDR_RAFT_ADDR
+              value: "$(POD_NAME).clusdr-sidecar.clusdr.svc.cluster.local:7946"
+            - name: CLUSDR_LOG_FORMAT
+              value: json
+            - name: CLUSDR_LOG_LEVEL
+              value: info
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+          ports:
+            - name: grpc
+              containerPort: 7947
+              protocol: TCP
+            - name: raft
+              containerPort: 7946
+              protocol: TCP
+          # Runtime Health RPC (not clusdr status). Needs a binary that has
+          # `clusdr health`. Else tcpSocket 7947.
+          livenessProbe:
+            exec:
+              command: ["/clusdr", "health"]
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["/clusdr", "health"]
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

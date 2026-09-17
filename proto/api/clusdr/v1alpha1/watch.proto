@@ -7,9 +7,10 @@ option go_package = "github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1
 // WatchService streams cluster events to connected clients.
 //
 // On every new stream the server sends a snapshot of current cluster state
-// (alive members + current leader as synthetic events) and then forwards
-// live events from the internal event bus.  This means a client that
-// reconnects always receives the full current picture before any live delta.
+// (listed members as member.join if alive or member.dead if dead, plus the
+// current leader) and then forwards live events from the internal event bus.
+// A client that reconnects always receives the full current picture first.
+// Left ids are absent.
 service WatchService {
   rpc Watch(WatchRequest) returns (stream WatchResponse);
 }
@@ -17,7 +18,7 @@ service WatchService {
 // WatchRequest optionally filters the event stream.
 message WatchRequest {
   // If non-empty, only events whose type matches one of these strings are
-  // forwarded.  Supported types: "member.join", "member.left",
+  // forwarded.  Supported types: "member.join", "member.dead", "member.left",
   // "leader.changed".  An empty list means "all events".
   // Protocol events (watch.sync, watch.gap) are always delivered.
   repeated string event_types = 1;
@@ -38,8 +39,8 @@ message WatchRequest {
 
 // WatchResponse carries a single cluster event.
 message WatchResponse {
-  // type is a dot-separated event kind: "member.join", "member.left",
-  // "leader.changed".
+  // type is a dot-separated event kind: "member.join", "member.dead",
+  // "member.left", "leader.changed".
   string type = 1;
 
   // source is the node ID that caused the event.

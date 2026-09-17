@@ -75,8 +75,37 @@ func TestEngine_Leave(t *testing.T) {
 	e.Leave("node-2")
 
 	for _, m := range e.Members() {
-		if m.ID == "node-2" && m.Status != membership.StatusLeaving {
-			t.Errorf("node-2 status: got %q, want leaving", m.Status)
+		if m.ID == "node-2" {
+			t.Fatal("left member still listed")
+		}
+	}
+	if !e.Left("node-2") {
+		t.Fatal("Left() false after Leave")
+	}
+}
+
+func TestEngine_MarkDead(t *testing.T) {
+	e := membership.New("node-1", "10.0.0.1:7947", nopLog())
+	_, _ = e.Join("node-2", "10.0.0.2:7947")
+	e.MarkDead("node-2")
+	found := false
+	for _, m := range e.Members() {
+		if m.ID == "node-2" {
+			found = true
+			if m.Status != membership.StatusDead {
+				t.Errorf("status: got %q, want dead", m.Status)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("dead member dropped from list")
+	}
+	if _, err := e.Join("node-2", "10.0.0.2:7947"); err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range e.Members() {
+		if m.ID == "node-2" && m.Status != membership.StatusAlive {
+			t.Errorf("rejoin status %q", m.Status)
 		}
 	}
 }

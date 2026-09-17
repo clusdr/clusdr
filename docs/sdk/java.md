@@ -6,7 +6,7 @@ Artifact `io.clusdr:clusdr`. Java 17+. Blocking gRPC client. Applications call t
 <dependency>
   <groupId>io.clusdr</groupId>
   <artifactId>clusdr</artifactId>
-  <version>0.1.4</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
@@ -88,7 +88,7 @@ List<Member> members = c.members();
 Member leader = c.leader();
 ```
 
-`Member`: `id`, `address`, `status`, `leader`, `role` (empty wire role becomes `"voter"`).
+`Member`: `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (empty wire role becomes `"voter"`).
 
 `leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=true`). No leader → `ClusdrException`.
 
@@ -96,8 +96,11 @@ Member leader = c.leader();
 
 ```java
 for (Event event : c.watch()) {
+    if (event.type().equals("member.dead")) {
+        // crash / miss; still in members()
+    }
     if (event.type().equals("member.left")) {
-        // ...
+        // clusdr leave; gone from members()
     }
     if (event.type().startsWith("custom.deployment")) {
         event.payload(); // byte[]

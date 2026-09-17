@@ -18,7 +18,9 @@ Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
 
 Snapshot events use `seq = 0`. Then `watch.sync`. Optional `watch.gap` if `last_seq` is behind.
 
-**Types:** `member.join`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, `watch.sync`, `watch.gap`.
+**Types:** `member.join`, `member.dead`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, `watch.sync`, `watch.gap`.
+
+Snapshot (`seq = 0`): each listed member → `member.join` if alive, `member.dead` if dead. Left ids are absent. Crash is not `member.left`.
 
 ## See also
 

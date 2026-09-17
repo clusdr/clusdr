@@ -111,6 +111,40 @@ func TestWatch_SnapshotSentOnConnect(t *testing.T) {
 	}
 }
 
+func TestWatch_SnapshotDeadMember(t *testing.T) {
+	bus := eventbus.New()
+	state := &fakeWatchState{
+		members: []membership.Member{
+			{ID: "node-a", Address: "127.0.0.1:7945", Status: membership.StatusAlive},
+			{ID: "node-b", Address: "127.0.0.1:7946", Status: membership.StatusDead},
+		},
+		leaderID: "node-a",
+	}
+	client := startWatchServer(t, bus, state)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	stream, err := client.Watch(ctx, &proto.WatchRequest{})
+	if err != nil {
+		t.Fatalf("Watch: %v", err)
+	}
+	snapshot, _ := drainToSync(t, stream)
+	var join, dead int
+	for _, r := range snapshot {
+		switch {
+		case r.Type == events.TypeMemberJoin && r.Source == "node-a":
+			join++
+		case r.Type == events.TypeMemberDead && r.Source == "node-b":
+			dead++
+		case r.Type == events.TypeMemberJoin && r.Source == "node-b":
+			t.Fatal("dead member sent as member.join")
+		}
+	}
+	if join != 1 || dead != 1 {
+		t.Fatalf("snapshot join=%d dead=%d, want 1 and 1", join, dead)
+	}
+}
+
 func TestWatch_LiveEventsDelivered(t *testing.T) {
 	bus := eventbus.New()
 	state := &fakeWatchState{} // empty cluster

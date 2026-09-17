@@ -17,7 +17,11 @@ func (n *nopApplier) Join(_ string, _ string) (bool, error) { return false, nil 
 func (n *nopApplier) JoinAs(_ string, _ string, _ string) (bool, error) {
 	return false, nil
 }
-func (n *nopApplier) MarkLeaving(_ string)         {}
+func (n *nopApplier) MarkDead(_ string) {}
+func (n *nopApplier) Drop(_ string)     {}
+func (n *nopApplier) RestoreMember(_ string, _ string, _ string, _ membership.Status) error {
+	return nil
+}
 func (n *nopApplier) Members() []membership.Member { return nil }
 
 func nopLog() *slog.Logger {

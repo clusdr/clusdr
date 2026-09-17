@@ -22,7 +22,7 @@ The YAML is short: ids, advertised `node.addr`, log. Other knobs stay at built-i
 
 The token is printed **once**. Copy it. You need it in [step 3](grow.md). The hash is stored; the plaintext is not.
 
-`--force` overwrites an existing config file. Without it, a second `init` is an error.
+`--force` overwrites an existing config file. A second `init` without `--force` is an error unless this `data.dir` is already initialized (then it is success and does not print a new token).
 
 TLS is on. `CLUSDR_TLS=disabled` is only for local experiments, and then every node and every client must set it.
 

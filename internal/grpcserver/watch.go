@@ -121,7 +121,7 @@ func (s *watchService) sendGap(stream proto.WatchService_WatchServer, from, to u
 }
 
 // sendSnapshot sends the current cluster state as synthetic watch events.
-// Alive members → TypeMemberJoin; current leader → TypeLeaderChanged.
+// Alive → member.join; dead → member.dead; current leader → leader.changed.
 // All snapshot events carry Seq=0 so clients can distinguish them from live
 // events. watch.sync (non-zero or zero high-water) follows the snapshot.
 func (s *watchService) sendSnapshot(req *proto.WatchRequest, stream proto.WatchService_WatchServer) error {
@@ -130,10 +130,13 @@ func (s *watchService) sendSnapshot(req *proto.WatchRequest, stream proto.WatchS
 	leaderID := s.state.LeaderID()
 
 	for _, m := range members {
-		if m.Status != membership.StatusAlive {
+		evType := events.TypeMemberJoin
+		if membership.NormalizeStatus(m.Status) == membership.StatusDead {
+			evType = events.TypeMemberDead
+		} else if m.Status != membership.StatusAlive {
 			continue
 		}
-		if !matchesWatch(req, events.TypeMemberJoin) {
+		if !matchesWatch(req, evType) {
 			continue
 		}
 		payload, _ := json.Marshal(map[string]any{
@@ -141,7 +144,7 @@ func (s *watchService) sendSnapshot(req *proto.WatchRequest, stream proto.WatchS
 			"snapshot": true,
 		})
 		resp := &proto.WatchResponse{
-			Type:            events.TypeMemberJoin,
+			Type:            evType,
 			Source:          m.ID,
 			Payload:         payload,
 			TimestampUnixMs: now,

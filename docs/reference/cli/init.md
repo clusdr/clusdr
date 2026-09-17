@@ -18,9 +18,11 @@ clusdr init [--force]
 
 Prints the join token once. Store it. The hash is kept in the store; plaintext is not.
 
+If the config file already exists and `data.dir` already has identity, prints `already initialized` and exits 0. No new token.
+
 ## Errors
 
-Config already exists without `--force`.
+Config already exists without `--force` **and** there is no identity in `data.dir`.
 
 ## See also
 

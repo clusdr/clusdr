@@ -14,6 +14,8 @@ clusdr start [--bootstrap]
 
 Safe to pass `--bootstrap` again on a node that already bootstrapped (`ErrCantBootstrap` is ignored).
 
+A restart with the same `data.dir` is this command again. Do not `join` unless [`clusdr leave`](leave.md) already removed the id ([presence](../../concepts/presence.md)).
+
 If `clusdr init` was never run, the process still starts and logs that identity is missing.
 
 ## See also

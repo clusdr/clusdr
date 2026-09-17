@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+
+FROM golang:1.27-alpine AS builder
+
+WORKDIR /src
+COPY . .
+
+ARG VERSION=dev
+ARG COMMIT=none
+ARG BUILD_TIME=unknown
+
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags "-s -w \
+      -X github.com/clusdr/clusdr/internal/version.Version=${VERSION} \
+      -X github.com/clusdr/clusdr/internal/version.Commit=${COMMIT} \
+      -X github.com/clusdr/clusdr/internal/version.BuildTime=${BUILD_TIME}" \
+    -o /clusdr-operator \
+    ./cmd/clusdr-operator
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+COPY --from=builder /clusdr-operator /clusdr-operator
+
+USER 65532:65532
+
+ENTRYPOINT ["/clusdr-operator"]

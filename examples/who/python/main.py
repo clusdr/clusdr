@@ -52,8 +52,12 @@ def print_members(c: Any) -> None:
 
 
 def format_event(ev: Any) -> str:
-    if ev.type in {"member.join", "member.left", "leader.changed"}:
+    if ev.type in {"member.join", "leader.changed"}:
         kind = "cluster"
+    elif ev.type == "member.dead":
+        kind = "dead"
+    elif ev.type == "member.left":
+        kind = "left"
     elif ev.type.startswith("custom."):
         kind = "gossip"
     elif ev.type in {"watch.sync", "watch.gap"}:

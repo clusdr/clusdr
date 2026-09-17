@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	JoinService_Join_FullMethodName    = "/clusdr.v1alpha1.JoinService/Join"
 	JoinService_Promote_FullMethodName = "/clusdr.v1alpha1.JoinService/Promote"
+	JoinService_Leave_FullMethodName   = "/clusdr.v1alpha1.JoinService/Leave"
+	JoinService_Rejoin_FullMethodName  = "/clusdr.v1alpha1.JoinService/Rejoin"
 )
 
 // JoinServiceClient is the client API for JoinService service.
@@ -33,6 +35,10 @@ type JoinServiceClient interface {
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
 	// Promote turns an existing observer into a voter. Followers forward to the leader.
 	Promote(ctx context.Context, in *PromoteRequest, opts ...grpc.CallOption) (*PromoteResponse, error)
+	// Leave is the only Raft RemoveServer. Presence expiry does not call this.
+	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*LeaveResponse, error)
+	// Rejoin marks an existing Raft server alive again (same id, no AddVoter).
+	Rejoin(ctx context.Context, in *RejoinRequest, opts ...grpc.CallOption) (*RejoinResponse, error)
 }
 
 type joinServiceClient struct {
@@ -63,6 +69,26 @@ func (c *joinServiceClient) Promote(ctx context.Context, in *PromoteRequest, opt
 	return out, nil
 }
 
+func (c *joinServiceClient) Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*LeaveResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LeaveResponse)
+	err := c.cc.Invoke(ctx, JoinService_Leave_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *joinServiceClient) Rejoin(ctx context.Context, in *RejoinRequest, opts ...grpc.CallOption) (*RejoinResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RejoinResponse)
+	err := c.cc.Invoke(ctx, JoinService_Rejoin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JoinServiceServer is the server API for JoinService service.
 // All implementations must embed UnimplementedJoinServiceServer
 // for forward compatibility.
@@ -73,6 +99,10 @@ type JoinServiceServer interface {
 	Join(context.Context, *JoinRequest) (*JoinResponse, error)
 	// Promote turns an existing observer into a voter. Followers forward to the leader.
 	Promote(context.Context, *PromoteRequest) (*PromoteResponse, error)
+	// Leave is the only Raft RemoveServer. Presence expiry does not call this.
+	Leave(context.Context, *LeaveRequest) (*LeaveResponse, error)
+	// Rejoin marks an existing Raft server alive again (same id, no AddVoter).
+	Rejoin(context.Context, *RejoinRequest) (*RejoinResponse, error)
 	mustEmbedUnimplementedJoinServiceServer()
 }
 
@@ -88,6 +118,12 @@ func (UnimplementedJoinServiceServer) Join(context.Context, *JoinRequest) (*Join
 }
 func (UnimplementedJoinServiceServer) Promote(context.Context, *PromoteRequest) (*PromoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Promote not implemented")
+}
+func (UnimplementedJoinServiceServer) Leave(context.Context, *LeaveRequest) (*LeaveResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Leave not implemented")
+}
+func (UnimplementedJoinServiceServer) Rejoin(context.Context, *RejoinRequest) (*RejoinResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Rejoin not implemented")
 }
 func (UnimplementedJoinServiceServer) mustEmbedUnimplementedJoinServiceServer() {}
 func (UnimplementedJoinServiceServer) testEmbeddedByValue()                     {}
@@ -146,6 +182,42 @@ func _JoinService_Promote_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _JoinService_Leave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JoinServiceServer).Leave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JoinService_Leave_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JoinServiceServer).Leave(ctx, req.(*LeaveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JoinService_Rejoin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RejoinRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JoinServiceServer).Rejoin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JoinService_Rejoin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JoinServiceServer).Rejoin(ctx, req.(*RejoinRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // JoinService_ServiceDesc is the grpc.ServiceDesc for JoinService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -161,6 +233,14 @@ var JoinService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Promote",
 			Handler:    _JoinService_Promote_Handler,
 		},
+		{
+			MethodName: "Leave",
+			Handler:    _JoinService_Leave_Handler,
+		},
+		{
+			MethodName: "Rejoin",
+			Handler:    _JoinService_Rejoin_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "clusdr/v1alpha1/join.proto",
@@ -169,6 +249,7 @@ var JoinService_ServiceDesc = grpc.ServiceDesc{
 const (
 	ControlService_RequestJoin_FullMethodName    = "/clusdr.v1alpha1.ControlService/RequestJoin"
 	ControlService_RequestPromote_FullMethodName = "/clusdr.v1alpha1.ControlService/RequestPromote"
+	ControlService_RequestLeave_FullMethodName   = "/clusdr.v1alpha1.ControlService/RequestLeave"
 )
 
 // ControlServiceClient is the client API for ControlService service.
@@ -181,6 +262,8 @@ type ControlServiceClient interface {
 	RequestJoin(ctx context.Context, in *RequestJoinRequest, opts ...grpc.CallOption) (*RequestJoinResponse, error)
 	// RequestPromote asks the local daemon to promote a node (empty id = self).
 	RequestPromote(ctx context.Context, in *RequestPromoteRequest, opts ...grpc.CallOption) (*RequestPromoteResponse, error)
+	// RequestLeave asks the local daemon to remove a member from Raft (empty id = self).
+	RequestLeave(ctx context.Context, in *RequestLeaveRequest, opts ...grpc.CallOption) (*RequestLeaveResponse, error)
 }
 
 type controlServiceClient struct {
@@ -211,6 +294,16 @@ func (c *controlServiceClient) RequestPromote(ctx context.Context, in *RequestPr
 	return out, nil
 }
 
+func (c *controlServiceClient) RequestLeave(ctx context.Context, in *RequestLeaveRequest, opts ...grpc.CallOption) (*RequestLeaveResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RequestLeaveResponse)
+	err := c.cc.Invoke(ctx, ControlService_RequestLeave_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ControlServiceServer is the server API for ControlService service.
 // All implementations must embed UnimplementedControlServiceServer
 // for forward compatibility.
@@ -221,6 +314,8 @@ type ControlServiceServer interface {
 	RequestJoin(context.Context, *RequestJoinRequest) (*RequestJoinResponse, error)
 	// RequestPromote asks the local daemon to promote a node (empty id = self).
 	RequestPromote(context.Context, *RequestPromoteRequest) (*RequestPromoteResponse, error)
+	// RequestLeave asks the local daemon to remove a member from Raft (empty id = self).
+	RequestLeave(context.Context, *RequestLeaveRequest) (*RequestLeaveResponse, error)
 	mustEmbedUnimplementedControlServiceServer()
 }
 
@@ -236,6 +331,9 @@ func (UnimplementedControlServiceServer) RequestJoin(context.Context, *RequestJo
 }
 func (UnimplementedControlServiceServer) RequestPromote(context.Context, *RequestPromoteRequest) (*RequestPromoteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RequestPromote not implemented")
+}
+func (UnimplementedControlServiceServer) RequestLeave(context.Context, *RequestLeaveRequest) (*RequestLeaveResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RequestLeave not implemented")
 }
 func (UnimplementedControlServiceServer) mustEmbedUnimplementedControlServiceServer() {}
 func (UnimplementedControlServiceServer) testEmbeddedByValue()                        {}
@@ -294,6 +392,24 @@ func _ControlService_RequestPromote_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ControlService_RequestLeave_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestLeaveRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ControlServiceServer).RequestLeave(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ControlService_RequestLeave_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ControlServiceServer).RequestLeave(ctx, req.(*RequestLeaveRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ControlService_ServiceDesc is the grpc.ServiceDesc for ControlService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -308,6 +424,10 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RequestPromote",
 			Handler:    _ControlService_RequestPromote_Handler,
+		},
+		{
+			MethodName: "RequestLeave",
+			Handler:    _ControlService_RequestLeave_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

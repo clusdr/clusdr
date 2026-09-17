@@ -1,0 +1,21 @@
+# Sidecar topology. Requires the CRD and clusdr-operator.
+# Replica is the member (14.4). App Local() at 127.0.0.1. PVC, not emptyDir.
+# Not the default. Not injection. Not a Deployment sidecar.
+#
+#   kubectl apply -f config/crd/clusdr.io_clusdrclusters.yaml
+#   kubectl apply -f config/operator
+#   kubectl apply -f examples/k8s/clusdrcluster-sidecar.yaml
+apiVersion: clusdr.io/v1alpha1
+kind: ClusdrCluster
+metadata:
+  name: clusdr
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/part-of: clusdr
+spec:
+  topology: Sidecar
+  voterCount: 3
+  image: durguto/clusdr:0.2.0
+  dataDir: /var/lib/clusdr
+  # leave: []   # clusdr node.id (pod name, e.g. clusdr-1) — not a vanished pod

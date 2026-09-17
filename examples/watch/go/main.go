@@ -112,8 +112,12 @@ func snapshot(ctx context.Context, c clusdr.Cluster) error {
 func printEvent(ev clusdr.Event) {
 	kind := "bus"
 	switch {
-	case ev.Type == "member.join", ev.Type == "member.left", ev.Type == "leader.changed":
+	case ev.Type == "member.join", ev.Type == "leader.changed":
 		kind = "cluster"
+	case ev.Type == "member.dead":
+		kind = "dead"
+	case ev.Type == "member.left":
+		kind = "left"
 	case strings.HasPrefix(ev.Type, "custom."):
 		kind = "gossip"
 	case ev.Type == "watch.sync", ev.Type == "watch.gap":

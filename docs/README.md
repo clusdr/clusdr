@@ -19,6 +19,8 @@ Read in order. Each page leaves a cluster you use on the next one.
 5. [Use it from your app](guide/from-your-app.md)
 6. [Run on other hosts](guide/other-hosts.md)
 
+Same model on a node (not a kube replacement): [Run on Kubernetes](guide/kubernetes.md) · [Helm](guide/kubernetes-helm.md) · [Operator](guide/kubernetes-operator.md) · [Sidecar](guide/kubernetes-sidecar.md).
+
 [Guide hub](guide/).
 
 ## SDKs
@@ -37,6 +39,7 @@ Applications talk to the local daemon. Not the operator path.
 | If you need | Go here |
 |---|---|
 | Is this the right tool? | [Overview](overview.md) |
+| Kubernetes as a place to run | [Run on Kubernetes](guide/kubernetes.md) · [Helm](guide/kubernetes-helm.md) · [Operator](guide/kubernetes-operator.md) · [Sidecar](guide/kubernetes-sidecar.md) · [examples/k8s](https://github.com/clusdr/clusdr/tree/main/examples/k8s) |
 | Process model, ports, disk | [Architecture](architecture.md) |
 | What a word means | [Glossary](glossary.md) |
 | Guarantees (Raft, presence, observers, …) | [Concepts](concepts/) |

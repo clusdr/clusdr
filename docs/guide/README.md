@@ -18,6 +18,8 @@ Read these pages **in order**. Each one leaves a cluster you use on the next pag
 5. [Use it from your app](from-your-app.md) — local SDK, locks, leases
 6. [Run on other hosts](other-hosts.md) — real addresses, Docker Hub, health
 
+Same host model on a node (not a sequential step; not a kube replacement): [Run on Kubernetes](kubernetes.md) · [Helm](kubernetes-helm.md) · [Operator](kubernetes-operator.md) · [Sidecar](kubernetes-sidecar.md).
+
 After the guide: [Overview](../overview.md) if you are still deciding, [concepts](../concepts/) for guarantees, [reference](../reference/) for a flag or RPC. Something failed: [Errors](../reference/errors.md).
 
 Contributor builds stay in [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md).

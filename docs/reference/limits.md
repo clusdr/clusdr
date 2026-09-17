@@ -4,7 +4,7 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 
 ## Scope
 
-- Not a database, queue, workflow engine, mesh, or Kubernetes
+- Not a database, queue, workflow engine, mesh, or Kubernetes replacement. It can run on Kubernetes; it does not replace kube coordination. Helm chart, `ClusdrCluster` CRD, and `clusdr-operator` are in-tree ([Helm](../guide/kubernetes-helm.md), [Operator](../guide/kubernetes-operator.md))
 - Custom events are ephemeral (1-hop gossip). They are not Raft-replicated and are not replayed on Watch reconnect. Bus is bounded; slow subscribers drop events
 - No federation, no OpenTelemetry export
 - Observer (non-voter) nodes exist; they do not change quorum
@@ -33,12 +33,12 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 - Default Raft heartbeat and election are 150ms. If peer RTT is larger, raise them or you get extra elections
 - `docker compose` is a single node without `init`
 - Two processes must not share one `data.dir`
-- Presence expiry (and heartbeat misses) **remove** the Raft server. There is no `disconnect` event and no auto-rejoin. Default TTL is 3s; raise it for reboots ([presence](../concepts/presence.md))
+- Presence expiry (and heartbeat misses) mark a member **not-alive**. They do not remove the Raft server. `clusdr leave` is the only `RemoveServer`. Restart with the same `data.dir` is `clusdr start` ([presence](../concepts/presence.md))
 
 ## Distribution
 
 - Release binaries embed the tag via ldflags. Source builds print `dev`
-- Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/clusdr/clusdr`)
+- Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/clusdr/clusdr`), operator image `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`), Helm `oci://ghcr.io/clusdr/charts/clusdr` ([Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)), operator YAML `https://clusdr.io/download/clusdr-crds.yaml` + `clusdr-operator.yaml`
 - Python SDK: `pip install clusdr`
 - Rust SDK: crate `clusdr` ([github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
 - TypeScript SDK: `npm install clusdr` ([github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))

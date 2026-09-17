@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/part-of: clusdr

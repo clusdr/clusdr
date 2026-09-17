@@ -19,19 +19,35 @@ type applyVoter struct {
 	engine    *membership.Engine
 	voters    []string
 	nonvoters []string
+	removed   []string
+	absent    map[string]bool
 }
 
 func (v *applyVoter) IsLeader() bool { return true }
 func (v *applyVoter) AddVoter(id, _ string) error {
 	v.voters = append(v.voters, id)
+	if v.absent != nil {
+		delete(v.absent, id)
+	}
 	return nil
 }
 func (v *applyVoter) AddNonvoter(id, _ string) error {
 	v.nonvoters = append(v.nonvoters, id)
+	if v.absent != nil {
+		delete(v.absent, id)
+	}
 	return nil
 }
 func (v *applyVoter) PromoteToVoter(id string) error {
 	v.voters = append(v.voters, id)
+	return nil
+}
+func (v *applyVoter) RemoveVoter(id string) error {
+	v.removed = append(v.removed, id)
+	if v.absent == nil {
+		v.absent = map[string]bool{}
+	}
+	v.absent[id] = true
 	return nil
 }
 func (v *applyVoter) ApplyAddMember(id, addr string) error {
@@ -41,6 +57,35 @@ func (v *applyVoter) ApplyAddMemberAs(id, addr, role string) error {
 	_, err := v.engine.JoinAs(id, addr, role)
 	return err
 }
+func (v *applyVoter) ApplyRemoveMember(id string) error {
+	v.engine.MarkDead(id)
+	return nil
+}
+func (v *applyVoter) ApplyDropMember(id string) error {
+	v.engine.Leave(id)
+	return nil
+}
+func (v *applyVoter) HasServer(id string) bool {
+	if v.absent[id] {
+		return false
+	}
+	for _, m := range v.engine.Members() {
+		if m.ID == id {
+			return true
+		}
+	}
+	for _, x := range v.voters {
+		if x == id {
+			return true
+		}
+	}
+	for _, x := range v.nonvoters {
+		if x == id {
+			return true
+		}
+	}
+	return false
+}
 
 type followerVoter struct{}
 
@@ -48,12 +93,16 @@ func (followerVoter) IsLeader() bool                   { return false }
 func (followerVoter) AddVoter(string, string) error    { return nil }
 func (followerVoter) AddNonvoter(string, string) error { return nil }
 func (followerVoter) PromoteToVoter(string) error      { return nil }
+func (followerVoter) RemoveVoter(string) error         { return nil }
 func (followerVoter) ApplyAddMember(string, string) error {
 	return nil
 }
 func (followerVoter) ApplyAddMemberAs(string, string, string) error {
 	return nil
 }
+func (followerVoter) ApplyRemoveMember(string) error { return nil }
+func (followerVoter) ApplyDropMember(string) error   { return nil }
+func (followerVoter) HasServer(string) bool          { return true }
 
 func startJoinServer(t *testing.T, clusterID string, engine *membership.Engine, voter grpcserver.VoterAdder) string {
 	t.Helper()
@@ -302,5 +351,98 @@ func TestJoinService_PromoteObserver(t *testing.T) {
 	_, err = pb.NewJoinServiceClient(conn).Promote(context.Background(), &pb.PromoteRequest{NodeId: "missing"})
 	if status.Code(err) != codes.NotFound {
 		t.Fatalf("missing: got %v, want NotFound", err)
+	}
+}
+
+func TestJoinService_LeaveRemovesServer(t *testing.T) {
+	engine := membership.New("node-a", "127.0.0.1:0", nopLogger())
+	if _, err := engine.Join("node-b", "127.0.0.1:2"); err != nil {
+		t.Fatal(err)
+	}
+	voter := &applyVoter{engine: engine}
+	addr := startJoinServer(t, "c", engine, voter)
+
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	cli := pb.NewJoinServiceClient(conn)
+
+	resp, err := cli.Leave(context.Background(), &pb.LeaveRequest{NodeId: "node-b"})
+	if err != nil {
+		t.Fatalf("Leave: %v", err)
+	}
+	if !resp.Left {
+		t.Fatalf("not left: %s", resp.Message)
+	}
+	if len(voter.removed) != 1 || voter.removed[0] != "node-b" {
+		t.Fatalf("RemoveVoter: %v", voter.removed)
+	}
+	if voter.HasServer("node-b") {
+		t.Fatal("HasServer still true after leave")
+	}
+	for _, m := range engine.Members() {
+		if m.ID == "node-b" {
+			t.Fatal("left member still in Members()")
+		}
+	}
+
+	again, err := cli.Leave(context.Background(), &pb.LeaveRequest{NodeId: "node-b"})
+	if err != nil || !again.Left {
+		t.Fatalf("leave already gone: %v %+v", err, again)
+	}
+
+	_, err = cli.Leave(context.Background(), &pb.LeaveRequest{NodeId: "missing"})
+	if status.Code(err) != codes.NotFound {
+		t.Fatalf("missing: got %v, want NotFound", err)
+	}
+}
+
+func TestJoinService_RejoinKeepsRaftServer(t *testing.T) {
+	engine := membership.New("node-a", "127.0.0.1:0", nopLogger())
+	if _, err := engine.Join("node-b", "127.0.0.1:2"); err != nil {
+		t.Fatal(err)
+	}
+	engine.MarkDead("node-b")
+	voter := &applyVoter{engine: engine}
+	addr := startJoinServer(t, "c", engine, voter)
+
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	cli := pb.NewJoinServiceClient(conn)
+
+	resp, err := cli.Rejoin(context.Background(), &pb.RejoinRequest{
+		NodeId:  "node-b",
+		Address: "127.0.0.1:2",
+	})
+	if err != nil {
+		t.Fatalf("Rejoin: %v", err)
+	}
+	if !resp.Rejoined {
+		t.Fatalf("not rejoined: %s", resp.Message)
+	}
+	if len(voter.voters) != 0 {
+		t.Fatalf("Rejoin must not AddVoter: %v", voter.voters)
+	}
+	found := false
+	for _, m := range engine.Members() {
+		if m.ID == "node-b" && m.Status == membership.StatusAlive {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("node-b not alive after Rejoin")
+	}
+
+	_, err = cli.Rejoin(context.Background(), &pb.RejoinRequest{
+		NodeId:  "stranger",
+		Address: "127.0.0.1:9",
+	})
+	if status.Code(err) != codes.FailedPrecondition {
+		t.Fatalf("unknown rejoin: got %v, want FailedPrecondition", err)
 	}
 }

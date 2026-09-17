@@ -98,7 +98,7 @@ const members = await c.members();
 const leader = await c.leader();
 ```
 
-`Member`: `id`, `address`, `status`, `leader`, `role` (empty wire role becomes `"voter"`).
+`Member`: `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (empty wire role becomes `"voter"`).
 
 `leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=true`). No leader → `ClusdrError` wrapping Unavailable.
 
@@ -106,8 +106,11 @@ const leader = await c.leader();
 
 ```ts
 for await (const event of c.watch()) {
+  if (event.type === "member.dead") {
+    // crash / miss; still in members()
+  }
   if (event.type === "member.left") {
-    // ...
+    // clusdr leave; gone from members()
   }
   if (event.type === "custom.deployment") {
     event.payload; // Uint8Array

@@ -30,14 +30,19 @@ type Joiner interface {
 //   - add the node to the Raft configuration (AddVoter or AddNonvoter)
 //   - write an add_member command to the Raft log so all FSMs update their
 //     membership engines (ApplyAddMember / ApplyAddMemberAs)
+//   - remove a node from Raft (RemoveVoter) — only Leave, never presence
 //
 // Defined here (grpcserver package) so grpcserver does not import consensus.
 type VoterAdder interface {
 	AddVoter(id, raftAddr string) error
 	AddNonvoter(id, raftAddr string) error
 	PromoteToVoter(id string) error
+	RemoveVoter(id string) error
 	ApplyAddMember(id, addr string) error
 	ApplyAddMemberAs(id, addr, role string) error
+	ApplyRemoveMember(id string) error
+	ApplyDropMember(id string) error
+	HasServer(id string) bool
 	IsLeader() bool
 }
 
@@ -426,4 +431,176 @@ func (c *controlService) forwardPromote(ctx context.Context, id string) (*pb.Pro
 	}
 	defer conn.Close()
 	return pb.NewJoinServiceClient(conn).Promote(dctx, &pb.PromoteRequest{NodeId: id, Relay: true})
+}
+
+func (j *joinService) Leave(ctx context.Context, req *pb.LeaveRequest) (*pb.LeaveResponse, error) {
+	id := req.GetNodeId()
+	if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "node_id is required")
+	}
+	if j.voter != nil && !j.voter.IsLeader() {
+		if req.GetRelay() {
+			return nil, status.Error(codes.FailedPrecondition, "NOT_LEADER")
+		}
+		return j.forwardLeave(ctx, req)
+	}
+	if err := leaveMember(j.joiner, j.voter, id); err != nil {
+		return nil, err
+	}
+	return &pb.LeaveResponse{Left: true, Members: protoMembers(j.joiner)}, nil
+}
+
+func (j *joinService) forwardLeave(ctx context.Context, req *pb.LeaveRequest) (*pb.LeaveResponse, error) {
+	leader, ok := j.joiner.Leader()
+	if !ok || leader.Address == "" || leader.ID == j.joiner.SelfID() {
+		return nil, status.Error(codes.FailedPrecondition, "NOT_LEADER")
+	}
+	dctx, cancel := context.WithTimeout(ctx, fanoutTimeout)
+	defer cancel()
+	conn, err := mtls.Dial(leader.Address, credsOf(j.peerCreds))
+	if err != nil {
+		return nil, status.Errorf(codes.Unavailable, "dial leader %s: %v", leader.ID, err)
+	}
+	defer conn.Close()
+	return pb.NewJoinServiceClient(conn).Leave(dctx, &pb.LeaveRequest{
+		NodeId: req.NodeId,
+		Relay:  true,
+	})
+}
+
+func (j *joinService) Rejoin(ctx context.Context, req *pb.RejoinRequest) (*pb.RejoinResponse, error) {
+	id := req.GetNodeId()
+	if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "node_id is required")
+	}
+	if req.GetAddress() == "" {
+		return nil, status.Error(codes.InvalidArgument, "address is required")
+	}
+	if j.voter != nil && !j.voter.IsLeader() {
+		if req.GetRelay() {
+			return nil, status.Error(codes.FailedPrecondition, "NOT_LEADER")
+		}
+		return j.forwardRejoin(ctx, req)
+	}
+	if err := rejoinMember(j.joiner, j.voter, id, req.GetAddress(), req.GetRole()); err != nil {
+		return nil, err
+	}
+	return &pb.RejoinResponse{Rejoined: true, Members: protoMembers(j.joiner)}, nil
+}
+
+func (j *joinService) forwardRejoin(ctx context.Context, req *pb.RejoinRequest) (*pb.RejoinResponse, error) {
+	leader, ok := j.joiner.Leader()
+	if !ok || leader.Address == "" || leader.ID == j.joiner.SelfID() {
+		return nil, status.Error(codes.FailedPrecondition, "NOT_LEADER")
+	}
+	dctx, cancel := context.WithTimeout(ctx, fanoutTimeout)
+	defer cancel()
+	conn, err := mtls.Dial(leader.Address, credsOf(j.peerCreds))
+	if err != nil {
+		return nil, status.Errorf(codes.Unavailable, "dial leader %s: %v", leader.ID, err)
+	}
+	defer conn.Close()
+	return pb.NewJoinServiceClient(conn).Rejoin(dctx, &pb.RejoinRequest{
+		NodeId:  req.NodeId,
+		Address: req.Address,
+		Role:    req.Role,
+		Relay:   true,
+	})
+}
+
+func (c *controlService) RequestLeave(ctx context.Context, req *pb.RequestLeaveRequest) (*pb.RequestLeaveResponse, error) {
+	id := req.GetNodeId()
+	if id == "" {
+		id = c.joiner.SelfID()
+	}
+	if id == "" {
+		return nil, status.Error(codes.InvalidArgument, "node_id is required")
+	}
+
+	if c.voter != nil && !c.voter.IsLeader() {
+		resp, err := c.forwardLeave(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		return &pb.RequestLeaveResponse{Left: resp.Left, Message: resp.Message, Members: resp.Members}, nil
+	}
+
+	if err := leaveMember(c.joiner, c.voter, id); err != nil {
+		return nil, err
+	}
+	return &pb.RequestLeaveResponse{Left: true, Members: protoMembers(c.joiner)}, nil
+}
+
+func (c *controlService) forwardLeave(ctx context.Context, id string) (*pb.LeaveResponse, error) {
+	leader, ok := c.joiner.Leader()
+	if !ok || leader.Address == "" || leader.ID == c.joiner.SelfID() {
+		return nil, status.Error(codes.FailedPrecondition, "NOT_LEADER")
+	}
+	dctx, cancel := context.WithTimeout(ctx, fanoutTimeout)
+	defer cancel()
+	conn, err := mtls.Dial(leader.Address, credsOf(c.peerCreds))
+	if err != nil {
+		return nil, status.Errorf(codes.Unavailable, "dial leader %s: %v", leader.ID, err)
+	}
+	defer conn.Close()
+	return pb.NewJoinServiceClient(conn).Leave(dctx, &pb.LeaveRequest{NodeId: id, Relay: true})
+}
+
+// leaveMember is the only RemoveServer path. Unknown id is NotFound.
+// Already gone from Raft is success.
+func leaveMember(j Joiner, voter VoterAdder, id string) error {
+	_, inMem := memberByID(j, id)
+	inRaft := voter != nil && voter.HasServer(id)
+	already := false
+	if g, ok := j.(interface{ Left(id string) bool }); ok {
+		already = g.Left(id)
+	}
+	if !inMem && !inRaft && !already {
+		return status.Errorf(codes.NotFound, "member %s not found", id)
+	}
+	if already && !inRaft {
+		return nil
+	}
+	if voter != nil {
+		if err := voter.ApplyDropMember(id); err != nil {
+			return status.Errorf(codes.Internal, "apply drop_member: %v", err)
+		}
+		if inRaft {
+			if err := voter.RemoveVoter(id); err != nil {
+				return status.Errorf(codes.Internal, "remove raft server: %v", err)
+			}
+		}
+		return nil
+	}
+	leaveLocal(j, id)
+	return nil
+}
+
+func leaveLocal(j Joiner, id string) {
+	if l, ok := j.(interface{ Leave(id string) }); ok {
+		l.Leave(id)
+	}
+}
+
+// rejoinMember marks an existing Raft server alive. It never AddVoter.
+// Unknown / already-left ids must use Join (token).
+func rejoinMember(j Joiner, voter VoterAdder, id, addr, role string) error {
+	if voter != nil && !voter.HasServer(id) {
+		return status.Errorf(codes.FailedPrecondition, "not a raft member; use Join")
+	}
+	if m, ok := memberByID(j, id); ok {
+		role = membership.NormalizeRole(m.Role)
+	} else {
+		role = membership.NormalizeRole(role)
+	}
+	if voter != nil {
+		if err := voter.ApplyAddMemberAs(id, addr, role); err != nil {
+			return status.Errorf(codes.Internal, "apply add_member: %v", err)
+		}
+		return nil
+	}
+	if err := joinLocal(j, id, addr, role); err != nil {
+		return status.Errorf(codes.Internal, "rejoin: %v", err)
+	}
+	return nil
 }

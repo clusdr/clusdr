@@ -12,6 +12,10 @@ service JoinService {
   rpc Join(JoinRequest) returns (JoinResponse);
   // Promote turns an existing observer into a voter. Followers forward to the leader.
   rpc Promote(PromoteRequest) returns (PromoteResponse);
+  // Leave is the only Raft RemoveServer. Presence expiry does not call this.
+  rpc Leave(LeaveRequest) returns (LeaveResponse);
+  // Rejoin marks an existing Raft server alive again (same id, no AddVoter).
+  rpc Rejoin(RejoinRequest) returns (RejoinResponse);
 }
 
 message JoinRequest {
@@ -59,6 +63,8 @@ service ControlService {
   rpc RequestJoin(RequestJoinRequest) returns (RequestJoinResponse);
   // RequestPromote asks the local daemon to promote a node (empty id = self).
   rpc RequestPromote(RequestPromoteRequest) returns (RequestPromoteResponse);
+  // RequestLeave asks the local daemon to remove a member from Raft (empty id = self).
+  rpc RequestLeave(RequestLeaveRequest) returns (RequestLeaveResponse);
 }
 
 message RequestJoinRequest {
@@ -98,6 +104,41 @@ message RequestPromoteRequest {
 
 message RequestPromoteResponse {
   bool promoted = 1;
+  string message = 2;
+  repeated Member members = 3;
+}
+
+message LeaveRequest {
+  string node_id = 1;
+  bool relay = 2;
+}
+
+message LeaveResponse {
+  bool left = 1;
+  string message = 2;
+  repeated Member members = 3;
+}
+
+message RequestLeaveRequest {
+  // node_id is the member to remove from Raft. Empty means the local node.
+  string node_id = 1;
+}
+
+message RequestLeaveResponse {
+  bool left = 1;
+  string message = 2;
+  repeated Member members = 3;
+}
+
+message RejoinRequest {
+  string node_id = 1;
+  string address = 2;
+  string role = 3;
+  bool relay = 4;
+}
+
+message RejoinResponse {
+  bool rejoined = 1;
   string message = 2;
   repeated Member members = 3;
 }

@@ -15,7 +15,8 @@ In another terminal:
     clusdr publish ping '{"from":"cli"}'
     python3 examples/watch/python/main.py --name edge-2
 
-custom.* is gossip (not Raft, not replayed). member.left is cluster state.
+custom.* is gossip (not Raft, not replayed). member.dead is crash (still listed).
+member.left is clusdr leave (gone).
 close() revokes the worker lease.
 """
 
@@ -89,8 +90,12 @@ def print_members(c: Any) -> None:
 
 
 def format_event(ev: Any) -> str:
-    if ev.type in {"member.join", "member.left", "leader.changed"}:
+    if ev.type in {"member.join", "leader.changed"}:
         kind = "cluster"
+    elif ev.type == "member.dead":
+        kind = "dead"
+    elif ev.type == "member.left":
+        kind = "left"
     elif ev.type.startswith("custom."):
         kind = "gossip"
     elif ev.type in {"watch.sync", "watch.gap"}:

@@ -98,7 +98,7 @@ members = c.members()
 leader = c.leader()
 ```
 
-`Member` (frozen dataclass): `id`, `address`, `status`, `leader`, `role` (default `"voter"`). Empty wire role becomes `"voter"`.
+`Member` (frozen dataclass): `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (default `"voter"`). Empty wire role becomes `"voter"`.
 
 `leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=True`). No leader → `ClusdrError` wrapping `Unavailable`.
 
@@ -106,8 +106,10 @@ leader = c.leader()
 
 ```python
 for event in c.watch():
+    if event.type == "member.dead":
+        ...  # crash / miss; still in members()
     if event.type == "member.left":
-        ...
+        ...  # clusdr leave; gone from members()
     if event.type == "custom.deployment":
         event.payload  # bytes
 ```

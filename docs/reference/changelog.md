@@ -9,16 +9,23 @@ description: Notable changes in each clusdr release.
 
 Notable changes in each release. The daemon and the language SDKs share one version number.
 
-## Unreleased
+## 0.2.0 — 2026-09-17
 
 ### Added
 
-- Buf for proto: `make proto` runs `buf generate`; pull requests lint and reject wire-incompatible changes
-- BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (application) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal) (join/heartbeat). `main` and `v*` tags push both.
+- [Run on Kubernetes](../guide/kubernetes.md): same Linux host model, one daemon per node. Examples in [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s)
+- Helm chart: `helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version <x.y.z>`. Join is still `clusdr join`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)
+- `ClusdrCluster` CRD and `clusdr-operator`. Install with `https://clusdr.io/download/clusdr-crds.yaml` and `clusdr-operator.yaml`. Image: `durguto/clusdr-operator`
+- `clusdr health` (Runtime RPC) and `clusdr leave` (the only way to remove a Raft member)
+- Linux archives and `install.sh` from GitHub Releases (`https://clusdr.io/download/` 302s there)
+- Buf for proto; BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal)
 
 ### Changed
 
-- gRPC request/response message names follow Buf STANDARD (`TryLockRequest`, `GrantRequest`, `LockServiceRenewRequest`, `LeaseServiceRenewRequest`). RPC paths and field numbers are unchanged. The [gRPC API](api/) pages list those names and which BSR module each service lives in.
+- A crash marks a member `dead` without removing it from Raft. `clusdr leave` is how a member leaves. Restart with the same `data.dir` is `clusdr start`, not another `join`
+- Member status is `alive` or `dead` only
+- `clusdr init` succeeds (no new token) when identity already exists
+- gRPC message names follow Buf STANDARD. RPC paths and field numbers are unchanged
 
 ## 0.1.4 — 2026-09-17
 

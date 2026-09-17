@@ -4,7 +4,7 @@ Crate `clusdr`. Rust 1.82+. Tokio. Applications call the daemon on this host. Sh
 
 ```toml
 [dependencies]
-clusdr = "0.1.4"
+clusdr = "0.2.0"
 ```
 
 Same version train as the daemon.
@@ -84,7 +84,7 @@ let members = c.members().await?;
 let leader = c.leader().await?;
 ```
 
-`Member`: `id`, `address`, `status`, `leader`, `role` (empty wire role becomes `"voter"`).
+`Member`: `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (empty wire role becomes `"voter"`).
 
 `leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=true`). No leader → error wrapping Unavailable.
 
@@ -98,7 +98,8 @@ let mut events = c.watch(WatchFilter::default()).await?;
 while let Some(event) = events.next().await {
     let event = event?;
     match event.event_type.as_str() {
-        "member.left" => {}
+        "member.dead" => {} // crash / miss; still in members()
+        "member.left" => {} // clusdr leave; gone from members()
         t if t.starts_with("custom.") => {
             let _ = event.payload;
         }

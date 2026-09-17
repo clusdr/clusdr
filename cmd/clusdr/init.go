@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,7 +33,7 @@ database. Run this once on the first node. Other nodes join with
 			path := f.configPath
 
 			if _, err := os.Stat(path); err == nil && !force {
-				return fmt.Errorf("config file %q already exists (use --force to overwrite)", path)
+				return alreadyInitialized(cmd, path)
 			}
 
 			clusterID, err := uid.New()
@@ -142,4 +143,33 @@ database. Run this once on the first node. Other nodes join with
 
 	cmd.Flags().BoolVar(&force, "force", false, "overwrite existing config file")
 	return cmd
+}
+
+// alreadyInitialized is success when this data.dir already has identity
+// (DaemonSet / seed pod restart). Config without a store is still an error.
+func alreadyInitialized(cmd *cobra.Command, path string) error {
+	resolved, err := config.LoadFrom(path, os.Getenv)
+	if err != nil {
+		return err
+	}
+	st, err := store.Open(resolved.Data.Dir)
+	if err != nil {
+		return fmt.Errorf("open store: %w", err)
+	}
+	defer st.Close()
+	nodeID, clusterID, err := st.Identity()
+	if err != nil {
+		if errors.Is(err, store.ErrNotInitialized) {
+			return fmt.Errorf("config file %q already exists (use --force to overwrite)", path)
+		}
+		return err
+	}
+	out := cmd.OutOrStdout()
+	fmt.Fprintln(out, "already initialized")
+	fmt.Fprintln(out)
+	fmt.Fprintf(out, "  cluster id      : %s\n", clusterID)
+	fmt.Fprintf(out, "  node id         : %s\n", nodeID)
+	fmt.Fprintf(out, "  config          : %s\n", path)
+	fmt.Fprintf(out, "  data dir        : %s\n", resolved.Data.Dir)
+	return nil
 }

@@ -11,8 +11,11 @@ type CommandKind string
 const (
 	// CmdAddMember is applied when a new node joins the cluster.
 	CmdAddMember CommandKind = "add_member"
-	// CmdRemoveMember is applied when a node leaves or is marked dead.
+	// CmdRemoveMember marks a member dead (liveness). Historical name; does
+	// not RemoveServer. Crash/heartbeat/presence use this.
 	CmdRemoveMember CommandKind = "remove_member"
+	// CmdDropMember removes a member from the list after clusdr leave.
+	CmdDropMember CommandKind = "drop_member"
 	// CmdLockAcquire tries to take a named lock.
 	CmdLockAcquire CommandKind = "lock_acquire"
 	// CmdLockRelease releases a named lock (holder + fencing token).

@@ -8,7 +8,8 @@
  *
  *     clusdr publish ping '{"from":"cli"}'
  *
- * custom.* is gossip (not Raft, not replayed). member.left is cluster state.
+ * custom.* is gossip (not Raft, not replayed). member.dead is crash (still listed).
+ * member.left is clusdr leave (gone).
  * close() revokes the worker lease.
  */
 import io.clusdr.Clusdr;
@@ -77,8 +78,12 @@ public final class Main {
 
   static String formatEvent(Event ev) {
     String kind = "bus";
-    if (ev.type().equals("member.join") || ev.type().equals("member.left") || ev.type().equals("leader.changed")) {
+    if (ev.type().equals("member.join") || ev.type().equals("leader.changed")) {
       kind = "cluster";
+    } else if (ev.type().equals("member.dead")) {
+      kind = "dead";
+    } else if (ev.type().equals("member.left")) {
+      kind = "left";
     } else if (ev.type().startsWith("custom.")) {
       kind = "gossip";
     } else if (ev.type().equals("watch.sync") || ev.type().equals("watch.gap")) {

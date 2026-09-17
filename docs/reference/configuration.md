@@ -90,7 +90,7 @@ raft:
   addr: 10.0.0.10:7946
 lease:
   presence: true
-  presence_ttl: 2m        # default 3s ejects a reboot; see presence docs
+  presence_ttl: 15s       # how fast member.dead after a crash; not an eject
 ```
 
 Env is equivalent and wins over YAML:
@@ -110,7 +110,7 @@ ExecStart=/usr/local/bin/clusdr start --config /etc/clusdr/clusdr.yaml --bootstr
 Restart=always
 ```
 
-`--bootstrap` only on the first voter. Do not put `clusdr join` on every boot. Join is first add (or after presence already removed the node). Default presence TTL is 3s — too short for a reboot; set `lease.presence_ttl` (example above) so `start` is enough ([presence](../concepts/presence.md)).
+`--bootstrap` only on the first voter. Do not put `clusdr join` on every boot. Join is first add (or after `clusdr leave`). A reboot is `clusdr start` with the same `data.dir` ([presence](../concepts/presence.md)).
 
 Docker image defaults `CLUSDR_DATA_DIR=/var/lib/clusdr` — [other hosts](../guide/other-hosts.md).
 
@@ -154,7 +154,7 @@ lease:
   ttl: 15s
   expire_interval: 100ms
   presence: true
-  presence_ttl: 3s       # laptop demo; servers: above reboot time (see presence)
+  presence_ttl: 3s       # how fast member.dead; crash is not leave
 ```
 
 `leader_lease_timeout` must be ≤ `heartbeat_timeout`. If an override breaks that, load clamps lease to half the heartbeat.

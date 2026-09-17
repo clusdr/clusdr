@@ -1,0 +1,4 @@
+.DS_Store
+*.tgz
+charts/
+artifacthub-repo.yml

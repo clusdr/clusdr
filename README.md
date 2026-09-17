@@ -68,7 +68,7 @@ const c = await local();
 const members = await c.members();
 ```
 
-Go: `go get github.com/clusdr/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.1.4"`. TypeScript: `npm install clusdr`. Java: `io.clusdr:clusdr`. Runnable copies: [examples/](examples/).
+Go: `go get github.com/clusdr/clusdr/sdk`. Python: `pip install clusdr`. Rust: `clusdr = "0.2.0"`. TypeScript: `npm install clusdr`. Java: `io.clusdr:clusdr`. Runnable copies: [examples/](examples/).
 
 ## Docs
 

@@ -575,6 +575,351 @@ func (x *RequestPromoteResponse) GetMembers() []*Member {
 	return nil
 }
 
+type LeaveRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Relay         bool                   `protobuf:"varint,2,opt,name=relay,proto3" json:"relay,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LeaveRequest) Reset() {
+	*x = LeaveRequest{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LeaveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveRequest) ProtoMessage() {}
+
+func (x *LeaveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveRequest.ProtoReflect.Descriptor instead.
+func (*LeaveRequest) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *LeaveRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *LeaveRequest) GetRelay() bool {
+	if x != nil {
+		return x.Relay
+	}
+	return false
+}
+
+type LeaveResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Left          bool                   `protobuf:"varint,1,opt,name=left,proto3" json:"left,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Members       []*Member              `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LeaveResponse) Reset() {
+	*x = LeaveResponse{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LeaveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveResponse) ProtoMessage() {}
+
+func (x *LeaveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveResponse.ProtoReflect.Descriptor instead.
+func (*LeaveResponse) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *LeaveResponse) GetLeft() bool {
+	if x != nil {
+		return x.Left
+	}
+	return false
+}
+
+func (x *LeaveResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *LeaveResponse) GetMembers() []*Member {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+type RequestLeaveRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// node_id is the member to remove from Raft. Empty means the local node.
+	NodeId        string `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestLeaveRequest) Reset() {
+	*x = RequestLeaveRequest{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestLeaveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestLeaveRequest) ProtoMessage() {}
+
+func (x *RequestLeaveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestLeaveRequest.ProtoReflect.Descriptor instead.
+func (*RequestLeaveRequest) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *RequestLeaveRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+type RequestLeaveResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Left          bool                   `protobuf:"varint,1,opt,name=left,proto3" json:"left,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Members       []*Member              `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestLeaveResponse) Reset() {
+	*x = RequestLeaveResponse{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestLeaveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestLeaveResponse) ProtoMessage() {}
+
+func (x *RequestLeaveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestLeaveResponse.ProtoReflect.Descriptor instead.
+func (*RequestLeaveResponse) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RequestLeaveResponse) GetLeft() bool {
+	if x != nil {
+		return x.Left
+	}
+	return false
+}
+
+func (x *RequestLeaveResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *RequestLeaveResponse) GetMembers() []*Member {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+type RejoinRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	Relay         bool                   `protobuf:"varint,4,opt,name=relay,proto3" json:"relay,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RejoinRequest) Reset() {
+	*x = RejoinRequest{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RejoinRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RejoinRequest) ProtoMessage() {}
+
+func (x *RejoinRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RejoinRequest.ProtoReflect.Descriptor instead.
+func (*RejoinRequest) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *RejoinRequest) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *RejoinRequest) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *RejoinRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *RejoinRequest) GetRelay() bool {
+	if x != nil {
+		return x.Relay
+	}
+	return false
+}
+
+type RejoinResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Rejoined      bool                   `protobuf:"varint,1,opt,name=rejoined,proto3" json:"rejoined,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Members       []*Member              `protobuf:"bytes,3,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RejoinResponse) Reset() {
+	*x = RejoinResponse{}
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RejoinResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RejoinResponse) ProtoMessage() {}
+
+func (x *RejoinResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_clusdr_v1alpha1_join_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RejoinResponse.ProtoReflect.Descriptor instead.
+func (*RejoinResponse) Descriptor() ([]byte, []int) {
+	return file_clusdr_v1alpha1_join_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *RejoinResponse) GetRejoined() bool {
+	if x != nil {
+		return x.Rejoined
+	}
+	return false
+}
+
+func (x *RejoinResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *RejoinResponse) GetMembers() []*Member {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
 var File_clusdr_v1alpha1_join_proto protoreflect.FileDescriptor
 
 const file_clusdr_v1alpha1_join_proto_rawDesc = "" +
@@ -620,13 +965,38 @@ const file_clusdr_v1alpha1_join_proto_rawDesc = "" +
 	"\x16RequestPromoteResponse\x12\x1a\n" +
 	"\bpromoted\x18\x01 \x01(\bR\bpromoted\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x121\n" +
-	"\amembers\x18\x03 \x03(\v2\x17.clusdr.v1alpha1.MemberR\amembers2\xa0\x01\n" +
+	"\amembers\x18\x03 \x03(\v2\x17.clusdr.v1alpha1.MemberR\amembers\"=\n" +
+	"\fLeaveRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x14\n" +
+	"\x05relay\x18\x02 \x01(\bR\x05relay\"p\n" +
+	"\rLeaveResponse\x12\x12\n" +
+	"\x04left\x18\x01 \x01(\bR\x04left\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x121\n" +
+	"\amembers\x18\x03 \x03(\v2\x17.clusdr.v1alpha1.MemberR\amembers\".\n" +
+	"\x13RequestLeaveRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\"w\n" +
+	"\x14RequestLeaveResponse\x12\x12\n" +
+	"\x04left\x18\x01 \x01(\bR\x04left\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x121\n" +
+	"\amembers\x18\x03 \x03(\v2\x17.clusdr.v1alpha1.MemberR\amembers\"l\n" +
+	"\rRejoinRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\x12\x14\n" +
+	"\x05relay\x18\x04 \x01(\bR\x05relay\"y\n" +
+	"\x0eRejoinResponse\x12\x1a\n" +
+	"\brejoined\x18\x01 \x01(\bR\brejoined\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x121\n" +
+	"\amembers\x18\x03 \x03(\v2\x17.clusdr.v1alpha1.MemberR\amembers2\xb3\x02\n" +
 	"\vJoinService\x12C\n" +
 	"\x04Join\x12\x1c.clusdr.v1alpha1.JoinRequest\x1a\x1d.clusdr.v1alpha1.JoinResponse\x12L\n" +
-	"\aPromote\x12\x1f.clusdr.v1alpha1.PromoteRequest\x1a .clusdr.v1alpha1.PromoteResponse2\xcd\x01\n" +
+	"\aPromote\x12\x1f.clusdr.v1alpha1.PromoteRequest\x1a .clusdr.v1alpha1.PromoteResponse\x12F\n" +
+	"\x05Leave\x12\x1d.clusdr.v1alpha1.LeaveRequest\x1a\x1e.clusdr.v1alpha1.LeaveResponse\x12I\n" +
+	"\x06Rejoin\x12\x1e.clusdr.v1alpha1.RejoinRequest\x1a\x1f.clusdr.v1alpha1.RejoinResponse2\xaa\x02\n" +
 	"\x0eControlService\x12X\n" +
 	"\vRequestJoin\x12#.clusdr.v1alpha1.RequestJoinRequest\x1a$.clusdr.v1alpha1.RequestJoinResponse\x12a\n" +
-	"\x0eRequestPromote\x12&.clusdr.v1alpha1.RequestPromoteRequest\x1a'.clusdr.v1alpha1.RequestPromoteResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
+	"\x0eRequestPromote\x12&.clusdr.v1alpha1.RequestPromoteRequest\x1a'.clusdr.v1alpha1.RequestPromoteResponse\x12[\n" +
+	"\fRequestLeave\x12$.clusdr.v1alpha1.RequestLeaveRequest\x1a%.clusdr.v1alpha1.RequestLeaveResponseB=Z;github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1b\x06proto3"
 
 var (
 	file_clusdr_v1alpha1_join_proto_rawDescOnce sync.Once
@@ -640,7 +1010,7 @@ func file_clusdr_v1alpha1_join_proto_rawDescGZIP() []byte {
 	return file_clusdr_v1alpha1_join_proto_rawDescData
 }
 
-var file_clusdr_v1alpha1_join_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_clusdr_v1alpha1_join_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_clusdr_v1alpha1_join_proto_goTypes = []any{
 	(*JoinRequest)(nil),            // 0: clusdr.v1alpha1.JoinRequest
 	(*JoinResponse)(nil),           // 1: clusdr.v1alpha1.JoinResponse
@@ -650,26 +1020,41 @@ var file_clusdr_v1alpha1_join_proto_goTypes = []any{
 	(*PromoteResponse)(nil),        // 5: clusdr.v1alpha1.PromoteResponse
 	(*RequestPromoteRequest)(nil),  // 6: clusdr.v1alpha1.RequestPromoteRequest
 	(*RequestPromoteResponse)(nil), // 7: clusdr.v1alpha1.RequestPromoteResponse
-	(*Member)(nil),                 // 8: clusdr.v1alpha1.Member
+	(*LeaveRequest)(nil),           // 8: clusdr.v1alpha1.LeaveRequest
+	(*LeaveResponse)(nil),          // 9: clusdr.v1alpha1.LeaveResponse
+	(*RequestLeaveRequest)(nil),    // 10: clusdr.v1alpha1.RequestLeaveRequest
+	(*RequestLeaveResponse)(nil),   // 11: clusdr.v1alpha1.RequestLeaveResponse
+	(*RejoinRequest)(nil),          // 12: clusdr.v1alpha1.RejoinRequest
+	(*RejoinResponse)(nil),         // 13: clusdr.v1alpha1.RejoinResponse
+	(*Member)(nil),                 // 14: clusdr.v1alpha1.Member
 }
 var file_clusdr_v1alpha1_join_proto_depIdxs = []int32{
-	8, // 0: clusdr.v1alpha1.JoinResponse.members:type_name -> clusdr.v1alpha1.Member
-	8, // 1: clusdr.v1alpha1.RequestJoinResponse.members:type_name -> clusdr.v1alpha1.Member
-	8, // 2: clusdr.v1alpha1.PromoteResponse.members:type_name -> clusdr.v1alpha1.Member
-	8, // 3: clusdr.v1alpha1.RequestPromoteResponse.members:type_name -> clusdr.v1alpha1.Member
-	0, // 4: clusdr.v1alpha1.JoinService.Join:input_type -> clusdr.v1alpha1.JoinRequest
-	4, // 5: clusdr.v1alpha1.JoinService.Promote:input_type -> clusdr.v1alpha1.PromoteRequest
-	2, // 6: clusdr.v1alpha1.ControlService.RequestJoin:input_type -> clusdr.v1alpha1.RequestJoinRequest
-	6, // 7: clusdr.v1alpha1.ControlService.RequestPromote:input_type -> clusdr.v1alpha1.RequestPromoteRequest
-	1, // 8: clusdr.v1alpha1.JoinService.Join:output_type -> clusdr.v1alpha1.JoinResponse
-	5, // 9: clusdr.v1alpha1.JoinService.Promote:output_type -> clusdr.v1alpha1.PromoteResponse
-	3, // 10: clusdr.v1alpha1.ControlService.RequestJoin:output_type -> clusdr.v1alpha1.RequestJoinResponse
-	7, // 11: clusdr.v1alpha1.ControlService.RequestPromote:output_type -> clusdr.v1alpha1.RequestPromoteResponse
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	14, // 0: clusdr.v1alpha1.JoinResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 1: clusdr.v1alpha1.RequestJoinResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 2: clusdr.v1alpha1.PromoteResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 3: clusdr.v1alpha1.RequestPromoteResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 4: clusdr.v1alpha1.LeaveResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 5: clusdr.v1alpha1.RequestLeaveResponse.members:type_name -> clusdr.v1alpha1.Member
+	14, // 6: clusdr.v1alpha1.RejoinResponse.members:type_name -> clusdr.v1alpha1.Member
+	0,  // 7: clusdr.v1alpha1.JoinService.Join:input_type -> clusdr.v1alpha1.JoinRequest
+	4,  // 8: clusdr.v1alpha1.JoinService.Promote:input_type -> clusdr.v1alpha1.PromoteRequest
+	8,  // 9: clusdr.v1alpha1.JoinService.Leave:input_type -> clusdr.v1alpha1.LeaveRequest
+	12, // 10: clusdr.v1alpha1.JoinService.Rejoin:input_type -> clusdr.v1alpha1.RejoinRequest
+	2,  // 11: clusdr.v1alpha1.ControlService.RequestJoin:input_type -> clusdr.v1alpha1.RequestJoinRequest
+	6,  // 12: clusdr.v1alpha1.ControlService.RequestPromote:input_type -> clusdr.v1alpha1.RequestPromoteRequest
+	10, // 13: clusdr.v1alpha1.ControlService.RequestLeave:input_type -> clusdr.v1alpha1.RequestLeaveRequest
+	1,  // 14: clusdr.v1alpha1.JoinService.Join:output_type -> clusdr.v1alpha1.JoinResponse
+	5,  // 15: clusdr.v1alpha1.JoinService.Promote:output_type -> clusdr.v1alpha1.PromoteResponse
+	9,  // 16: clusdr.v1alpha1.JoinService.Leave:output_type -> clusdr.v1alpha1.LeaveResponse
+	13, // 17: clusdr.v1alpha1.JoinService.Rejoin:output_type -> clusdr.v1alpha1.RejoinResponse
+	3,  // 18: clusdr.v1alpha1.ControlService.RequestJoin:output_type -> clusdr.v1alpha1.RequestJoinResponse
+	7,  // 19: clusdr.v1alpha1.ControlService.RequestPromote:output_type -> clusdr.v1alpha1.RequestPromoteResponse
+	11, // 20: clusdr.v1alpha1.ControlService.RequestLeave:output_type -> clusdr.v1alpha1.RequestLeaveResponse
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_clusdr_v1alpha1_join_proto_init() }
@@ -684,7 +1069,7 @@ func file_clusdr_v1alpha1_join_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_clusdr_v1alpha1_join_proto_rawDesc), len(file_clusdr_v1alpha1_join_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

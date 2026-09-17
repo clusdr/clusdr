@@ -36,8 +36,50 @@ release:
   extra_files:
     - glob: ./scripts/install.sh
       name_template: install.sh
-  footer: |
+  header: |
+    A runtime for the cluster. An SDK for the app. Your application talks to a local daemon. The daemons form the cluster.
+
+    ## {{.Version}}
+
+    ### Added
+
+    - [Run on Kubernetes](https://clusdr.io/docs/guide/kubernetes): same Linux host model, one daemon per node
+    - Helm chart: `helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version {{.Version}}`. Join is still `clusdr join`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)
+    - `ClusdrCluster` CRD and `clusdr-operator`. Install with `https://clusdr.io/download/clusdr-crds.yaml` and `clusdr-operator.yaml`. Image: `durguto/clusdr-operator`
+    - `clusdr health` (Runtime RPC) and `clusdr leave` (the only way to remove a Raft member)
+    - Linux archives and `install.sh` from GitHub Releases (`https://clusdr.io/download/` 302s there)
+    - Buf for proto; BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal)
+
+    ### Changed
+
+    - A crash marks a member `dead` without removing it from Raft. `clusdr leave` is how a member leaves. Restart with the same `data.dir` is `clusdr start`, not another `join`
+    - Member status is `alive` or `dead` only
+    - `clusdr init` succeeds (no new token) when identity already exists
+    - gRPC message names follow Buf STANDARD. RPC paths and field numbers are unchanged
+
+    ## Install
+
     ```bash
     curl -fsSL https://clusdr.io/install.sh | sh
     ```
-    Linux amd64/arm64. Image: `durguto/clusdr`. Mirror: `ghcr.io/clusdr/clusdr`.
+
+    Linux amd64/arm64. Image: `durguto/clusdr:{{.Version}}` (GHCR `ghcr.io/clusdr/clusdr`). Operator: `durguto/clusdr-operator:{{.Version}}`.
+
+    ```bash
+    helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version {{.Version}} \
+      --namespace clusdr --create-namespace \
+      --set seed.nodeName=<node>
+    ```
+
+    ```bash
+    kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
+    kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+    ```
+
+    SDKs (same version train): `go get github.com/clusdr/clusdr/sdk`, `pip install clusdr`, `clusdr = "{{.Version}}"`, `npm install clusdr`, `io.clusdr:clusdr:{{.Version}}`.
+  footer: |
+    - Site: https://clusdr.io
+    - Packages: https://clusdr.io/packages
+    - Docs: https://clusdr.io/docs/
+    - Docker Hub: https://hub.docker.com/r/durguto/clusdr
+    - Changelog: https://clusdr.io/changelog

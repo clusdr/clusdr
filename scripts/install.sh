@@ -71,7 +71,7 @@ resolve_version() {
 	echo "${ver#v}"
 }
 
-# download URL dest — tries origin, then GitHub latest if origin is the domain.
+# download URL dest — tries origin, then GitHub if origin is the domain.
 download() {
 	url=$1
 	dest=$2
@@ -80,6 +80,9 @@ download() {
 	fi
 	if [ "${origin}" = "${DEFAULT_ORIGIN}" ] && [ -n "${github_fallback:-}" ]; then
 		file=$(basename "$url")
+		case "$file" in
+		checksums_*.txt) file=checksums.txt ;;
+		esac
 		curl -fsSL "${github_fallback}/${file}" -o "$dest"
 		return
 	fi
@@ -124,8 +127,8 @@ if [ -n "${CLUSDR_DOWNLOAD_ORIGIN:-}" ]; then
 	origin=${CLUSDR_DOWNLOAD_ORIGIN}
 	github_fallback=
 elif [ -n "$pinned" ]; then
-	origin="https://github.com/${REPO}/releases/download/v${CLUSDR_VERSION#v}"
-	github_fallback=
+	origin=$DEFAULT_ORIGIN
+	github_fallback="https://github.com/${REPO}/releases/download/v${CLUSDR_VERSION#v}"
 else
 	origin=$DEFAULT_ORIGIN
 	github_fallback=$GITHUB_LATEST
@@ -133,7 +136,11 @@ fi
 
 version=$(resolve_version)
 archive="${PROJECT}_${version}_${os}_${arch}.tar.gz"
-sums=checksums.txt
+if [ -n "$pinned" ] && [ -z "${CLUSDR_DOWNLOAD_ORIGIN:-}" ]; then
+	sums="checksums_${version}.txt"
+else
+	sums=checksums.txt
+fi
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT

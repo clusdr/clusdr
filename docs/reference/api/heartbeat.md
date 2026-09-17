@@ -8,7 +8,7 @@ Node-to-node liveness pings. Internal module [`buf.build/clusdr/internal`](https
 
 **Request:** `sender_id`. **Response:** `node_id`, `alive`.
 
-Defaults: interval 2s, timeout 1s, 3 misses before a peer is marked leaving. [Presence](../../concepts/presence.md) is the faster dead path.
+Defaults: interval 2s, timeout 1s, 3 misses before a peer is marked not-alive. [Presence](../../concepts/presence.md) is the faster liveness path. Neither removes the Raft server.
 
 ## See also
 

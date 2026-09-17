@@ -28,7 +28,7 @@ type Member struct {
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// address is the gRPC Runtime API address of this node.
 	Address string `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
-	// status is the current liveness of this node: alive | leaving | dead.
+	// status is liveness: alive | dead. Legacy "leaving" is read as dead.
 	Status string `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
 	// leader is true when this node is the current Raft leader.
 	Leader bool `protobuf:"varint,4,opt,name=leader,proto3" json:"leader,omitempty"`

@@ -16,15 +16,15 @@ That puts the latest release into `/usr/local/bin`. Another prefix:
 curl -fsSL https://clusdr.io/install.sh | BINDIR=~/bin sh
 ```
 
-The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSION=0.1.4`. Override the archive origin with `CLUSDR_DOWNLOAD_ORIGIN`.
+The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSION=0.2.0`. Override the archive origin with `CLUSDR_DOWNLOAD_ORIGIN`.
 
-Archives are published as GitHub Releases and served from `clusdr.io`. Direct GitHub URL if you need it:
+Archives come from [GitHub Releases](https://github.com/clusdr/clusdr/releases). `https://clusdr.io/download/<file>` 302s there (versioned names pin the tag). Direct GitHub URL if you need it:
 
 ```bash
 curl -fsSL https://github.com/clusdr/clusdr/releases/latest/download/install.sh | sh
 ```
 
-Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from [clusdr.io/download](https://clusdr.io/download/) ([GitHub Releases](https://github.com/clusdr/clusdr/releases) is the source). Checksums sit next to the archives.
+Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from the [GitHub Release](https://github.com/clusdr/clusdr/releases). Checksums sit next to the archives.
 
 ## Check it
 

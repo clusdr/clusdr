@@ -264,9 +264,39 @@ func (n *Node) PromoteToVoter(id string) error {
 	return n.AddVoter(id, string(addr))
 }
 
+// HasServer reports whether id is in the current Raft configuration
+// (voter or observer). Presence expiry must not change this; only Leave does.
+func (n *Node) HasServer(id string) bool {
+	if n == nil || n.r == nil || id == "" {
+		return false
+	}
+	fut := n.r.GetConfiguration()
+	if err := fut.Error(); err != nil {
+		return false
+	}
+	for _, s := range fut.Configuration().Servers {
+		if string(s.ID) == id {
+			return true
+		}
+	}
+	return false
+}
+
+// ServerCount is the number of servers in the Raft configuration.
+func (n *Node) ServerCount() int {
+	if n == nil || n.r == nil {
+		return 0
+	}
+	fut := n.r.GetConfiguration()
+	if err := fut.Error(); err != nil {
+		return 0
+	}
+	return len(fut.Configuration().Servers)
+}
+
 // RemoveVoter removes a node from the Raft configuration (voter or observer).
 // Must only be called on the leader; safe to call on an already-removed node
-// (Raft returns nil in that case).
+// (Raft returns nil in that case). Presence expiry must not call this.
 func (n *Node) RemoveVoter(id string) error {
 	f := n.r.RemoveServer(
 		raftlib.ServerID(id),
@@ -324,15 +354,28 @@ func (n *Node) ApplyAddMemberAs(id, addr, role string) error {
 	return nil
 }
 
-// ApplyRemoveMember writes a remove_member command to the Raft log and blocks
-// until committed. Must only be called on the leader.
+// ApplyRemoveMember marks id dead (presence/heartbeat). Does not RemoveServer.
+// Must only be called on the leader.
 func (n *Node) ApplyRemoveMember(id string) error {
 	data, err := encodeCommand(Command{Kind: CmdRemoveMember, ID: id})
 	if err != nil {
 		return err
 	}
 	if err := n.r.Apply(data, 5*time.Second).Error(); err != nil {
-		return fmt.Errorf("raft apply remove_member %s: %w", id, err)
+		return fmt.Errorf("raft apply mark_dead %s: %w", id, err)
+	}
+	return nil
+}
+
+// ApplyDropMember removes id from the membership list (clusdr leave).
+// Must only be called on the leader.
+func (n *Node) ApplyDropMember(id string) error {
+	data, err := encodeCommand(Command{Kind: CmdDropMember, ID: id})
+	if err != nil {
+		return err
+	}
+	if err := n.r.Apply(data, 5*time.Second).Error(); err != nil {
+		return fmt.Errorf("raft apply drop_member %s: %w", id, err)
 	}
 	return nil
 }

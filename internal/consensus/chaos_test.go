@@ -481,7 +481,7 @@ func (c *chaosCluster) waitLeaseGone(name string) {
 	c.t.Fatalf("lease %q still held after TTL", name)
 }
 
-func (c *chaosCluster) waitLeaving(id string) {
+func (c *chaosCluster) waitDead(id string) {
 	c.t.Helper()
 	deadline := time.Now().Add(8 * time.Second)
 	for time.Now().Before(deadline) {
@@ -489,7 +489,7 @@ func (c *chaosCluster) waitLeaving(id string) {
 		for _, n := range c.live() {
 			found := false
 			for _, m := range n.mem.Members() {
-				if m.ID == id && m.Status == membership.StatusLeaving {
+				if m.ID == id && m.Status == membership.StatusDead {
 					found = true
 					break
 				}
@@ -504,7 +504,31 @@ func (c *chaosCluster) waitLeaving(id string) {
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	c.t.Fatalf("%s not leaving on all live nodes", id)
+	c.t.Fatalf("%s not dead on all live nodes", id)
+}
+
+func (c *chaosCluster) waitGone(id string) {
+	c.t.Helper()
+	deadline := time.Now().Add(8 * time.Second)
+	for time.Now().Before(deadline) {
+		ok := true
+		for _, n := range c.live() {
+			for _, m := range n.mem.Members() {
+				if m.ID == id {
+					ok = false
+					break
+				}
+			}
+			if !ok {
+				break
+			}
+		}
+		if ok {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	c.t.Fatalf("%s still listed on a live node", id)
 }
 
 func (c *chaosCluster) startLockExpirers(ctx context.Context) {
@@ -523,7 +547,6 @@ func (c *chaosCluster) startLeaseExpirers(ctx context.Context) {
 			if !n.node.IsLeader() || id == n.id {
 				return
 			}
-			_ = n.node.RemoveVoter(id)
 			_ = n.node.ApplyRemoveMember(id)
 		})
 	}
@@ -658,14 +681,14 @@ func TestChaos_RapidJoinLeave(t *testing.T) {
 			t.Fatalf("cycle %d remove voter: %v", i, err)
 		}
 		lead = c.waitStableLeader()
-		if err := lead.node.ApplyRemoveMember(id); err != nil {
-			t.Fatalf("cycle %d remove member: %v", i, err)
+		if err := lead.node.ApplyDropMember(id); err != nil {
+			t.Fatalf("cycle %d drop member: %v", i, err)
 		}
 		_ = extra.node.Shutdown()
 		for _, n := range c.live() {
 			disconnectInmem(tr, n.trans)
 		}
-		c.waitLeaving(id)
+		c.waitGone(id)
 		c.waitAlive("node-a", "node-b", "node-c")
 	}
 
@@ -710,7 +733,7 @@ func TestChaos_LockHolderDies(t *testing.T) {
 }
 
 // TestChaos_LeaseHolderDies: killing a node without revoke expires its
-// presence lease and the survivors mark it leaving.
+// presence lease and the survivors mark it dead.
 func TestChaos_LeaseHolderDies(t *testing.T) {
 	c := startTriad(t)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -727,11 +750,56 @@ func TestChaos_LeaseHolderDies(t *testing.T) {
 	c.kill(victim)
 	c.waitStableLeader()
 	c.waitLeaseGone(name)
-	c.waitLeaving(victim.id)
+	c.waitDead(victim.id)
 
 	for _, n := range c.live() {
 		if hasAlive(n.mem, victim.id) {
 			t.Fatalf("%s still lists %s as alive after presence expiry", n.id, victim.id)
 		}
+		if !n.node.HasServer(victim.id) {
+			t.Fatalf("%s dropped %s from Raft after presence expiry", n.id, victim.id)
+		}
 	}
+	if c.waitStableLeader().node.ServerCount() != 3 {
+		t.Fatalf("raft servers=%d, want 3 after one death", c.mustLeader().node.ServerCount())
+	}
+
+	if err := c.withLeader(func(lead *consensus.Node) error {
+		return lead.ApplyAddMember(victim.id, string(victim.trans.LocalAddr()))
+	}); err != nil {
+		t.Fatalf("rejoin dead member: %v", err)
+	}
+	c.waitAlive("node-a", "node-b", "node-c")
+}
+
+// TestChaos_LeaveDropsServer: explicit leave is the only RemoveServer.
+func TestChaos_LeaveDropsServer(t *testing.T) {
+	c := startTriad(t)
+	victim := c.byID("node-c")
+	if err := c.withLeader(func(lead *consensus.Node) error {
+		if err := lead.ApplyDropMember(victim.id); err != nil {
+			return err
+		}
+		return lead.RemoveVoter(victim.id)
+	}); err != nil {
+		t.Fatalf("leave: %v", err)
+	}
+	deadline := time.Now().Add(8 * time.Second)
+	for time.Now().Before(deadline) {
+		ok := true
+		for _, n := range c.live() {
+			if n.id == victim.id {
+				continue
+			}
+			if n.node.HasServer(victim.id) {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatal("leave did not drop node-c from Raft on remaining members")
 }

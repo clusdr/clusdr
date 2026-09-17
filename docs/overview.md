@@ -13,7 +13,7 @@ It does that without being a general-purpose coordination suite.
 
 - Agents or services need membership and a watch stream
 - Services need leader election without standing up etcd or Consul as a product
-- A node dying should produce `member.left` without a graceful leave. That also removes it from Raft; raise presence TTL so a reboot is `start`, not another `join` ([presence](concepts/presence.md))
+- A node dying should produce `member.dead` without a graceful leave. That is liveness; the Raft id stays until `clusdr leave` (`member.left`). Restart is `clusdr start` with the same `data.dir` ([presence](concepts/presence.md))
 - You need exclusive [locks](concepts/locks.md) or named TTL [leases](concepts/leases.md) with fencing tokens
 - Extra hosts should see state without changing quorum ([observers](concepts/observers.md))
 - You need small signals (`publish` → `custom.<topic>`), not a durable log
@@ -24,8 +24,9 @@ It does that without being a general-purpose coordination suite.
 - You need at-least-once or durable messaging (custom events are not on the Raft log)
 - You need multi-cluster federation (not in this version)
 - You want to replace etcd as Kubernetes storage
+- You want to replace the Kubernetes Lease API, probes, or EndpointSlice
 
-Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes.
+Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes. It **runs on** Kubernetes as a Linux host ([guide](guide/kubernetes.md), [Helm](guide/kubernetes-helm.md), [Operator](guide/kubernetes-operator.md)). A Go controller that only needs leader election should keep using `coordination.k8s.io`.
 
 ## Versus common alternatives
 
@@ -35,6 +36,7 @@ Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes.
 | Distributed lock / lease | Raft lock and lease APIs | etcd lock, Consul session |
 | KV, DNS catalog, ACLs | Not provided | etcd, Consul |
 | Durable log of user events | Not provided | a queue, or another system's Raft log |
+| Kubernetes controller leader | Out of scope | Lease API (`coordination.k8s.io`) |
 
 If you already run etcd for KV, adding Clusdr only for membership is optional.
 

@@ -63,12 +63,12 @@ func TestMonitor_MarksLeaving_WhenPeerUnreachable(t *testing.T) {
 	for time.Now().Before(deadline) {
 		time.Sleep(50 * time.Millisecond)
 		for _, mem := range e.Members() {
-			if mem.ID == "node-b" && mem.Status == membership.StatusLeaving {
+			if mem.ID == "node-b" && mem.Status == membership.StatusDead {
 				return // success
 			}
 		}
 	}
-	t.Error("node-b was not marked leaving after missed heartbeats")
+	t.Error("node-b was not marked dead after missed heartbeats")
 }
 
 func TestMonitor_KeepsAlive_WhenPeerResponds(t *testing.T) {
@@ -99,7 +99,7 @@ func TestMonitor_KeepsAlive_WhenPeerResponds(t *testing.T) {
 }
 
 func TestMonitor_IgnoresSelf(t *testing.T) {
-	// Self address is unreachable but must never be marked leaving.
+	// Self address is unreachable but must never be marked dead.
 	e := membership.New("node-a", "127.0.0.1:19998", nopLog())
 
 	cfg := heartbeat.Config{

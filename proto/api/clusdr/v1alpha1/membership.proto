@@ -19,7 +19,7 @@ message Member {
   string id = 1;
   // address is the gRPC Runtime API address of this node.
   string address = 2;
-  // status is the current liveness of this node: alive | leaving | dead.
+  // status is liveness: alive | dead. Legacy "leaving" is read as dead.
   string status = 3;
   // leader is true when this node is the current Raft leader.
   bool leader = 4;

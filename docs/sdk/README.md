@@ -14,7 +14,7 @@ The [guide](../guide/from-your-app.md) is the first call. These pages are the wa
 |---|---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
-| Rust | `clusdr = "0.1.4"` | [Rust SDK](rust.md) |
+| Rust | `clusdr = "0.2.0"` | [Rust SDK](rust.md) |
 | TypeScript | `npm install clusdr` | [TypeScript SDK](typescript.md) |
 | Java | `io.clusdr:clusdr` | [Java SDK](java.md) |
 
@@ -22,10 +22,11 @@ CPython 3.10+. Rust 1.82+ (Tokio). Node.js 20+. Java 17+. Wire package `clusdr.v
 
 ## What the SDKs do
 
-- `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`
+- `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. On Kubernetes that is the **node** daemon ([guide](../guide/kubernetes.md#apps-on-the-node)), not a Service. Sidecar exception: `127.0.0.1` in that pod ([sidecar](../guide/kubernetes-sidecar.md))
 - `Dial` / `dial(addr)` — tests and operators, not the default app path
 - Membership, leader, Watch, Publish
 - Optional Watch `topics` / `event_types` (same semantics as CLI `--topic` / `--type`)
+- Status is a string: `alive` or `dead`. Watch crash is `member.dead`; leave is `member.left`. No `Leave()` on Cluster (that is CLI)
 - Locks and leases with a fencing token and background renew
 - Retry `Unavailable` / `Aborted` / `ResourceExhausted` with bounded backoff
 - Watch reconnects with `last_seq`
@@ -35,7 +36,7 @@ TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` 
 
 ## What they do not do
 
-- Join, promote, or configure the cluster (CLI)
+- Join, leave, promote, or configure the cluster (CLI)
 - Store application data
 - Talk to a remote node's Runtime API as the normal path — put a daemon on that host
 

@@ -12,7 +12,7 @@ Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api). Avail
 |---|---|
 | `id` | Node id |
 | `address` | Runtime API address |
-| `status` | `alive` \| `leaving` \| `dead` |
+| `status` | `alive` \| `dead` (liveness; legacy `leaving` is read as `dead`) |
 | `leader` | bool |
 | `role` | `voter` \| `observer` (empty means voter) |
 

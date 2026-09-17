@@ -20,9 +20,20 @@ type Status string
 
 const (
 	StatusAlive   Status = "alive"
-	StatusLeaving Status = "leaving"
 	StatusDead    Status = "dead"
+	// StatusLeaving is legacy. Readers treat it as dead; nothing writes it.
+	StatusLeaving Status = "leaving"
 )
+
+// NormalizeStatus maps empty to alive and legacy leaving to dead.
+func NormalizeStatus(s Status) Status {
+	switch s {
+	case StatusAlive, "":
+		return StatusAlive
+	default:
+		return StatusDead
+	}
+}
 
 // Raft membership role. Empty Role on a Member is treated as voter.
 const (
@@ -55,10 +66,11 @@ type Engine struct {
 	selfID   string
 	leaderID string
 	members  map[string]Member
+	dropped  map[string]struct{}
 	log      *slog.Logger
 
-	// Emit is an optional hook called after membership events (join, left,
-	// leader changed).
+	// Emit is an optional hook called after membership events (join, dead,
+	// left, leader changed).
 	// Called without the mutex held. Safe to call gRPC or Raft methods.
 	Emit func(events.Event)
 }
@@ -69,6 +81,7 @@ func New(selfID, selfAddr string, log *slog.Logger) *Engine {
 		selfID:   selfID,
 		leaderID: selfID, // single node is its own leader until Raft takes over
 		members:  make(map[string]Member),
+		dropped:  make(map[string]struct{}),
 		log:      log,
 	}
 	e.members[selfID] = Member{
@@ -101,6 +114,7 @@ func (e *Engine) JoinAs(id, addr, role string) (bool, error) {
 	}
 	role = NormalizeRole(role)
 	e.mu.Lock()
+	delete(e.dropped, id)
 
 	existing, ok := e.members[id]
 	isNew := !ok || existing.Status != StatusAlive
@@ -133,18 +147,40 @@ func (e *Engine) JoinAs(id, addr, role string) (bool, error) {
 	return isNew, nil
 }
 
-// MarkLeaving marks a member as leaving. Used by the consensus FSM when
-// applying a remove_member log entry. Emits member.left for Watch; callers
-// must not turn that event back into another Raft command.
-func (e *Engine) MarkLeaving(id string) {
+// MarkDead marks a member not-alive. Raft id stays. Emits member.dead.
+// Used by the FSM for presence/heartbeat. No-op if unknown or already dead.
+func (e *Engine) MarkDead(id string) {
 	e.mu.Lock()
 	m, ok := e.members[id]
-	if !ok || m.Status != StatusAlive {
+	if !ok || NormalizeStatus(m.Status) == StatusDead {
 		e.mu.Unlock()
 		return
 	}
-	m.Status = StatusLeaving
+	m.Status = StatusDead
 	e.members[id] = m
+	emit := e.Emit
+	e.mu.Unlock()
+
+	e.log.Info("member.dead", "node_id", id)
+	if emit != nil {
+		emit(events.Event{Type: events.TypeMemberDead, Source: id})
+	}
+}
+
+// Leave removes a member from the list (operator leave). Emits member.left.
+// No-op if the member is unknown.
+func (e *Engine) Leave(id string) {
+	e.mu.Lock()
+	if _, gone := e.dropped[id]; gone {
+		e.mu.Unlock()
+		return
+	}
+	if _, ok := e.members[id]; !ok {
+		e.mu.Unlock()
+		return
+	}
+	delete(e.members, id)
+	e.dropped[id] = struct{}{}
 	emit := e.Emit
 	e.mu.Unlock()
 
@@ -154,25 +190,33 @@ func (e *Engine) MarkLeaving(id string) {
 	}
 }
 
-// Leave marks a member as leaving. Noop if the member is unknown.
-// Emits a TypeMemberLeft event via Emit (if set) after releasing the lock so callers can safely
-// perform gRPC or Raft operations from the hook.
-func (e *Engine) Leave(id string) {
-	e.mu.Lock()
-	m, ok := e.members[id]
-	if !ok || m.Status != StatusAlive {
-		e.mu.Unlock()
-		return
-	}
-	m.Status = StatusLeaving
-	e.members[id] = m
-	emit := e.Emit
-	e.mu.Unlock()
+// Drop is Leave. The FSM applier uses this name.
+func (e *Engine) Drop(id string) { e.Leave(id) }
 
-	e.log.Info("member.left", "node_id", id)
-	if emit != nil {
-		emit(events.Event{Type: events.TypeMemberLeft, Source: id})
+// RestoreMember writes id into the list without emitting. Used by FSM snapshot
+// restore. Legacy status "leaving" becomes dead.
+func (e *Engine) RestoreMember(id, addr, role string, status Status) error {
+	if id == "" {
+		return fmt.Errorf("membership restore: empty node id")
 	}
+	role = NormalizeRole(role)
+	status = NormalizeStatus(status)
+	e.mu.Lock()
+	delete(e.dropped, id)
+	joinedAt := time.Now()
+	if existing, ok := e.members[id]; ok {
+		joinedAt = existing.JoinedAt
+	}
+	e.members[id] = Member{
+		ID:       id,
+		Address:  addr,
+		Status:   status,
+		Leader:   id == e.leaderID,
+		Role:     role,
+		JoinedAt: joinedAt,
+	}
+	e.mu.Unlock()
+	return nil
 }
 
 // Members returns a stable-sorted snapshot of all known members.
@@ -237,4 +281,12 @@ func (e *Engine) LeaderID() string {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	return e.leaderID
+}
+
+// Left reports whether id was removed by Leave/Drop (not merely dead).
+func (e *Engine) Left(id string) bool {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	_, ok := e.dropped[id]
+	return ok
 }

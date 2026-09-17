@@ -18,8 +18,17 @@ CLI → local daemon. Internal module [`buf.build/clusdr/internal`](https://buf.
 
 **Response:** `promoted`, `message`, `members`. Unknown id → `NotFound`. Already a voter → `promoted = true`.
 
+## `RequestLeave`
+
+**Signature:** `RequestLeave(RequestLeaveRequest) returns (RequestLeaveResponse)`
+
+**Request:** optional `node_id` (empty = local node).
+
+**Response:** `left`, `message`, `members`. Unknown id → `NotFound`. Already gone → `left = true`.
+
 ## See also
 
 - [`clusdr join`](../cli/join.md)
 - [`clusdr promote`](../cli/promote.md)
+- [`clusdr leave`](../cli/leave.md)
 - [JoinService](join.md)

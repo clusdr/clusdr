@@ -53,7 +53,7 @@ func memberToProto(m membership.Member) *pb.Member {
 	return &pb.Member{
 		Id:      m.ID,
 		Address: m.Address,
-		Status:  string(m.Status),
+		Status:  string(membership.NormalizeStatus(m.Status)),
 		Leader:  m.Leader,
 		Role:    membership.NormalizeRole(m.Role),
 	}

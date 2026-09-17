@@ -27,7 +27,7 @@ if err != nil {
 defer c.Close()
 ```
 
-`Local` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (10s). That wait is not configurable from a public option.
+`Local` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (10s). That wait is not configurable from a public option. On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../guide/kubernetes.md#apps-on-the-node)).
 
 ```go
 c, err := clusdr.Dial("127.0.0.1:8947", clusdr.WithDataDir("./data-b"))
@@ -87,7 +87,7 @@ leader, err := c.Leader(ctx)
 |---|---|
 | `ID` | Stable node id |
 | `Address` | Advertised Runtime API |
-| `Status` | `alive`, `leaving`, or `dead` |
+| `Status` | `alive` or `dead` (liveness). A left id is gone from the list |
 | `Leader` | True if this id is the current Raft leader |
 | `Role` | `voter` or `observer`. Empty from the wire becomes `voter` |
 
@@ -102,8 +102,8 @@ defer cancel()
 ch, err := c.Watch(ctx)
 for ev := range ch {
     switch ev.Type {
-    case "member.join", "member.left", "leader.changed":
-        // cluster
+    case "member.join", "member.dead", "member.left", "leader.changed":
+        // cluster: crash is member.dead (still listed); leave is member.left (gone)
     case "custom.deployment":
         // payload is []byte
     }
@@ -223,7 +223,7 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 ## Not in this package
 
 - `ListLocks` / `ListLeases`
-- Join, promote, config
+- Join, leave, promote, config
 - A public `WithReadyTimeout`
 
 Wire shapes: [gRPC API](../reference/api/). Python: [Python SDK](python.md). Rust: [Rust SDK](rust.md). TypeScript: [TypeScript SDK](typescript.md). Java: [Java SDK](java.md). Runnable programs: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

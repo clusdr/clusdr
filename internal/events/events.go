@@ -9,6 +9,7 @@ import "time"
 // Built-in event types emitted by Clusdr engines.
 const (
 	TypeMemberJoin    = "member.join"
+	TypeMemberDead    = "member.dead"
 	TypeMemberLeft    = "member.left"
 	TypeLeaderChanged = "leader.changed"
 	TypeLockExpired   = "lock.expired"
@@ -29,9 +30,8 @@ const (
 // Event is a single occurrence within the cluster. Its shape matches the
 // Watch API proto so it can be forwarded to gRPC streams without conversion.
 type Event struct {
-	// Type is a dot-separated string: "member.join", "member.left",
-	// "leader.changed", "lock.expired", "lease.granted". Custom events
-	// use "custom.<topic>".
+	// Type is a dot-separated string: "member.join", "member.dead",
+	// "member.left", "leader.changed", "lock.expired", "lease.granted".
 	Type string
 
 	// Source is the node ID responsible for the event.
