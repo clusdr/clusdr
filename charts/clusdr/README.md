@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://clusdr.io/docs/guide/kubernetes-helm"><img src="https://img.shields.io/badge/docs-clusdr.io-0C0C10" alt="docs"></a>
-  <a href="https://artifacthub.io/packages/helm/clusdr/clusdr"><img src="https://img.shields.io/badge/Artifact%20Hub-clusdr-326CE5" alt="Artifact Hub"></a>
+  <a href="https://artifacthub.io/packages/search?repo=clusdr"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/clusdr" alt="Artifact Hub"></a>
   <a href="https://github.com/clusdr/clusdr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/clusdr/clusdr" alt="License"></a>
 </p>
 
