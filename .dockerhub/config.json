@@ -1,8 +1,22 @@
 {
-  "repository": "durguto/clusdr",
-  "short_description": "A runtime for the cluster. An SDK for the app.",
-  "categories": [
-    {"name": "Developer tools", "slug": "developer-tools"},
-    {"name": "Networking", "slug": "networking"}
+  "repositories": [
+    {
+      "repository": "durguto/clusdr",
+      "readme": "README.md",
+      "short_description": "A runtime for the cluster. An SDK for the app.",
+      "categories": [
+        {"name": "Developer tools", "slug": "developer-tools"},
+        {"name": "Networking", "slug": "networking"}
+      ]
+    },
+    {
+      "repository": "durguto/clusdr-operator",
+      "readme": "README.operator.md",
+      "short_description": "Kubernetes Operator for clusdr. Reconciles ClusdrCluster. Not the daemon.",
+      "categories": [
+        {"name": "Developer tools", "slug": "developer-tools"},
+        {"name": "Integration & delivery", "slug": "integration-and-delivery"}
+      ]
+    }
   ]
 }

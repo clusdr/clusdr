@@ -19,15 +19,20 @@ def die(msg: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
-def load() -> tuple[dict, str]:
+def load() -> list[tuple[dict, str]]:
     cfg = json.loads((ROOT / "config.json").read_text())
-    readme = (ROOT / "README.md").read_text()
-    short = cfg["short_description"]
-    if len(short.encode()) > 100:
-        die(f"short_description is {len(short.encode())} bytes; Hub max is 100")
-    if len(readme.encode()) > 25000:
-        die(f"README.md is {len(readme.encode())} bytes; Hub max is 25000")
-    return cfg, readme
+    items = cfg["repositories"] if "repositories" in cfg else [cfg]
+    out: list[tuple[dict, str]] = []
+    for item in items:
+        readme_name = item.get("readme", "README.md")
+        readme = (ROOT / readme_name).read_text()
+        short = item["short_description"]
+        if len(short.encode()) > 100:
+            die(f"{item['repository']}: short_description is {len(short.encode())} bytes; Hub max is 100")
+        if len(readme.encode()) > 25000:
+            die(f"{readme_name} is {len(readme.encode())} bytes; Hub max is 25000")
+        out.append((item, readme))
+    return out
 
 
 def request(method: str, url: str, token: str | None = None, data: object | None = None) -> tuple[int, object]:
@@ -61,41 +66,44 @@ def login(username: str, password: str) -> str:
     return str(payload["token"])
 
 
+def push_one(token: str, item: dict, readme: str) -> None:
+    ns, name = str(item["repository"]).split("/", 1)
+    payload = {
+        "description": item["short_description"],
+        "full_description": readme,
+    }
+    status, result = request("PATCH", f"{HUB}/repositories/{ns}/{name}/", token=token, data=payload)
+    if status != 200:
+        die(f"PATCH {ns}/{name} failed ({status}): {result}")
+
+    cat_status, _ = request(
+        "PATCH",
+        f"{HUB}/repositories/{ns}/{name}/categories/",
+        token=token,
+        data=item["categories"],
+    )
+    if cat_status != 200:
+        die(f"PATCH {ns}/{name} categories failed ({cat_status})")
+
+    status, verify = request("GET", f"{HUB}/repositories/{ns}/{name}/", token=token)
+    if status != 200 or not isinstance(verify, dict):
+        die(f"GET {ns}/{name} failed ({status})")
+    print(f"updated {ns}/{name}")
+    print(f"description: {verify.get('description')}")
+    print(f"categories: {verify.get('categories')}")
+    full = verify.get("full_description")
+    print(f"overview_bytes: {len(full.encode()) if isinstance(full, str) else 0}")
+
+
 def main() -> None:
     username = os.environ.get("DOCKERHUB_USERNAME", "").strip()
     password = os.environ.get("DOCKERHUB_TOKEN", "").strip()
     if not username or not password:
         die("DOCKERHUB_USERNAME and DOCKERHUB_TOKEN must be set")
 
-    cfg, readme = load()
-    ns, name = str(cfg["repository"]).split("/", 1)
     token = login(username, password)
-
-    payload = {
-        "description": cfg["short_description"],
-        "full_description": readme,
-    }
-    status, result = request("PATCH", f"{HUB}/repositories/{ns}/{name}/", token=token, data=payload)
-    if status != 200:
-        die(f"PATCH repository failed ({status}): {result}")
-
-    cat_status, _ = request(
-        "PATCH",
-        f"{HUB}/repositories/{ns}/{name}/categories/",
-        token=token,
-        data=cfg["categories"],
-    )
-    if cat_status != 200:
-        die(f"PATCH categories failed ({cat_status})")
-
-    status, verify = request("GET", f"{HUB}/repositories/{ns}/{name}/", token=token)
-    if status != 200 or not isinstance(verify, dict):
-        die(f"GET repository failed ({status})")
-    print(f"updated {ns}/{name}")
-    print(f"description: {verify.get('description')}")
-    print(f"categories: {verify.get('categories')}")
-    full = verify.get("full_description")
-    print(f"overview_bytes: {len(full.encode()) if isinstance(full, str) else 0}")
+    for item, readme in load():
+        push_one(token, item, readme)
 
 
 if __name__ == "__main__":
