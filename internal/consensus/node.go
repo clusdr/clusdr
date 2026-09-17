@@ -51,6 +51,7 @@ type Config struct {
 // Node wraps hashicorp/raft with Clusdr lifecycle and observation conventions.
 type Node struct {
 	r      *raftlib.Raft
+	store  *raftbolt.BoltStore
 	log    *slog.Logger
 	selfID string
 
@@ -118,6 +119,7 @@ func New(cfg Config, nodeID, dataDir string, applier MemberApplier, lockTab Lock
 	fsm := &FSM{log: log, applier: applier, locks: lockTab, leases: leaseTab}
 	r, err := raftlib.NewRaft(rc, fsm, boltStore, boltStore, snapStore, transport)
 	if err != nil {
+		_ = boltStore.Close()
 		return nil, fmt.Errorf("new raft: %w", err)
 	}
 
@@ -133,13 +135,15 @@ func New(cfg Config, nodeID, dataDir string, applier MemberApplier, lockTab Lock
 		}
 		if err := r.BootstrapCluster(configuration).Error(); err != nil &&
 			!errors.Is(err, raftlib.ErrCantBootstrap) {
+			_ = r.Shutdown().Error()
+			_ = boltStore.Close()
 			return nil, fmt.Errorf("raft bootstrap: %w", err)
 		}
 		log.Info("raft bootstrap complete", "node_id", nodeID, "addr", raftAddr)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	return &Node{r: r, log: log, selfID: nodeID, ctx: ctx, cancel: cancel}, nil
+	return &Node{r: r, store: boltStore, log: log, selfID: nodeID, ctx: ctx, cancel: cancel}, nil
 }
 
 func raftTransport(cfg Config) (raftlib.Transport, string, error) {
@@ -524,8 +528,14 @@ func (n *Node) applyLock(data []byte, op, name string) (lockResult, error) {
 // Shutdown stops all watcher goroutines and shuts down the Raft node cleanly.
 func (n *Node) Shutdown() error {
 	n.cancel() // stops all watchers
+	var first error
 	if err := n.r.Shutdown().Error(); err != nil {
-		return fmt.Errorf("raft shutdown: %w", err)
+		first = fmt.Errorf("raft shutdown: %w", err)
 	}
-	return nil
+	if n.store != nil {
+		if err := n.store.Close(); err != nil && first == nil {
+			first = fmt.Errorf("raft store close: %w", err)
+		}
+	}
+	return first
 }
