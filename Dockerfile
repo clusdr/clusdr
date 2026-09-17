@@ -1,15 +1,23 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.27-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS builder
 
 WORKDIR /src
+
+COPY go.mod go.sum ./
+COPY api/go.mod api/go.sum ./api/
+COPY sdk/go.mod sdk/go.sum ./sdk/
+RUN go mod download
+
 COPY . .
 
+ARG TARGETOS
+ARG TARGETARCH
 ARG VERSION=dev
 ARG COMMIT=none
 ARG BUILD_TIME=unknown
 
-RUN CGO_ENABLED=0 GOOS=linux go build \
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags "-s -w \
       -X github.com/clusdr/clusdr/internal/version.Version=${VERSION} \
       -X github.com/clusdr/clusdr/internal/version.Commit=${COMMIT} \
