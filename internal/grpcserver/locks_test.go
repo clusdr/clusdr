@@ -42,14 +42,14 @@ func TestLockService_RaceOneWins(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	a, err := c.TryLock(context.Background(), &pb.LockRequest{Name: "scheduler", Holder: "node-a"})
+	a, err := c.TryLock(context.Background(), &pb.TryLockRequest{Name: "scheduler", Holder: "node-a"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !a.Acquired {
 		t.Fatal("node-a should win")
 	}
-	b, err := c.TryLock(context.Background(), &pb.LockRequest{Name: "scheduler", Holder: "node-b"})
+	b, err := c.TryLock(context.Background(), &pb.TryLockRequest{Name: "scheduler", Holder: "node-b"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func TestLockService_RaceOneWins(t *testing.T) {
 		t.Fatalf("unlock: %v %+v", err, u)
 	}
 
-	b2, err := c.TryLock(context.Background(), &pb.LockRequest{Name: "scheduler", Holder: "node-b"})
+	b2, err := c.TryLock(context.Background(), &pb.TryLockRequest{Name: "scheduler", Holder: "node-b"})
 	if err != nil || !b2.Acquired {
 		t.Fatalf("node-b after unlock: %+v %v", b2, err)
 	}
@@ -100,7 +100,7 @@ func TestLockService_LockWaitsForUnlock(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	first, err := c.TryLock(context.Background(), &pb.LockRequest{Name: "job", Holder: "node-a"})
+	first, err := c.TryLock(context.Background(), &pb.TryLockRequest{Name: "job", Holder: "node-a"})
 	if err != nil || !first.Acquired {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestLockService_TTLExpireThenOtherWins(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	a, err := c.TryLock(context.Background(), &pb.LockRequest{
+	a, err := c.TryLock(context.Background(), &pb.TryLockRequest{
 		Name: "job", Holder: "node-a", TtlMs: 50,
 	})
 	if err != nil || !a.Acquired {
@@ -166,7 +166,7 @@ func TestLockService_TTLExpireThenOtherWins(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 
-	b, err := c.TryLock(context.Background(), &pb.LockRequest{Name: "job", Holder: "node-b"})
+	b, err := c.TryLock(context.Background(), &pb.TryLockRequest{Name: "job", Holder: "node-b"})
 	if err != nil || !b.Acquired {
 		t.Fatalf("node-b after expire: %+v %v", b, err)
 	}
@@ -186,13 +186,13 @@ func TestLockService_RenewExtendsDeadline(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	a, err := c.TryLock(context.Background(), &pb.LockRequest{
+	a, err := c.TryLock(context.Background(), &pb.TryLockRequest{
 		Name: "job", Holder: "node-a", TtlMs: 80,
 	})
 	if err != nil || !a.Acquired {
 		t.Fatal(err)
 	}
-	r, err := c.Renew(context.Background(), &pb.RenewLockRequest{
+	r, err := c.Renew(context.Background(), &pb.LockServiceRenewRequest{
 		Name: "job", Holder: "node-a", FencingToken: a.FencingToken, TtlMs: 3600_000,
 	})
 	if err != nil || !r.Renewed {
@@ -218,7 +218,7 @@ func TestLockService_LockWaitsForExpire(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	first, err := c.TryLock(context.Background(), &pb.LockRequest{
+	first, err := c.TryLock(context.Background(), &pb.TryLockRequest{
 		Name: "job", Holder: "node-a", TtlMs: 80,
 	})
 	if err != nil || !first.Acquired {
@@ -273,7 +273,7 @@ func TestLockService_ObserverRejectsMutations(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLockServiceClient(conn)
 
-	_, err = c.TryLock(context.Background(), &pb.LockRequest{Name: "scheduler", Holder: "app"})
+	_, err = c.TryLock(context.Background(), &pb.TryLockRequest{Name: "scheduler", Holder: "app"})
 	if status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("TryLock: got %v, want FailedPrecondition", err)
 	}
@@ -285,7 +285,7 @@ func TestLockService_ObserverRejectsMutations(t *testing.T) {
 	if status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("Unlock: got %v, want FailedPrecondition", err)
 	}
-	_, err = c.Renew(context.Background(), &pb.RenewLockRequest{Name: "scheduler", Holder: "app"})
+	_, err = c.Renew(context.Background(), &pb.LockServiceRenewRequest{Name: "scheduler", Holder: "app"})
 	if status.Code(err) != codes.FailedPrecondition {
 		t.Fatalf("Renew: got %v, want FailedPrecondition", err)
 	}

@@ -49,7 +49,7 @@ func (h *RaftHolder) Grant(ctx context.Context, name, owner string, ttl time.Dur
 		return 0, err
 	}
 	defer cc.Close()
-	resp, err := pb.NewLeaseServiceClient(cc).Grant(ctx, &pb.GrantLeaseRequest{
+	resp, err := pb.NewLeaseServiceClient(cc).Grant(ctx, &pb.GrantRequest{
 		Name:  name,
 		Owner: owner,
 		TtlMs: ttl.Milliseconds(),
@@ -74,7 +74,7 @@ func (h *RaftHolder) Renew(ctx context.Context, name, owner string, token uint64
 		return err
 	}
 	defer cc.Close()
-	resp, err := pb.NewLeaseServiceClient(cc).Renew(ctx, &pb.RenewLeaseRequest{
+	resp, err := pb.NewLeaseServiceClient(cc).Renew(ctx, &pb.LeaseServiceRenewRequest{
 		Name:         name,
 		Owner:        owner,
 		FencingToken: token,

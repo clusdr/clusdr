@@ -10,7 +10,7 @@ Leader commits; followers forward. An **observer** rejects Lock / TryLock / Unlo
 | `Renew` | Extends deadline; `ttl_ms = 0` reuses the last TTL |
 | `ListLocks` | All current grants |
 
-**LockRequest:** `name`, `holder` (empty → this daemon's node id), `ttl_ms` (`0` → `lock.ttl`).
+**LockRequest / TryLockRequest:** `name`, `holder` (empty → this daemon's node id), `ttl_ms` (`0` → `lock.ttl`). Same fields; `TryLock` does not wait.
 
 **LockResponse:** `acquired`, `message`, `fencing_token`, `holder`, `deadline_unix_ms`.
 

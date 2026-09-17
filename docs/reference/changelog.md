@@ -11,6 +11,15 @@ Notable changes in each release. The daemon and the language SDKs share one vers
 
 ## Unreleased
 
+### Added
+
+- Buf for proto: `make proto` runs `buf generate`; pull requests lint and reject wire-incompatible changes
+- BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (application) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal) (join/heartbeat). `main` and `v*` tags push both.
+
+### Changed
+
+- gRPC request/response message names follow Buf STANDARD (`TryLockRequest`, `GrantRequest`, `LockServiceRenewRequest`, `LeaseServiceRenewRequest`). RPC paths and field numbers are unchanged.
+
 ## 0.1.4 — 2026-09-17
 
 ### Added

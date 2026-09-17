@@ -1,0 +1,12 @@
+version: v2
+modules:
+  - path: proto/api
+    name: buf.build/clusdr/api
+  - path: proto/internal
+    name: buf.build/clusdr/internal
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

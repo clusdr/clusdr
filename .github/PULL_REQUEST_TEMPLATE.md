@@ -9,6 +9,7 @@
 ## Testing
 
 - [ ] `make test`, `make vet`, and `make lint` (skip if docs-only)
+- [ ] `make proto` and `make proto-lint` if `proto/` moved
 - [ ] Docs under `docs/` updated in this change if config, CLI, proto, SDK, or defaults moved
 
 ## Commits

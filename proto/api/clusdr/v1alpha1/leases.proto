@@ -9,13 +9,13 @@ option go_package = "github.com/clusdr/clusdr/api/clusdr/v1alpha1;clusdrv1alpha1
 // A lease is lighter than a lock: Grant never blocks. The owner must Renew
 // before the deadline or the leader expires the grant (lease.expired).
 service LeaseService {
-  rpc Grant(GrantLeaseRequest) returns (GrantLeaseResponse);
-  rpc Renew(RenewLeaseRequest) returns (RenewLeaseResponse);
-  rpc Revoke(RevokeLeaseRequest) returns (RevokeLeaseResponse);
+  rpc Grant(GrantRequest) returns (GrantResponse);
+  rpc Renew(LeaseServiceRenewRequest) returns (LeaseServiceRenewResponse);
+  rpc Revoke(RevokeRequest) returns (RevokeResponse);
   rpc ListLeases(ListLeasesRequest) returns (ListLeasesResponse);
 }
 
-message GrantLeaseRequest {
+message GrantRequest {
   // name is the lease identity (1–128 chars: letters, digits, . _ -).
   string name = 1;
   // owner is the node or client id. Empty → this daemon's node id.
@@ -24,7 +24,7 @@ message GrantLeaseRequest {
   int64 ttl_ms = 3;
 }
 
-message GrantLeaseResponse {
+message GrantResponse {
   bool granted = 1;
   string message = 2;
   uint64 fencing_token = 3;
@@ -32,7 +32,7 @@ message GrantLeaseResponse {
   int64 deadline_unix_ms = 5;
 }
 
-message RenewLeaseRequest {
+message LeaseServiceRenewRequest {
   string name = 1;
   string owner = 2;
   uint64 fencing_token = 3;
@@ -40,20 +40,20 @@ message RenewLeaseRequest {
   int64 ttl_ms = 4;
 }
 
-message RenewLeaseResponse {
+message LeaseServiceRenewResponse {
   bool renewed = 1;
   string message = 2;
   uint64 fencing_token = 3;
   int64 deadline_unix_ms = 4;
 }
 
-message RevokeLeaseRequest {
+message RevokeRequest {
   string name = 1;
   string owner = 2;
   uint64 fencing_token = 3;
 }
 
-message RevokeLeaseResponse {
+message RevokeResponse {
   bool revoked = 1;
   string message = 2;
 }

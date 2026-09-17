@@ -16,10 +16,10 @@ func (c *client) Lease(ctx context.Context, name string, ttl time.Duration) (*Le
 		return l, nil
 	}
 	rpcCtx, cancel := c.withRPC(ctx)
-	var resp *pb.GrantLeaseResponse
+	var resp *pb.GrantResponse
 	err := retry(rpcCtx, func() error {
 		var e error
-		resp, e = c.lease.Grant(rpcCtx, &pb.GrantLeaseRequest{
+		resp, e = c.lease.Grant(rpcCtx, &pb.GrantRequest{
 			Name:  name,
 			Owner: c.holder,
 			TtlMs: ttlMs(ttl),
@@ -54,10 +54,10 @@ func (c *client) Renew(ctx context.Context, name string) error {
 	}
 	ctx, cancel := c.withRPC(ctx)
 	defer cancel()
-	var resp *pb.RenewLeaseResponse
+	var resp *pb.LeaseServiceRenewResponse
 	err := retry(ctx, func() error {
 		var e error
-		resp, e = c.lease.Renew(ctx, &pb.RenewLeaseRequest{
+		resp, e = c.lease.Renew(ctx, &pb.LeaseServiceRenewRequest{
 			Name:         l.Name,
 			Owner:        l.Owner,
 			FencingToken: l.Token,
@@ -93,10 +93,10 @@ func (l *Lease) drop(ctx context.Context) error {
 	l.stopRenew()
 	ctx, cancel := l.c.withRPC(ctx)
 	defer cancel()
-	var resp *pb.RevokeLeaseResponse
+	var resp *pb.RevokeResponse
 	err := retry(ctx, func() error {
 		var e error
-		resp, e = l.c.lease.Revoke(ctx, &pb.RevokeLeaseRequest{
+		resp, e = l.c.lease.Revoke(ctx, &pb.RevokeRequest{
 			Name:         l.Name,
 			Owner:        l.Owner,
 			FencingToken: l.Token,
@@ -117,7 +117,7 @@ func (l *Lease) drop(ctx context.Context) error {
 	return nil
 }
 
-func (c *client) adoptLease(life context.Context, resp *pb.GrantLeaseResponse, name string, ttl time.Duration) *Lease {
+func (c *client) adoptLease(life context.Context, resp *pb.GrantResponse, name string, ttl time.Duration) *Lease {
 	l := leaseFromResp(resp, name)
 	l.c = c
 	c.mu.Lock()
@@ -146,7 +146,7 @@ func (c *client) startLeaseRenew(life context.Context, l *Lease, ttl time.Durati
 				return
 			case <-t.C:
 				rctx, rcancel := context.WithTimeout(ctx, c.opts.requestTimeout)
-				resp, err := c.lease.Renew(rctx, &pb.RenewLeaseRequest{
+				resp, err := c.lease.Renew(rctx, &pb.LeaseServiceRenewRequest{
 					Name:         l.Name,
 					Owner:        l.Owner,
 					FencingToken: l.Token,
@@ -211,7 +211,7 @@ func (c *client) releaseLeases() {
 	}
 }
 
-func leaseFromResp(resp *pb.GrantLeaseResponse, name string) *Lease {
+func leaseFromResp(resp *pb.GrantResponse, name string) *Lease {
 	l := &Lease{Name: name}
 	if resp == nil {
 		return l

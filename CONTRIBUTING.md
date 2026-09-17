@@ -32,6 +32,7 @@ CI lints PR commits against that grammar. Prefer squash-merge; the squash title 
 ## Requirements
 
 - Go 1.27
+- [Buf](https://buf.build/docs/cli/installation) (1.73+) for proto — `brew install bufbuild/buf/buf`
 
 ```bash
 make test    # go test -race ./... and sdk/
@@ -40,14 +41,21 @@ make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
 ```
 
-Regenerate gRPC stubs after editing `proto/`:
+`proto/api` is the application wire (`buf.build/clusdr/api`). `proto/internal` is join/heartbeat (`buf.build/clusdr/internal`). After editing either:
 
 ```bash
-make proto
-make proto-python   # writes ../clusdr-python/src
+make proto-lint   # buf lint + format
+make proto        # buf generate → api/
+make proto-python # sibling clusdr-python stubs
 ```
 
-Rust and TypeScript load `.proto` files at runtime. Copy them in the sibling trees (`make proto` in `clusdr-rust` / `clusdr-js`). Java compiles `.proto` at build time (`make proto` then `mvn test` in `clusdr-java`).
+Pull requests lint, format, and run `buf breaking` against the PR base (FILE). Additive changes in `v1alpha1` are fine; field delete/renumber/type change is not. Intentional breaks use the `buf skip breaking` label.
+
+Language SDKs export `buf.build/clusdr/api` only (or the sibling `../clusdr/proto/api` checkout). They never take `internal`.
+
+Push to `main` or a `v*` tag publishes both modules to the [Buf Schema Registry](https://buf.build/clusdr). That needs a `clusdr` org on buf.build and repo secret `BUF_TOKEN` (account token with push). Repositories are created public so SDK CI can export without a token.
+
+Message names follow Buf STANDARD: `{Method}Request` when the method is unique in the package (`GrantRequest`, `LockRequest`). Two services that share a method name use `{Service}{Method}Request` (`LockServiceRenewRequest`, `LeaseServiceRenewRequest`). `TryLock` has its own request/response types (same fields as `Lock`). gRPC method paths (`/clusdr.v1alpha1.LockService/TryLock`) are the wire identity; protobuf field numbers are the payload identity.
 
 `gofmt` on changed Go files.
 
@@ -62,7 +70,10 @@ cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
 examples/           small programs against a local daemon; each example has go/, python/, rust/, typescript/, java/ packages
 internal/           daemon
-proto/              .proto sources
+proto/api           application .proto (BSR buf.build/clusdr/api)
+proto/internal      join/heartbeat .proto (BSR buf.build/clusdr/internal)
+buf.yaml            Buf workspace (two named modules)
+buf.gen.yaml        Go stub generation into api/
 api/                generated Go stubs (module github.com/clusdr/clusdr/api)
 sdk/                application SDK (module github.com/clusdr/clusdr/sdk)
 ```

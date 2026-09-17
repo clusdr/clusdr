@@ -11,6 +11,12 @@ import (
 	pb "github.com/clusdr/clusdr/api/clusdr/v1alpha1"
 )
 
+type lockGrant interface {
+	GetHolder() string
+	GetFencingToken() uint64
+	GetDeadlineUnixMs() int64
+}
+
 func (c *client) Lock(ctx context.Context, name string, ttl time.Duration) (*Lock, error) {
 	if l := c.heldLock(name); l != nil {
 		return l, nil
@@ -46,10 +52,10 @@ func (c *client) TryLock(ctx context.Context, name string, ttl time.Duration) (*
 	}
 	ctx, cancel := c.withRPC(ctx)
 	defer cancel()
-	var resp *pb.LockResponse
+	var resp *pb.TryLockResponse
 	err := retry(ctx, func() error {
 		var e error
-		resp, e = c.lock.TryLock(ctx, &pb.LockRequest{
+		resp, e = c.lock.TryLock(ctx, &pb.TryLockRequest{
 			Name:   name,
 			Holder: c.holder,
 			TtlMs:  ttlMs(ttl),
@@ -60,7 +66,10 @@ func (c *client) TryLock(ctx context.Context, name string, ttl time.Duration) (*
 		return nil, false, fmt.Errorf("clusdr: trylock %q: %w", name, err)
 	}
 	if resp == nil || !resp.GetAcquired() {
-		cur := lockFromResp(resp, name)
+		cur := &Lock{Name: name}
+		if resp != nil {
+			cur = lockFromResp(resp, name)
+		}
 		return cur, false, nil
 	}
 	return c.adopt(resp, name, ttl), true, nil
@@ -105,7 +114,7 @@ func (l *Lock) release(ctx context.Context) error {
 	return nil
 }
 
-func (c *client) adopt(resp *pb.LockResponse, name string, ttl time.Duration) *Lock {
+func (c *client) adopt(resp lockGrant, name string, ttl time.Duration) *Lock {
 	l := lockFromResp(resp, name)
 	l.c = c
 	c.mu.Lock()
@@ -134,7 +143,7 @@ func (c *client) startRenew(l *Lock, ttl time.Duration) {
 				return
 			case <-t.C:
 				rctx, rcancel := context.WithTimeout(ctx, c.opts.requestTimeout)
-				resp, err := c.lock.Renew(rctx, &pb.RenewLockRequest{
+				resp, err := c.lock.Renew(rctx, &pb.LockServiceRenewRequest{
 					Name:         l.Name,
 					Holder:       l.Holder,
 					FencingToken: l.Token,
@@ -199,11 +208,8 @@ func (c *client) releaseHeld() {
 	}
 }
 
-func lockFromResp(resp *pb.LockResponse, name string) *Lock {
+func lockFromResp(resp lockGrant, name string) *Lock {
 	l := &Lock{Name: name}
-	if resp == nil {
-		return l
-	}
 	if resp.GetHolder() != "" {
 		l.Holder = resp.GetHolder()
 	}

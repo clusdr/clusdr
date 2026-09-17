@@ -58,7 +58,7 @@ type leaseService struct {
 	defaultTTL time.Duration
 }
 
-func (s *leaseService) Grant(ctx context.Context, req *pb.GrantLeaseRequest) (*pb.GrantLeaseResponse, error) {
+func (s *leaseService) Grant(ctx context.Context, req *pb.GrantRequest) (*pb.GrantResponse, error) {
 	if err := leases.ValidName(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -73,7 +73,7 @@ func (s *leaseService) Grant(ctx context.Context, req *pb.GrantLeaseRequest) (*p
 	}
 	if !ok {
 		held, _ := s.table.Get(req.GetName())
-		return &pb.GrantLeaseResponse{
+		return &pb.GrantResponse{
 			Granted:        false,
 			Message:        "held",
 			FencingToken:   held.Token,
@@ -84,7 +84,7 @@ func (s *leaseService) Grant(ctx context.Context, req *pb.GrantLeaseRequest) (*p
 	return s.grantResponse(req.GetName(), owner, tok), nil
 }
 
-func (s *leaseService) Renew(ctx context.Context, req *pb.RenewLeaseRequest) (*pb.RenewLeaseResponse, error) {
+func (s *leaseService) Renew(ctx context.Context, req *pb.LeaseServiceRenewRequest) (*pb.LeaseServiceRenewResponse, error) {
 	if err := leases.ValidName(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -101,14 +101,14 @@ func (s *leaseService) Renew(ctx context.Context, req *pb.RenewLeaseRequest) (*p
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
-	return &pb.RenewLeaseResponse{
+	return &pb.LeaseServiceRenewResponse{
 		Renewed:        true,
 		FencingToken:   req.GetFencingToken(),
 		DeadlineUnixMs: unixMs(deadline),
 	}, nil
 }
 
-func (s *leaseService) Revoke(ctx context.Context, req *pb.RevokeLeaseRequest) (*pb.RevokeLeaseResponse, error) {
+func (s *leaseService) Revoke(ctx context.Context, req *pb.RevokeRequest) (*pb.RevokeResponse, error) {
 	if err := leases.ValidName(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -119,7 +119,7 @@ func (s *leaseService) Revoke(ctx context.Context, req *pb.RevokeLeaseRequest) (
 	if err := s.applyRevoke(req.GetName(), owner, req.GetFencingToken()); err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
-	return &pb.RevokeLeaseResponse{Revoked: true}, nil
+	return &pb.RevokeResponse{Revoked: true}, nil
 }
 
 func (s *leaseService) ListLeases(_ context.Context, _ *pb.ListLeasesRequest) (*pb.ListLeasesResponse, error) {
@@ -140,8 +140,8 @@ func (s *leaseService) ListLeases(_ context.Context, _ *pb.ListLeasesRequest) (*
 	return &pb.ListLeasesResponse{Leases: out}, nil
 }
 
-func (s *leaseService) grantResponse(name, owner string, tok uint64) *pb.GrantLeaseResponse {
-	resp := &pb.GrantLeaseResponse{
+func (s *leaseService) grantResponse(name, owner string, tok uint64) *pb.GrantResponse {
+	resp := &pb.GrantResponse{
 		Granted:      true,
 		FencingToken: tok,
 		Owner:        owner,
@@ -208,7 +208,7 @@ func (s *leaseService) applyRevoke(name, owner string, token uint64) error {
 	return s.table.Revoke(name, owner, token)
 }
 
-func (s *leaseService) forwardGrant(ctx context.Context, req *pb.GrantLeaseRequest) (*pb.GrantLeaseResponse, error) {
+func (s *leaseService) forwardGrant(ctx context.Context, req *pb.GrantRequest) (*pb.GrantResponse, error) {
 	cc, err := s.dialLeader()
 	if err != nil {
 		return nil, err
@@ -217,7 +217,7 @@ func (s *leaseService) forwardGrant(ctx context.Context, req *pb.GrantLeaseReque
 	return pb.NewLeaseServiceClient(cc).Grant(ctx, req)
 }
 
-func (s *leaseService) forwardRenew(ctx context.Context, req *pb.RenewLeaseRequest) (*pb.RenewLeaseResponse, error) {
+func (s *leaseService) forwardRenew(ctx context.Context, req *pb.LeaseServiceRenewRequest) (*pb.LeaseServiceRenewResponse, error) {
 	cc, err := s.dialLeader()
 	if err != nil {
 		return nil, err
@@ -226,7 +226,7 @@ func (s *leaseService) forwardRenew(ctx context.Context, req *pb.RenewLeaseReque
 	return pb.NewLeaseServiceClient(cc).Renew(ctx, req)
 }
 
-func (s *leaseService) forwardRevoke(ctx context.Context, req *pb.RevokeLeaseRequest) (*pb.RevokeLeaseResponse, error) {
+func (s *leaseService) forwardRevoke(ctx context.Context, req *pb.RevokeRequest) (*pb.RevokeResponse, error) {
 	cc, err := s.dialLeader()
 	if err != nil {
 		return nil, err

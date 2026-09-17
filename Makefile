@@ -1,4 +1,4 @@
-.PHONY: build bench test vet lint proto proto-python clean
+.PHONY: build bench test vet lint proto proto-lint proto-python clean
 
 VERSION  ?= dev
 COMMIT   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -29,26 +29,14 @@ lint:
 	cd sdk && golangci-lint run --config ../.golangci.yml ./...
 
 proto:
-	protoc \
-		--proto_path=proto \
-		--go_out=api \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=api \
-		--go-grpc_opt=paths=source_relative \
-		$$(find proto -name '*.proto')
+	buf generate
+
+proto-lint:
+	buf lint
+	buf format --exit-code --diff
 
 proto-python:
-	python3 -m grpc_tools.protoc \
-		--proto_path=proto \
-		--python_out=../clusdr-python/src \
-		--grpc_python_out=../clusdr-python/src \
-		--pyi_out=../clusdr-python/src \
-		proto/clusdr/v1alpha1/health.proto \
-		proto/clusdr/v1alpha1/membership.proto \
-		proto/clusdr/v1alpha1/watch.proto \
-		proto/clusdr/v1alpha1/events.proto \
-		proto/clusdr/v1alpha1/locks.proto \
-		proto/clusdr/v1alpha1/leases.proto
+	$(MAKE) -C ../clusdr-python proto
 
 clean:
 	rm -rf bin/

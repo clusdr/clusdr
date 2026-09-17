@@ -12,11 +12,11 @@ service LockService {
   // Lock blocks until the named lock is acquired or the RPC deadline expires.
   rpc Lock(LockRequest) returns (LockResponse);
   // TryLock attempts once and returns immediately.
-  rpc TryLock(LockRequest) returns (LockResponse);
+  rpc TryLock(TryLockRequest) returns (TryLockResponse);
   // Unlock releases a lock. holder + fencing_token must match the holder.
   rpc Unlock(UnlockRequest) returns (UnlockResponse);
   // Renew extends the deadline. holder + fencing_token must match.
-  rpc Renew(RenewLockRequest) returns (RenewLockResponse);
+  rpc Renew(LockServiceRenewRequest) returns (LockServiceRenewResponse);
   // ListLocks returns every currently held lock.
   rpc ListLocks(ListLocksRequest) returns (ListLocksResponse);
 }
@@ -40,6 +40,23 @@ message LockResponse {
   int64 deadline_unix_ms = 5;
 }
 
+message TryLockRequest {
+  // name is the lock identity (1–128 chars: letters, digits, . _ -).
+  string name = 1;
+  // holder is the node or client id taking the lock. Empty → this daemon's node id.
+  string holder = 2;
+  // ttl_ms is the grant lifetime. 0 uses the daemon default (lock.ttl).
+  int64 ttl_ms = 3;
+}
+
+message TryLockResponse {
+  bool acquired = 1;
+  string message = 2;
+  uint64 fencing_token = 3;
+  string holder = 4;
+  int64 deadline_unix_ms = 5;
+}
+
 message UnlockRequest {
   string name = 1;
   string holder = 2;
@@ -51,7 +68,7 @@ message UnlockResponse {
   string message = 2;
 }
 
-message RenewLockRequest {
+message LockServiceRenewRequest {
   string name = 1;
   string holder = 2;
   uint64 fencing_token = 3;
@@ -59,7 +76,7 @@ message RenewLockRequest {
   int64 ttl_ms = 4;
 }
 
-message RenewLockResponse {
+message LockServiceRenewResponse {
   bool renewed = 1;
   string message = 2;
   uint64 fencing_token = 3;

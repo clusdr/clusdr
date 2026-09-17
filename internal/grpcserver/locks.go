@@ -123,7 +123,7 @@ func (s *lockService) Lock(ctx context.Context, req *pb.LockRequest) (*pb.LockRe
 	}
 }
 
-func (s *lockService) TryLock(ctx context.Context, req *pb.LockRequest) (*pb.LockResponse, error) {
+func (s *lockService) TryLock(ctx context.Context, req *pb.TryLockRequest) (*pb.TryLockResponse, error) {
 	if err := locks.ValidName(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -141,7 +141,7 @@ func (s *lockService) TryLock(ctx context.Context, req *pb.LockRequest) (*pb.Loc
 	}
 	if !ok {
 		held, _ := s.table.Get(req.GetName())
-		return &pb.LockResponse{
+		return &pb.TryLockResponse{
 			Acquired:       false,
 			Message:        "held",
 			FencingToken:   held.Token,
@@ -149,7 +149,7 @@ func (s *lockService) TryLock(ctx context.Context, req *pb.LockRequest) (*pb.Loc
 			DeadlineUnixMs: unixMs(held.Deadline),
 		}, nil
 	}
-	return s.grantResponse(req.GetName(), holder, tok), nil
+	return s.tryLockResponse(req.GetName(), holder, tok), nil
 }
 
 func (s *lockService) Unlock(ctx context.Context, req *pb.UnlockRequest) (*pb.UnlockResponse, error) {
@@ -169,7 +169,7 @@ func (s *lockService) Unlock(ctx context.Context, req *pb.UnlockRequest) (*pb.Un
 	return &pb.UnlockResponse{Released: true}, nil
 }
 
-func (s *lockService) Renew(ctx context.Context, req *pb.RenewLockRequest) (*pb.RenewLockResponse, error) {
+func (s *lockService) Renew(ctx context.Context, req *pb.LockServiceRenewRequest) (*pb.LockServiceRenewResponse, error) {
 	if err := locks.ValidName(req.GetName()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -189,7 +189,7 @@ func (s *lockService) Renew(ctx context.Context, req *pb.RenewLockRequest) (*pb.
 	if err != nil {
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	}
-	return &pb.RenewLockResponse{
+	return &pb.LockServiceRenewResponse{
 		Renewed:        true,
 		FencingToken:   req.GetFencingToken(),
 		DeadlineUnixMs: unixMs(deadline),
@@ -216,6 +216,20 @@ func (s *lockService) ListLocks(_ context.Context, _ *pb.ListLocksRequest) (*pb.
 
 func (s *lockService) grantResponse(name, holder string, tok uint64) *pb.LockResponse {
 	resp := &pb.LockResponse{
+		Acquired:     true,
+		FencingToken: tok,
+		Holder:       holder,
+	}
+	if s.table != nil {
+		if rec, ok := s.table.Get(name); ok {
+			resp.DeadlineUnixMs = unixMs(rec.Deadline)
+		}
+	}
+	return resp
+}
+
+func (s *lockService) tryLockResponse(name, holder string, tok uint64) *pb.TryLockResponse {
+	resp := &pb.TryLockResponse{
 		Acquired:     true,
 		FencingToken: tok,
 		Holder:       holder,
@@ -291,7 +305,7 @@ func (s *lockService) forwardLock(ctx context.Context, req *pb.LockRequest) (*pb
 	return pb.NewLockServiceClient(cc).Lock(ctx, req)
 }
 
-func (s *lockService) forwardTryLock(ctx context.Context, req *pb.LockRequest) (*pb.LockResponse, error) {
+func (s *lockService) forwardTryLock(ctx context.Context, req *pb.TryLockRequest) (*pb.TryLockResponse, error) {
 	cc, err := s.dialLeader()
 	if err != nil {
 		return nil, err
@@ -309,7 +323,7 @@ func (s *lockService) forwardUnlock(ctx context.Context, req *pb.UnlockRequest) 
 	return pb.NewLockServiceClient(cc).Unlock(ctx, req)
 }
 
-func (s *lockService) forwardRenew(ctx context.Context, req *pb.RenewLockRequest) (*pb.RenewLockResponse, error) {
+func (s *lockService) forwardRenew(ctx context.Context, req *pb.LockServiceRenewRequest) (*pb.LockServiceRenewResponse, error) {
 	cc, err := s.dialLeader()
 	if err != nil {
 		return nil, err

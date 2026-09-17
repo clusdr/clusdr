@@ -41,11 +41,11 @@ func TestLeaseService_GrantListRevoke(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLeaseServiceClient(conn)
 
-	a, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{Name: "worker-1", Owner: "node-a"})
+	a, err := c.Grant(context.Background(), &pb.GrantRequest{Name: "worker-1", Owner: "node-a"})
 	if err != nil || !a.Granted {
 		t.Fatalf("grant: %+v %v", a, err)
 	}
-	b, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{Name: "worker-1", Owner: "node-b"})
+	b, err := c.Grant(context.Background(), &pb.GrantRequest{Name: "worker-1", Owner: "node-b"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,19 +61,19 @@ func TestLeaseService_GrantListRevoke(t *testing.T) {
 		t.Fatalf("list: %+v", list.Leases)
 	}
 
-	if _, err := c.Revoke(context.Background(), &pb.RevokeLeaseRequest{
+	if _, err := c.Revoke(context.Background(), &pb.RevokeRequest{
 		Name: "worker-1", Owner: "node-b", FencingToken: a.FencingToken,
 	}); err == nil {
 		t.Fatal("wrong owner should not revoke")
 	}
-	u, err := c.Revoke(context.Background(), &pb.RevokeLeaseRequest{
+	u, err := c.Revoke(context.Background(), &pb.RevokeRequest{
 		Name: "worker-1", Owner: "node-a", FencingToken: a.FencingToken,
 	})
 	if err != nil || !u.Revoked {
 		t.Fatalf("revoke: %v %+v", err, u)
 	}
 
-	b2, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{Name: "worker-1", Owner: "node-b"})
+	b2, err := c.Grant(context.Background(), &pb.GrantRequest{Name: "worker-1", Owner: "node-b"})
 	if err != nil || !b2.Granted {
 		t.Fatalf("node-b after revoke: %+v %v", b2, err)
 	}
@@ -95,7 +95,7 @@ func TestLeaseService_ExpireThenOtherWins(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLeaseServiceClient(conn)
 
-	a, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{
+	a, err := c.Grant(context.Background(), &pb.GrantRequest{
 		Name: "worker-1", Owner: "node-a", TtlMs: 50,
 	})
 	if err != nil || !a.Granted {
@@ -123,7 +123,7 @@ func TestLeaseService_ExpireThenOtherWins(t *testing.T) {
 		t.Errorf("event: %+v", expired)
 	}
 
-	b, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{Name: "worker-1", Owner: "node-b"})
+	b, err := c.Grant(context.Background(), &pb.GrantRequest{Name: "worker-1", Owner: "node-b"})
 	if err != nil || !b.Granted {
 		t.Fatalf("node-b after expire: %+v %v", b, err)
 	}
@@ -140,13 +140,13 @@ func TestLeaseService_RenewExtendsDeadline(t *testing.T) {
 	defer conn.Close()
 	c := pb.NewLeaseServiceClient(conn)
 
-	a, err := c.Grant(context.Background(), &pb.GrantLeaseRequest{
+	a, err := c.Grant(context.Background(), &pb.GrantRequest{
 		Name: "worker-1", Owner: "node-a", TtlMs: 80,
 	})
 	if err != nil || !a.Granted {
 		t.Fatal(err)
 	}
-	r, err := c.Renew(context.Background(), &pb.RenewLeaseRequest{
+	r, err := c.Renew(context.Background(), &pb.LeaseServiceRenewRequest{
 		Name: "worker-1", Owner: "node-a", FencingToken: a.FencingToken, TtlMs: 3600_000,
 	})
 	if err != nil || !r.Renewed {
