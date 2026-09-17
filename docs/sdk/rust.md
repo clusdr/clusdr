@@ -11,7 +11,7 @@ Same version train as the daemon.
 
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
-Contributor checkout: `cargo test` in the `clusdr-rust` tree. Proto is compiled at build time from `proto/`.
+Contributor checkout: `cargo test` in the `clusdr-rust` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`); `tonic-build` compiles that tree.
 
 ## Connect
 

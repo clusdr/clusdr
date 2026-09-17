@@ -1,6 +1,6 @@
 # MembershipService
 
-Available on the Runtime API.
+Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api). Available on the Runtime API.
 
 ## `ListMembers`
 

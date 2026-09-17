@@ -14,7 +14,7 @@ Same version train as the daemon.
 
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
-Contributor checkout: `mvn test` in the `clusdr-java` tree. Proto is compiled at build time from `proto/`.
+Contributor checkout: `mvn test` in the `clusdr-java` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`), then injects `java_package`.
 
 ## Connect
 

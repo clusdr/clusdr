@@ -1,8 +1,10 @@
 # JoinService
 
-Daemon → daemon.
+Daemon → daemon. Internal module [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal). Not in the language SDKs.
 
 ## `Join`
+
+**Signature:** `Join(JoinRequest) returns (JoinResponse)`
 
 **Request:** `node_id`, `cluster_id`, `address`, `raft_addr`, `join_token`, `relay`, optional `observer`.
 
@@ -13,6 +15,8 @@ Invalid token → gRPC `Unauthenticated` (`UNAUTHORIZED`). Cluster id mismatch (
 Followers forward to the leader unless `relay` is already set.
 
 ## `Promote`
+
+**Signature:** `Promote(PromoteRequest) returns (PromoteResponse)`
 
 **Request:** `node_id`, `relay`. Turns an observer into a voter on the leader (`AddVoter` + membership role). Followers forward.
 

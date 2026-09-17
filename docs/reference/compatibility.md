@@ -8,6 +8,7 @@ What this version is built and tested against. Anything else is unclaimed.
 |---|---|
 | Daemon language / build | Go 1.27 |
 | Application protocol | gRPC, package `clusdr.v1alpha1` |
+| Schema registry | [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (apps / SDKs), [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal) (join / heartbeat / control) |
 | Go SDK module | `github.com/clusdr/clusdr/sdk` — [docs](../sdk/go.md) |
 | Python SDK | `pip install clusdr`, CPython 3.10+ — [docs](../sdk/python.md) |
 | Rust SDK | crate `clusdr`, Rust 1.82+ — [docs](../sdk/rust.md) |

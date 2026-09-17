@@ -1,6 +1,6 @@
 # ControlService
 
-CLI → local daemon.
+CLI → local daemon. Internal module [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal) (same file as JoinService). Not in the language SDKs.
 
 ## `RequestJoin`
 

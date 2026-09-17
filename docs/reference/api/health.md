@@ -1,5 +1,7 @@
 # HealthService
 
+Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+
 ## `Health`
 
 **Signature:** `Health(HealthRequest) returns (HealthResponse)`

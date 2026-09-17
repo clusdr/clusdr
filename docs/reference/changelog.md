@@ -18,7 +18,7 @@ Notable changes in each release. The daemon and the language SDKs share one vers
 
 ### Changed
 
-- gRPC request/response message names follow Buf STANDARD (`TryLockRequest`, `GrantRequest`, `LockServiceRenewRequest`, `LeaseServiceRenewRequest`). RPC paths and field numbers are unchanged.
+- gRPC request/response message names follow Buf STANDARD (`TryLockRequest`, `GrantRequest`, `LockServiceRenewRequest`, `LeaseServiceRenewRequest`). RPC paths and field numbers are unchanged. The [gRPC API](api/) pages list those names and which BSR module each service lives in.
 
 ## 0.1.4 — 2026-09-17
 

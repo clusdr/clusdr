@@ -10,7 +10,7 @@ Same version train as the daemon.
 
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
-Contributor checkout: `npm test` in the `clusdr-js` tree. Proto is loaded at runtime from `proto/`.
+Contributor checkout: `npm test` in the `clusdr-js` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`); the client loads that tree at runtime.
 
 ## Connect
 

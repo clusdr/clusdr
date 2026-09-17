@@ -10,7 +10,7 @@ Same version train as the daemon.
 
 A running daemon is required ([guide: first member](../guide/first-member.md)).
 
-Contributor checkout (editable + proto): `pip install -e ".[dev]"` in the `clusdr-python` tree. That is not the product install.
+Contributor checkout (editable + proto): `pip install -e ".[dev]"` in the `clusdr-python` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`) and regenerates stubs. That is not the product install.
 
 ## Connect
 

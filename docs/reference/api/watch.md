@@ -1,5 +1,7 @@
 # WatchService
 
+Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+
 ## `Watch`
 
 **Signature:** `Watch(WatchRequest) returns (stream WatchResponse)`

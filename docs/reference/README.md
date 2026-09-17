@@ -6,7 +6,7 @@ Lookup pages. Learn the product in the [guide](../guide/).
 |---|---|
 | [CLI](cli/) | Every `clusdr` command |
 | [gRPC API](api/) | Every service |
-| [SDKs](../sdk/) | Go and Python application clients |
+| [SDKs](../sdk/) | Go, Python, Rust, TypeScript, Java |
 | [Configuration](configuration.md) | YAML process, examples, `CLUSDR_*` |
 | [Errors](errors.md) | Join token, TLS, dial, locks, SDK, reboot/`join` |
 | [Limits](limits.md) | Caps and non-goals of this version |

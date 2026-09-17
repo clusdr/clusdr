@@ -1,5 +1,7 @@
 # EventService
 
+Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+
 ## `PublishEvent`
 
 **Signature:** `PublishEvent(PublishEventRequest) returns (PublishEventResponse)`
