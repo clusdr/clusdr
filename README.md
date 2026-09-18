@@ -16,6 +16,7 @@
   <a href="https://pkg.go.dev/github.com/clusdr/clusdr/sdk"><img src="https://pkg.go.dev/badge/github.com/clusdr/clusdr/sdk.svg" alt="Go Reference"></a>
   <a href="https://hub.docker.com/r/durguto/clusdr"><img src="https://img.shields.io/docker/pulls/durguto/clusdr" alt="Docker"></a>
   <a href="https://artifacthub.io/packages/search?repo=clusdr"><img src="https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/clusdr" alt="Artifact Hub"></a>
+  <a href="https://www.bestpractices.dev/projects/14654"><img src="https://www.bestpractices.dev/projects/14654/badge" alt="OpenSSF Best Practices"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/clusdr/clusdr" alt="License"></a>
 </p>
 
