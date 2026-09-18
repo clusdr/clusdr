@@ -24,7 +24,29 @@ Archives come from [GitHub Releases](https://github.com/clusdr/clusdr/releases).
 curl -fsSL https://github.com/clusdr/clusdr/releases/latest/download/install.sh | sh
 ```
 
-Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from the [GitHub Release](https://github.com/clusdr/clusdr/releases). Checksums sit next to the archives.
+Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from the [GitHub Release](https://github.com/clusdr/clusdr/releases). Checksums sit next to the archives. `install.sh` checks SHA-256 for you.
+
+A GitHub Release is built by `.github/workflows/release.yml` on a tag in `clusdr/clusdr` (GitHub Actions, not a laptop). From the next release after this lands, `checksums.txt` has a Sigstore signature (`checksums.txt.sig` and `checksums.txt.pem`). Archives also ship an SPDX SBOM.
+
+```bash
+# after downloading checksums.txt, checksums.txt.sig, checksums.txt.pem
+cosign verify-blob \
+  --certificate checksums.txt.pem \
+  --signature checksums.txt.sig \
+  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  checksums.txt
+```
+
+Images on GHCR (same for `clusdr-operator`):
+
+```bash
+cosign verify ghcr.io/clusdr/clusdr:vX.Y.Z \
+  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+`v0.2.0` and earlier were checksum-only. Signed blobs start at the first release cut after this landed.
 
 ## Check it
 
