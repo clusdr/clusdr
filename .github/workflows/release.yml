@@ -1,5 +1,9 @@
 name: Release
 
+# vX.Y.Z-rc.N: lint, test, smoke, GitHub prerelease, versioned images/chart (not latest).
+# vX.Y.Z: the same, plus latest.json, :latest images, Artifact Hub metadata, SDK tags.
+# Language SDKs publish only on a stable tag (no hyphen) in their own repos.
+
 on:
   push:
     tags: ["v*.*.*"]
@@ -9,6 +13,10 @@ on:
         description: Existing git tag to publish Hub and GHCR images (daemon + operator)
         required: true
         default: v0.2.0
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -58,12 +66,32 @@ jobs:
 
       - name: go test
         run: |
-          go test -race -count=1 -p 2 ./...
+          go test -race -count=1 -p 1 ./...
           go test -C sdk -race -count=1 ./...
+
+  smoke:
+    name: Smoke
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache: true
+
+      - name: Build and smoke
+        run: |
+          make build VERSION=rc COMMIT=${{ github.sha }}
+          chmod +x scripts/release-smoke.sh
+          ./scripts/release-smoke.sh ./bin/clusdr
 
   goreleaser:
     name: GitHub Release
-    needs: [lint, test]
+    needs: [lint, test, smoke]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -85,6 +113,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload latest.json
+        if: ${{ !contains(github.ref_name, '-') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -106,11 +135,12 @@ jobs:
 
   chart:
     name: Helm chart
-    needs: [lint, test, goreleaser]
+    needs: [lint, test, smoke, goreleaser]
     if: |
       always() &&
       needs.lint.result == 'success' &&
       needs.test.result == 'success' &&
+      needs.smoke.result == 'success' &&
       (needs.goreleaser.result == 'success' || needs.goreleaser.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
@@ -138,6 +168,7 @@ jobs:
       - uses: oras-project/setup-oras@v1
 
       - name: Artifact Hub repo metadata
+        if: ${{ !contains(github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name, '-') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -150,11 +181,12 @@ jobs:
 
   manifests:
     name: Operator YAML
-    needs: [lint, test, goreleaser]
+    needs: [lint, test, smoke, goreleaser]
     if: |
       always() &&
       needs.lint.result == 'success' &&
       needs.test.result == 'success' &&
+      needs.smoke.result == 'success' &&
       (needs.goreleaser.result == 'success' || needs.goreleaser.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
@@ -190,11 +222,12 @@ jobs:
 
   docker:
     name: Images
-    needs: [lint, test, goreleaser]
+    needs: [lint, test, smoke, goreleaser]
     if: |
       always() &&
       needs.lint.result == 'success' &&
       needs.test.result == 'success' &&
+      needs.smoke.result == 'success' &&
       (needs.goreleaser.result == 'success' || needs.goreleaser.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
@@ -208,9 +241,30 @@ jobs:
         id: ver
         run: |
           tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}"
+          ver="${tag#v}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          echo "version=$ver" >> "$GITHUB_OUTPUT"
           echo "commit=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          {
+            echo "daemon<<EOF"
+            echo "durguto/clusdr:${tag}"
+            echo "ghcr.io/clusdr/clusdr:${tag}"
+            if [[ "$tag" != *-* ]]; then
+              echo "durguto/clusdr:latest"
+              echo "ghcr.io/clusdr/clusdr:latest"
+            fi
+            echo "EOF"
+            echo "operator<<EOF"
+            echo "durguto/clusdr-operator:${tag}"
+            echo "durguto/clusdr-operator:${ver}"
+            echo "ghcr.io/clusdr/clusdr-operator:${tag}"
+            echo "ghcr.io/clusdr/clusdr-operator:${ver}"
+            if [[ "$tag" != *-* ]]; then
+              echo "durguto/clusdr-operator:latest"
+              echo "ghcr.io/clusdr/clusdr-operator:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - uses: docker/login-action@v3
         with:
@@ -228,11 +282,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            durguto/clusdr:${{ steps.ver.outputs.tag }}
-            durguto/clusdr:latest
-            ghcr.io/clusdr/clusdr:${{ steps.ver.outputs.tag }}
-            ghcr.io/clusdr/clusdr:latest
+          tags: ${{ steps.ver.outputs.daemon }}
           labels: |
             org.opencontainers.image.source=https://github.com/clusdr/clusdr
             org.opencontainers.image.licenses=Apache-2.0
@@ -246,13 +296,7 @@ jobs:
           file: Dockerfile.operator
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            durguto/clusdr-operator:${{ steps.ver.outputs.tag }}
-            durguto/clusdr-operator:${{ steps.ver.outputs.version }}
-            durguto/clusdr-operator:latest
-            ghcr.io/clusdr/clusdr-operator:${{ steps.ver.outputs.tag }}
-            ghcr.io/clusdr/clusdr-operator:${{ steps.ver.outputs.version }}
-            ghcr.io/clusdr/clusdr-operator:latest
+          tags: ${{ steps.ver.outputs.operator }}
           labels: |
             org.opencontainers.image.source=https://github.com/clusdr/clusdr
             org.opencontainers.image.licenses=Apache-2.0
@@ -265,6 +309,7 @@ jobs:
           ref: ${{ github.ref }}
 
       - name: Docker Hub overview
+        if: ${{ !contains(github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name, '-') }}
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

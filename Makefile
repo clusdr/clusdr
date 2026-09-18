@@ -1,4 +1,4 @@
-.PHONY: build build-operator bench test cover vet lint proto proto-lint proto-python helm manifests clean
+.PHONY: build build-operator bench test cover smoke vet lint proto proto-lint proto-python helm manifests clean
 
 VERSION  ?= dev
 COMMIT   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -12,6 +12,10 @@ LDFLAGS  := -ldflags "\
 
 build:
 	go build $(LDFLAGS) -o bin/clusdr ./cmd/clusdr
+
+smoke: build
+	chmod +x scripts/release-smoke.sh
+	./scripts/release-smoke.sh ./bin/clusdr
 
 build-operator:
 	go build $(LDFLAGS) -o bin/clusdr-operator ./cmd/clusdr-operator
