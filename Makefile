@@ -31,7 +31,7 @@ test:
 # are excluded: they are demos / a load generator, not production packages.
 cover:
 	@pkgs=$$(go list ./... | grep -Ev '/examples/|/cmd/clusdr-bench'); \
-	go test -count=1 -covermode=atomic -coverprofile=coverage.out $$pkgs
+	go test -count=1 -p 1 -covermode=atomic -coverprofile=coverage.out $$pkgs
 	@go tool cover -func=coverage.out | tail -1
 	go test -C sdk -count=1 -covermode=atomic -coverprofile=../sdk-coverage.out ./...
 	@go tool cover -func=sdk-coverage.out | tail -1
