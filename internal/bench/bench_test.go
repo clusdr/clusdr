@@ -44,26 +44,22 @@ func TestRun_MeetsTargets(t *testing.T) {
 			t.Errorf("missing scenario %s", name)
 		}
 	}
-	// Election/lock p95 are the CLI gates. Under -race, with other packages
-	// sharing the machine, p95 can tick over; p50 must still clear the target.
-	if e := got["election"]; e.P50 > bench.TargetElection {
-		t.Errorf("election p50 %s > %s", e.P50, bench.TargetElection)
+	// Run already failed if a majority did not elect. These gates are latency.
+	// raceSlack is 1 without -race and 4 with it (detector tax, not a skip).
+	if e := got["election"]; e.P50 > time.Duration(raceSlack)*bench.TargetElection {
+		t.Errorf("election p50 %s > %s", e.P50, time.Duration(raceSlack)*bench.TargetElection)
+	}
+	if e := got["election"]; e.P95 > time.Duration(raceSlack)*2*bench.TargetElection {
+		t.Errorf("election p95 %s > %s", e.P95, time.Duration(raceSlack)*2*bench.TargetElection)
 	}
 	if e := got["events"]; e.P95 > bench.TargetEventFanout {
 		t.Errorf("events p95 %s > %s", e.P95, bench.TargetEventFanout)
 	}
-	if e := got["locks"]; e.P50 > bench.TargetLockAcquire {
-		t.Errorf("locks p50 %s > %s", e.P50, bench.TargetLockAcquire)
+	if e := got["locks"]; e.P50 > time.Duration(raceSlack)*bench.TargetLockAcquire {
+		t.Errorf("locks p50 %s > %s", e.P50, time.Duration(raceSlack)*bench.TargetLockAcquire)
 	}
-	// p95 election/lock are laptop/CLI gates. Cover and GitHub runners add
-	// enough jitter that 2× target is a coin flip; p50 still has to clear.
-	if testing.CoverMode() == "" {
-		if e := got["election"]; e.P95 > 2*bench.TargetElection {
-			t.Errorf("election p95 %s > %s", e.P95, 2*bench.TargetElection)
-		}
-		if e := got["locks"]; e.P95 > 2*bench.TargetLockAcquire {
-			t.Errorf("locks p95 %s > %s", e.P95, 2*bench.TargetLockAcquire)
-		}
+	if e := got["locks"]; e.P95 > time.Duration(raceSlack)*2*bench.TargetLockAcquire {
+		t.Errorf("locks p95 %s > %s", e.P95, time.Duration(raceSlack)*2*bench.TargetLockAcquire)
 	}
 	if e := got["members"]; e.N != 50 {
 		t.Errorf("members n=%d want 50", e.N)
