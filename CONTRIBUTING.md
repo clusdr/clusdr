@@ -29,6 +29,14 @@ A breaking change uses `feat!:` (or another type with `!`) and a `BREAKING CHANG
 
 CI lints PR commits against that grammar. Prefer squash-merge; the squash title must stay conventional.
 
+## Branching
+
+`main` is the trunk. It is protected: no direct push, no force-push, no delete. Every change lands through a pull request. CI must be green (Lint, Test, Coverage, Helm, Buf, Conventional Commits). Squash-merge; the squash title stays conventional.
+
+Branch names: `feat/…`, `fix/…`, `docs/…`, `ci/…`, `chore/…`. Do not cut a release tag from a red `main`.
+
+This is GitHub Flow plus SemVer prerelease tags (not Git Flow `develop` / `release/*`). OpenSSF Passing needs CI on the integration branch (`test_continuous_integration`, `version_tags`). A second human reviewer (`two_person_review`) is Silver; this repo allows self-merge after green CI.
+
 ## Requirements
 
 - Go 1.27
@@ -41,6 +49,7 @@ make vet
 make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
 make build-operator
+make smoke    # init + start + health + members, then stop
 ```
 
 `proto/api` is the application wire (`buf.build/clusdr/api`). `proto/internal` is join/heartbeat (`buf.build/clusdr/internal`). After editing either:
@@ -55,7 +64,7 @@ Pull requests lint, format, and run `buf breaking` against the PR base (FILE). A
 
 Language SDKs export `buf.build/clusdr/api` only (or the sibling `../clusdr/proto/api` checkout). They never take `internal`.
 
-Push to `main` or a `v*` tag publishes both modules to the [Buf Schema Registry](https://buf.build/clusdr). That needs a `clusdr` org on buf.build and repo secret `BUF_TOKEN` (account token with push). Repositories are created public so SDK CI can export without a token.
+Push to `main` or a GA `vX.Y.Z` tag (not `-rc`) publishes both modules to the [Buf Schema Registry](https://buf.build/clusdr). That needs a `clusdr` org on buf.build and repo secret `BUF_TOKEN` (account token with push). Repositories are created public so SDK CI can export without a token.
 
 Message names follow Buf STANDARD: `{Method}Request` when the method is unique in the package (`GrantRequest`, `LockRequest`). Two services that share a method name use `{Service}{Method}Request` (`LockServiceRenewRequest`, `LeaseServiceRenewRequest`). `TryLock` has its own request/response types (same fields as `Lock`). gRPC method paths (`/clusdr.v1alpha1.LockService/TryLock`) are the wire identity; protobuf field numbers are the payload identity.
 
@@ -98,9 +107,23 @@ Sibling checkouts:
 
 ## Releases
 
-A `v*` tag runs GoReleaser (GitHub Release). `clusdr.io/download/<file>` 302s there. The same tag (and image `workflow_dispatch`) pushes `durguto/clusdr` and `durguto/clusdr-operator` to Docker Hub, with GHCR mirrors `ghcr.io/clusdr/clusdr` and `ghcr.io/clusdr/clusdr-operator`. The chart is `helm package`d and `helm push`ed to `oci://ghcr.io/clusdr/charts` (`clusdr-<version>.tgz` also lands on the GitHub Release). Do not push the chart to `ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**. The same job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
+Do not tag until `main` is green. Cut an RC first; GA is a second tag after that Release workflow is green.
 
-One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml` and `clusdr-operator.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there.
+```bash
+git checkout main
+git pull
+git tag vX.Y.Z-rc.1
+git push origin vX.Y.Z-rc.1
+# wait for Release (lint, test, smoke, GitHub prerelease, versioned images/chart)
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+A hyphen in the tag (`-rc.1`) is a prerelease: GitHub Release is marked prerelease, images and the chart use that version, `:latest` / `latest.json` / Artifact Hub metadata / BSR tag push / language SDK registries do **not** move. A tag with no hyphen (`vX.Y.Z`) is GA and publishes all of those.
+
+`clusdr.io/download/<file>` 302s to the GitHub Release. Images: `durguto/clusdr` and `durguto/clusdr-operator` (GHCR mirrors `ghcr.io/clusdr/clusdr` and `ghcr.io/clusdr/clusdr-operator`). Chart: `helm push` to `oci://ghcr.io/clusdr/charts` (`clusdr-<version>.tgz` also lands on the GitHub Release). Do not push the chart to `ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**. The GA job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
+
+One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next GA push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml` and `clusdr-operator.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there.
 
 Repo secrets (not in git):
 

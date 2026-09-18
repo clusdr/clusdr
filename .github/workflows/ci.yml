@@ -49,7 +49,8 @@ jobs:
 
       - name: go test
         run: |
-          go test -race -count=1 -p 2 ./...
+          # -p 1: raft/bench SLO tests share CPU with -race; -p 2 flakes on GHA.
+          go test -race -count=1 -p 1 ./...
           go test -C sdk -race -count=1 ./...
 
   cover:
@@ -99,6 +100,8 @@ jobs:
         run: |
           ./bin/clusdr version
           ./bin/clusdr-operator version
+          chmod +x scripts/release-smoke.sh
+          ./scripts/release-smoke.sh ./bin/clusdr
 
       - uses: goreleaser/goreleaser-action@v6
         with:

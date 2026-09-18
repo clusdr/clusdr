@@ -12,6 +12,7 @@
 - [ ] New behavior covered by automated tests (or N/A with reason)
 - [ ] `make proto` and `make proto-lint` if `proto/` moved
 - [ ] Docs under `docs/` updated in this change if config, CLI, proto, SDK, or defaults moved
+- [ ] CI green on this PR before merge (do not tag from red `main`)
 
 ## Commits
 

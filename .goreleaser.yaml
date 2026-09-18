@@ -33,6 +33,7 @@ release:
     owner: clusdr
     name: clusdr
   name_template: "v{{.Version}}"
+  prerelease: auto
   extra_files:
     - glob: ./scripts/install.sh
       name_template: install.sh

@@ -44,7 +44,7 @@ func TestNormalizeWatchTopics_SkipsEmpty(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != nil && len(got) != 0 {
+	if len(got) != 0 {
 		t.Fatalf("%q", got)
 	}
 }
