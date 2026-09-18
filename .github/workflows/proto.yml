@@ -10,16 +10,18 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   buf:
     name: Buf
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         if: github.event_name != 'delete'
         id: filter
         with:
@@ -29,7 +31,7 @@ jobs:
         if: github.event_name != 'delete' && steps.filter.outputs.proto != 'true' && github.event.action != 'labeled' && github.event.action != 'unlabeled'
         run: echo "no proto paths; Buf reports success without buf lint"
 
-      - uses: bufbuild/buf-action@v1
+      - uses: bufbuild/buf-action@8c6a16e16f12ba20b6470afa9c2ba9b5ba8c97c3 # v1.5.0
         if: github.event_name == 'delete' || steps.filter.outputs.proto == 'true' || github.event.action == 'labeled' || github.event.action == 'unlabeled'
         with:
           version: "1.73.0"

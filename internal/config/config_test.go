@@ -309,3 +309,26 @@ func TestLoadFrom_LeaseEnv(t *testing.T) {
 		t.Errorf("presence ttl: got %v, want 1s", cfg.Lease.PresenceTTL)
 	}
 }
+
+func TestParseYAML_Empty(t *testing.T) {
+	cfg, err := config.ParseYAML(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.TLS.Mode != "enabled" {
+		t.Errorf("defaults after empty yaml: TLS %q", cfg.TLS.Mode)
+	}
+}
+
+func FuzzParseYAML(f *testing.F) {
+	f.Add([]byte(""))
+	f.Add([]byte("node:\n  id: n1\n"))
+	f.Add([]byte("raft:\n  heartbeat_timeout: 50ms\n  leader_lease_timeout: 75ms\n"))
+	f.Add([]byte("tls:\n  mode: disabled\n"))
+	f.Fuzz(func(t *testing.T, data []byte) {
+		if len(data) > 32<<10 {
+			return
+		}
+		_, _ = config.ParseYAML(data)
+	})
+}
