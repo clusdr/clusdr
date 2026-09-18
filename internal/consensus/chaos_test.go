@@ -672,7 +672,6 @@ func TestChaos_RapidJoinLeave(t *testing.T) {
 		}); err != nil {
 			t.Fatalf("cycle %d add voter: %v", i, err)
 		}
-		voters := append(c.live(), extra)
 		if err := c.withLeader(func(n *consensus.Node) error {
 			return n.ApplyAddMember(id, string(tr.LocalAddr()))
 		}); err != nil {
