@@ -2,7 +2,13 @@
 
 The chart templates the [default topology](kubernetes.md#default-one-daemon-per-node): one daemon per node, `data.dir` on hostPath. It does not join Raft, does not install the CRD, and does not run the Operator.
 
-Install is OCI. There is no `helm repo add`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr).
+Install is OCI. There is no `helm repo add`. Catalog:
+[Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr).
+
+The chart ships `values.schema.json`. Releases after Cosign signing landed mark the OCI
+digest (Artifact Hub Signed). Official is not a chart file: request it from Artifact Hub
+after Verified publisher is on
+([template](https://github.com/artifacthub/hub/issues/new?template=official-status.yml)).
 
 ```bash
 helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \

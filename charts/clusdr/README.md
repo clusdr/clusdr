@@ -19,7 +19,7 @@ Example chart. **Not** an Operator, CRD, or sidecar injector.
 
 Same as [`examples/k8s`](../../examples/k8s): one seed voter, DaemonSet on every other node, `data.dir` on hostPath. Join is still [`clusdr join`](../../docs/reference/cli/join.md). Sidecar StatefulSet is **not** this chart ([14.4 YAML](../../examples/k8s/sidecar-statefulset.yaml)).
 
-Published on each `v*` tag as OCI (not `ghcr.io/clusdr/clusdr` — that is the daemon image). GitHub Release has the `.tgz`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`.
+Published on each `v*` tag as OCI (not `ghcr.io/clusdr/clusdr` — that is the daemon image). GitHub Release has the `.tgz`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`. Values are validated by `values.schema.json`. The OCI digest is Cosign-signed on publish.
 
 ```bash
 # hostPath uid 65532 on each node — see NOTES after install

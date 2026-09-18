@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "clusdr Helm values",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "nameOverride": {
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "boolean"
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string",
+          "description": "Empty uses Chart.appVersion."
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "dataDir": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/"
+    },
+    "voterCount": {
+      "description": "Odd voter target. Helm does not join Raft.",
+      "type": "integer",
+      "minimum": 1,
+      "not": {
+        "multipleOf": 2
+      }
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nodeName": {
+          "type": "string"
+        }
+      }
+    },
+    "probes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["exec", "tcp"]
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number"]
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number"]
+          }
+        }
+      }
+    },
+    "log": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["json", "text"]
+        },
+        "level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"]
+        }
+      }
+    }
+  }
+}
