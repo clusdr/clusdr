@@ -16,4 +16,4 @@
 
 ## Commits
 
-This PR uses [Conventional Commits](https://www.conventionalcommits.org/). Prefer one commit, or a short stack of `feat` / `fix` / `docs` / `ci` / `chore` subjects. GitHub squash-merge title must stay conventional.
+This PR uses [Conventional Commits](https://www.conventionalcommits.org/). Prefer one commit, or a short stack of `feat` / `fix` / `docs` / `ci` / `chore` subjects. Header and body lines at most 100 characters. GitHub squash-merge title must stay conventional. `make hooks` installs the local checks.

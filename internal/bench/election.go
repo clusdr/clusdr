@@ -25,9 +25,9 @@ func measureElection(ctx context.Context, cl *Cluster, ops int) (Result, error) 
 			return Result{}, err
 		}
 		waitCtx, cancel = context.WithTimeout(ctx, 10*time.Second)
-		_, err = waitLeaderOf(waitCtx, majority...)
-		cancel()
+		_, err = waitFirstLeader(waitCtx, majority...)
 		elapsed := time.Since(start)
+		cancel()
 		healErr := cl.Heal(lead.ID)
 		if err != nil {
 			return Result{}, fmt.Errorf("election sample %d: majority did not elect: %w", i, err)

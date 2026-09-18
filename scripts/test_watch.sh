@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# test_watch.sh — end-to-end test for Phase 4.2 Watch RPC
+# test_watch.sh — Watch RPC end-to-end: two nodes, then a join on the stream.
 #
 # Starts two nodes (A + B), opens a grpcurl watch stream on A, then
 # joins a third node C and verifies that the stream delivers a member.join event.

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Product targets from Phase 10.2.
+// Latency gates for election, event fan-out, and lock acquire.
 const (
 	TargetElection    = 500 * time.Millisecond
 	TargetEventFanout = 100 * time.Millisecond

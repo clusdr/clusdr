@@ -1,4 +1,4 @@
-.PHONY: build build-operator bench test cover smoke vet lint proto proto-lint proto-python helm manifests clean
+.PHONY: build build-operator bench test cover smoke vet lint proto proto-lint proto-python helm manifests hooks clean
 
 VERSION  ?= dev
 COMMIT   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -76,6 +76,13 @@ manifests:
 	test -f "$$tmp/clusdr-operator-0.2.0.yaml"; \
 	if grep -q '^kind: ClusdrCluster$$' "$$tmp/clusdr-operator.yaml"; then echo "sample CR in operator bundle" >&2; exit 1; fi; \
 	rm -rf "$$tmp"
+
+# Copies scripts/githooks into .git/hooks (does not change git config).
+hooks:
+	@test -d .git || { echo "hooks: not a git checkout" >&2; exit 1; }
+	cp scripts/githooks/pre-commit scripts/githooks/commit-msg .git/hooks/
+	chmod +x .git/hooks/pre-commit .git/hooks/commit-msg scripts/lint-commit-msg.sh
+	@echo "installed .git/hooks/{pre-commit,commit-msg}"
 
 clean:
 	rm -rf bin/
