@@ -606,7 +606,9 @@ func TestChaos_KillLeaderMidWrite(t *testing.T) {
 		}
 	}
 
-	if err := surviving.node.ApplyAddMember("after-failover", "10.0.0.3:1"); err != nil {
+	if err := c.withLeader(func(n *consensus.Node) error {
+		return n.ApplyAddMember("after-failover", "10.0.0.3:1")
+	}); err != nil {
 		t.Fatalf("write after failover: %v", err)
 	}
 	c.waitHasMember("after-failover")
@@ -665,23 +667,27 @@ func TestChaos_RapidJoinLeave(t *testing.T) {
 		}
 		extra := startChaosNode(t, id, false, tr)
 
-		lead := c.waitStableLeader()
-		if err := lead.node.AddVoter(id, string(tr.LocalAddr())); err != nil {
+		if err := c.withLeader(func(n *consensus.Node) error {
+			return n.AddVoter(id, string(tr.LocalAddr()))
+		}); err != nil {
 			t.Fatalf("cycle %d add voter: %v", i, err)
 		}
 		voters := append(c.live(), extra)
-		lead = waitLeaderOf(t, voters...)
-		if err := lead.node.ApplyAddMember(id, string(tr.LocalAddr())); err != nil {
+		if err := c.withLeader(func(n *consensus.Node) error {
+			return n.ApplyAddMember(id, string(tr.LocalAddr()))
+		}); err != nil {
 			t.Fatalf("cycle %d add member: %v", i, err)
 		}
 		c.waitHasMember(id)
 
-		lead = waitLeaderOf(t, voters...)
-		if err := lead.node.RemoveVoter(id); err != nil {
+		if err := c.withLeader(func(n *consensus.Node) error {
+			return n.RemoveVoter(id)
+		}); err != nil {
 			t.Fatalf("cycle %d remove voter: %v", i, err)
 		}
-		lead = c.waitStableLeader()
-		if err := lead.node.ApplyDropMember(id); err != nil {
+		if err := c.withLeader(func(n *consensus.Node) error {
+			return n.ApplyDropMember(id)
+		}); err != nil {
 			t.Fatalf("cycle %d drop member: %v", i, err)
 		}
 		_ = extra.node.Shutdown()
