@@ -6,25 +6,54 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      helm: ${{ steps.filter.outputs.helm }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: .github/path-filters.yml
+
   lint:
     name: Lint
+    needs: changes
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
+      - name: Skip
+        if: needs.changes.outputs.go != 'true'
+        run: echo "no Go paths; Lint reports success without golangci-lint"
+
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.go == 'true'
 
       - uses: actions/setup-go@v5
+        if: needs.changes.outputs.go == 'true'
         with:
           go-version: "1.27.1"
           cache: true
 
       - uses: golangci/golangci-lint-action@v8
+        if: needs.changes.outputs.go == 'true'
         with:
           version: v2.13.2
 
       - uses: golangci/golangci-lint-action@v8
+        if: needs.changes.outputs.go == 'true'
         with:
           version: v2.13.2
           working-directory: sdk
@@ -32,22 +61,30 @@ jobs:
 
   test:
     name: Test
+    needs: changes
     runs-on: ubuntu-latest
-
     steps:
+      - name: Skip
+        if: needs.changes.outputs.go != 'true'
+        run: echo "no Go paths; Test reports success without go test"
+
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.go == 'true'
 
       - uses: actions/setup-go@v5
+        if: needs.changes.outputs.go == 'true'
         with:
           go-version: "1.27.1"
           cache: true
 
       - name: go vet
+        if: needs.changes.outputs.go == 'true'
         run: |
           go vet ./...
           go vet -C sdk ./...
 
       - name: go test
+        if: needs.changes.outputs.go == 'true'
         run: |
           # One suite: race + coverprofile. A second Coverage job was a second
           # dice roll on Raft SLO/chaos tests (PR green, main red).
@@ -58,6 +95,7 @@ jobs:
           go tool cover -func=sdk-coverage.out | tail -1
 
       - uses: actions/upload-artifact@v4
+        if: needs.changes.outputs.go == 'true'
         with:
           name: coverage
           path: |
@@ -67,9 +105,9 @@ jobs:
 
   build:
     name: Build
+    needs: [changes, test, lint]
+    if: needs.changes.outputs.go == 'true'
     runs-on: ubuntu-latest
-    needs: [test, lint]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -99,15 +137,23 @@ jobs:
 
   helm:
     name: Helm
+    needs: changes
     runs-on: ubuntu-latest
     steps:
+      - name: Skip
+        if: needs.changes.outputs.helm != 'true'
+        run: echo "no chart/CRD paths; Helm reports success without helm lint"
+
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.helm == 'true'
 
       - uses: azure/setup-helm@v4
+        if: needs.changes.outputs.helm == 'true'
         with:
           version: v3.16.4
 
       - name: helm lint and template
+        if: needs.changes.outputs.helm == 'true'
         run: |
           make helm
           make manifests
