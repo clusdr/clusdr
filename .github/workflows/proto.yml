@@ -7,7 +7,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
   delete:
-
+    10|
 permissions:
   contents: read
   pull-requests: write
@@ -19,7 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: dorny/paths-filter@v3
+        if: github.event_name != 'delete'
+        id: filter
+        with:
+          filters: .github/path-filters.yml
+
+      - name: Skip
+        if: github.event_name != 'delete' && steps.filter.outputs.proto != 'true' && github.event.action != 'labeled' && github.event.action != 'unlabeled'
+        run: echo "no proto paths; Buf reports success without buf lint"
+
       - uses: bufbuild/buf-action@v1
+        if: github.event_name == 'delete' || steps.filter.outputs.proto == 'true' || github.event.action == 'labeled' || github.event.action == 'unlabeled'
         with:
           version: "1.73.0"
           token: ${{ secrets.BUF_TOKEN }}
@@ -27,7 +38,7 @@ jobs:
           push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || (startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-'))) && secrets.BUF_TOKEN != '' }}
 
       - name: Generate
-        if: github.event_name != 'delete'
+        if: github.event_name != 'delete' && steps.filter.outputs.proto == 'true'
         run: |
           buf generate
           git diff --exit-code -- api/

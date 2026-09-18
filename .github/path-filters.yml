@@ -1,0 +1,37 @@
+# Jobs named Lint / Test / Helm / Buf are required on main; they must
+# still report a check. These paths decide whether they do the work.
+go:
+  - "**/*.go"
+  - "go.mod"
+  - "go.sum"
+  - "go.work"
+  - "go.work.sum"
+  - "sdk/go.mod"
+  - "sdk/go.sum"
+  - "Makefile"
+  - ".golangci.yml"
+  - ".golangci-lint-version"
+  - ".goreleaser.yaml"
+  - "Dockerfile"
+  - "Dockerfile.operator"
+  - "scripts/release-smoke.sh"
+  - ".github/workflows/ci.yml"
+  - ".github/path-filters.yml"
+
+helm:
+  - "charts/**"
+  - "config/**"
+  - "scripts/package-chart.sh"
+  - "scripts/package-operator-yaml.sh"
+  - "Makefile"
+  - ".github/workflows/ci.yml"
+  - ".github/path-filters.yml"
+
+proto:
+  - "proto/**"
+  - "buf.yaml"
+  - "buf.gen.yaml"
+  - "buf.lock"
+  - "api/**"
+  - ".github/workflows/proto.yml"
+  - ".github/path-filters.yml"
