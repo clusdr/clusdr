@@ -31,7 +31,7 @@ CI lints PR commits against that grammar. Prefer squash-merge; the squash title 
 
 ## Branching
 
-`main` is the trunk. It is protected: no direct push, no force-push, no delete. Every change lands through a pull request. CI must be green (Lint, Test, Coverage, Helm, Buf, Conventional Commits). Squash-merge; the squash title stays conventional.
+`main` is the trunk. It is protected: no direct push, no force-push, no delete. Every change lands through a pull request. CI must be green (Lint, Test, Helm, Buf, Conventional Commits). Squash-merge; the squash title stays conventional.
 
 Branch names: `feat/…`, `fix/…`, `docs/…`, `ci/…`, `chore/…`. Do not cut a release tag from a red `main`.
 
@@ -72,7 +72,7 @@ Message names follow Buf STANDARD: `{Method}Request` when the method is unique i
 
 ## Tests
 
-Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage for the daemon, operator, and Go SDK (examples and `clusdr-bench` are excluded). CI uploads `coverage.out` and `sdk-coverage.out` as the Coverage job artifact; it does not fail the build on a percentage.
+Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage locally (examples and `clusdr-bench` excluded). CI’s Test job writes the same profiles (`coverage.out`, `sdk-coverage.out`) and uploads them as an artifact; it does not fail the build on a percentage.
 
 ## Docs
 

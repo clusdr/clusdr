@@ -49,25 +49,13 @@ jobs:
 
       - name: go test
         run: |
-          # -p 1: raft/bench SLO tests share CPU with -race; -p 2 flakes on GHA.
-          go test -race -count=1 -p 1 ./...
-          go test -C sdk -race -count=1 ./...
-
-  cover:
-    name: Coverage
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.27.1"
-          cache: true
-
-      - name: make cover
-        run: make cover
+          # One suite: race + coverprofile. A second Coverage job was a second
+          # dice roll on Raft SLO/chaos tests (PR green, main red).
+          pkgs=$(go list ./... | grep -Ev '/examples/|/cmd/clusdr-bench')
+          go test -race -count=1 -p 1 -coverprofile=coverage.out $pkgs
+          go tool cover -func=coverage.out | tail -1
+          go test -C sdk -race -count=1 -coverprofile=../sdk-coverage.out ./...
+          go tool cover -func=sdk-coverage.out | tail -1
 
       - uses: actions/upload-artifact@v4
         with:
