@@ -60,6 +60,10 @@ Message names follow Buf STANDARD: `{Method}Request` when the method is unique i
 
 `gofmt` on changed Go files.
 
+## Tests
+
+Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist).
+
 ## Docs
 
 If you change configuration, CLI, proto, SDK, or defaults, update the matching page under `docs/` in the **same** change (concepts, tasks, or reference — not a dump on one page). Do not put roadmap or design notes in `docs/`.
