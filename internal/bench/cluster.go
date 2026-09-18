@@ -235,6 +235,19 @@ func (c *Cluster) WaitLeader(ctx context.Context) (*Node, error) {
 }
 
 func waitLeaderOf(ctx context.Context, nodes ...*Node) (*Node, error) {
+	return waitLeaderStable(ctx, 3, nodes...)
+}
+
+// waitFirstLeader returns as soon as the live nodes agree on one leader.
+// Election latency is isolate-to-first-quorum, not isolate-to-three-polls.
+func waitFirstLeader(ctx context.Context, nodes ...*Node) (*Node, error) {
+	return waitLeaderStable(ctx, 1, nodes...)
+}
+
+func waitLeaderStable(ctx context.Context, need int, nodes ...*Node) (*Node, error) {
+	if need < 1 {
+		need = 1
+	}
 	stable := 0
 	for {
 		if err := ctx.Err(); err != nil {
@@ -257,7 +270,7 @@ func waitLeaderOf(ctx context.Context, nodes ...*Node) (*Node, error) {
 			}
 			if agree {
 				stable++
-				if stable >= 3 {
+				if stable >= need {
 					return leaders[0], nil
 				}
 			} else {

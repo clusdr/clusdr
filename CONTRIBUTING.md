@@ -25,17 +25,21 @@ docs: document CLUSDR_RAFT_ADDR on other hosts
 ci: run goreleaser check on pull requests
 ```
 
-A breaking change uses `feat!:` (or another type with `!`) and a `BREAKING CHANGE:` footer. Subject is lowercase after the type, no trailing period, ~72 characters.
+A breaking change uses `feat!:` (or another type with `!`) and a `BREAKING CHANGE:` footer. Subject is lowercase after the type, no trailing period. Header and body lines are at most 100 characters (wrap the body; ~72 on the subject is easier to read). A body needs a blank line after the subject.
 
 CI lints PR commits against that grammar. Prefer squash-merge; the squash title must stay conventional.
 
+```bash
+make hooks   # .git/hooks: gofmt on staged .go, commit-msg same as CI
+```
+
 ## Branching
 
-`main` is the trunk. It is protected: no direct push, no force-push, no delete. Every change lands through a pull request. CI must be green (Lint, Test, Helm, Buf, Conventional Commits). Squash-merge; the squash title stays conventional.
+`main` is the trunk. It is protected: no direct push, no force-push, no delete. Every change lands through a pull request. CI must be green (Lint, Test, Helm, Buf, Conventional Commits). Those names always report; Lint/Test/Helm/Buf skip the work when their paths did not change. Conventional Commits always runs. Squash-merge; the squash title stays conventional.
 
 Branch names: `feat/…`, `fix/…`, `docs/…`, `ci/…`, `chore/…`. Do not cut a release tag from a red `main`.
 
-This is GitHub Flow plus SemVer prerelease tags (not Git Flow `develop` / `release/*`). OpenSSF Passing needs CI on the integration branch (`test_continuous_integration`, `version_tags`). A second human reviewer (`two_person_review`) is Silver; this repo allows self-merge after green CI.
+This is GitHub Flow plus SemVer tags (`vX.Y.Z-rc.N`, then `vX.Y.Z`). There is no `develop` branch.
 
 ## Requirements
 
@@ -50,6 +54,7 @@ make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
 make build-operator
 make smoke    # init + start + health + members, then stop
+make hooks    # install local pre-commit and commit-msg hooks
 ```
 
 `proto/api` is the application wire (`buf.build/clusdr/api`). `proto/internal` is join/heartbeat (`buf.build/clusdr/internal`). After editing either:
