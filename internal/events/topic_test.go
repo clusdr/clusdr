@@ -7,6 +7,12 @@ import (
 	"github.com/clusdr/clusdr/internal/events"
 )
 
+func TestCustomType(t *testing.T) {
+	if got := events.CustomType("deployment"); got != "custom.deployment" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestTopicFromType(t *testing.T) {
 	topic, ok := events.TopicFromType("custom.deployment")
 	if !ok || topic != "deployment" {
@@ -14,6 +20,9 @@ func TestTopicFromType(t *testing.T) {
 	}
 	if _, ok := events.TopicFromType("member.join"); ok {
 		t.Error("member.join should not parse as a topic")
+	}
+	if _, ok := events.TopicFromType("custom."); ok {
+		t.Error("empty topic after prefix")
 	}
 }
 
@@ -27,7 +36,7 @@ func TestNormalizeTopic(t *testing.T) {
 }
 
 func TestValidTopic(t *testing.T) {
-	ok := []string{"deployment", "app.rollout", "worker_1", "a-b"}
+	ok := []string{"deployment", "custom.deployment", "app.rollout", "worker_1", "a-b"}
 	for _, topic := range ok {
 		if err := events.ValidTopic(topic); err != nil {
 			t.Errorf("%q: %v", topic, err)

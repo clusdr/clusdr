@@ -52,6 +52,30 @@ jobs:
           go test -race -count=1 -p 2 ./...
           go test -C sdk -race -count=1 ./...
 
+  cover:
+    name: Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.27.1"
+          cache: true
+
+      - name: make cover
+        run: make cover
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.out
+            sdk-coverage.out
+          if-no-files-found: error
+
   build:
     name: Build
     runs-on: ubuntu-latest

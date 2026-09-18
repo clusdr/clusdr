@@ -1,4 +1,4 @@
-.PHONY: build build-operator bench test vet lint proto proto-lint proto-python helm manifests clean
+.PHONY: build build-operator bench test cover vet lint proto proto-lint proto-python helm manifests clean
 
 VERSION  ?= dev
 COMMIT   ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -22,6 +22,15 @@ bench:
 test:
 	go test -race ./...
 	go test -C sdk -race ./...
+
+# Statement coverage for daemon + operator + SDK. Examples and clusdr-bench
+# are excluded: they are demos / a load generator, not production packages.
+cover:
+	@pkgs=$$(go list ./... | grep -Ev '/examples/|/cmd/clusdr-bench'); \
+	go test -count=1 -covermode=atomic -coverprofile=coverage.out $$pkgs
+	@go tool cover -func=coverage.out | tail -1
+	go test -C sdk -count=1 -covermode=atomic -coverprofile=../sdk-coverage.out ./...
+	@go tool cover -func=sdk-coverage.out | tail -1
 
 vet:
 	go vet ./...

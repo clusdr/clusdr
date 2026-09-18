@@ -36,6 +36,7 @@ CI lints PR commits against that grammar. Prefer squash-merge; the squash title 
 
 ```bash
 make test    # go test -race ./... and sdk/
+make cover   # statement coverage (examples and clusdr-bench excluded); prints totals
 make vet
 make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
@@ -62,7 +63,7 @@ Message names follow Buf STANDARD: `{Method}Request` when the method is unique i
 
 ## Tests
 
-Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist).
+Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage for the daemon, operator, and Go SDK (examples and `clusdr-bench` are excluded). CI uploads `coverage.out` and `sdk-coverage.out` as the Coverage job artifact; it does not fail the build on a percentage.
 
 ## Docs
 

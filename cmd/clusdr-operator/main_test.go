@@ -1,9 +1,11 @@
 package main
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestVersionRequested(t *testing.T) {
-	t.Parallel()
 	cases := []struct {
 		args []string
 		want bool
@@ -19,5 +21,12 @@ func TestVersionRequested(t *testing.T) {
 		if got := versionRequested(tc.args); got != tc.want {
 			t.Fatalf("versionRequested(%q) = %v, want %v", tc.args, got, tc.want)
 		}
+	}
+}
+
+func TestKubeConfig_MissingFile(t *testing.T) {
+	t.Setenv("KUBECONFIG", filepath.Join(t.TempDir(), "no-such"))
+	if _, err := kubeConfig(); err == nil {
+		t.Fatal("expected missing kubeconfig error")
 	}
 }
