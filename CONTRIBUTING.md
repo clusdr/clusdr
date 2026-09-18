@@ -4,7 +4,7 @@ Build and test from this repository. Operators install a **Linux** release binar
 
 Product behavior is described in [docs/](docs/README.md), not here.
 
-License: [Apache-2.0](LICENSE). Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Security: [SECURITY.md](SECURITY.md).
+License: [Apache-2.0](LICENSE). Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Security: [SECURITY.md](SECURITY.md). Governance: [GOVERNANCE.md](GOVERNANCE.md).
 
 ## Commits
 
@@ -75,9 +75,19 @@ Message names follow Buf STANDARD: `{Method}Request` when the method is unique i
 
 `gofmt` on changed Go files.
 
+## Dependencies
+
+Go modules come from the public module proxy, recorded in `go.mod` / `go.sum`. Prefer well-known libraries (stdlib first). Do not vendor. Dependabot opens weekly PRs for Go, Actions, and Docker base images. A GA tag does not ship a known critical/high hole without a note in the release — see [SECURITY.md](SECURITY.md).
+
+## Review
+
+On a pull request, check that tests cover the new path (or the PR says why not), docs in `docs/` moved with the behavior, and the squash title stays conventional. Required CI must be green.
+
 ## Tests
 
 Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage locally (examples and `clusdr-bench` excluded). CI’s Test job writes the same profiles (`coverage.out`, `sdk-coverage.out`) and uploads them as an artifact; it does not fail the build on a percentage.
+
+`make build` does not strip symbols. GitHub Release binaries use `-s -w`.
 
 ## Docs
 

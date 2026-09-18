@@ -215,6 +215,19 @@ func LoadFrom(path string, getenv func(string) string) (Config, error) {
 	return cfg, nil
 }
 
+// ParseYAML merges YAML onto defaults, clamps Raft, and validates.
+func ParseYAML(data []byte) (Config, error) {
+	cfg := Defaults()
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return Config{}, err
+	}
+	cfg.clampRaft()
+	if err := cfg.Validate(); err != nil {
+		return Config{}, err
+	}
+	return cfg, nil
+}
+
 // clampRaft keeps leader_lease_timeout <= heartbeat_timeout when a caller
 // overrides only one of the pair.
 func (c *Config) clampRaft() {
