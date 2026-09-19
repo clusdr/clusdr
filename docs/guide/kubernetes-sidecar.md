@@ -1,31 +1,35 @@
-# Sidecar
+# Run a sidecar StatefulSet
 
-A sidecar next to the app is only when that **replica is the member** (a small elected StatefulSet). Shared netns → `127.0.0.1` / `Local()`. That is the one Kubernetes layout where the pod *is* the host for the SDK.
+Use this only when the **replica is the Raft member**. Shared netns → `127.0.0.1` / `Local()`. N replicas = N members.
 
-Default remains [one daemon per node](kubernetes.md#default-one-daemon-per-node). Do not apply this next to the DaemonSet example unless you mean **two** clusters. Do not put a clusdr sidecar on every microservice pod. That is not a mesh sidecar.
+Default remains [one daemon per node](kubernetes.md). Do not apply this next to the DaemonSet example unless you mean **two** clusters. Why this is the exception: [Kubernetes](../concepts/kubernetes.md).
 
-```text
-Pod
-├── Application     →  Local()  →  127.0.0.1:7947
-└── clusdr sidecar  →  Raft to the other replicas
+The published image has **no shell**. One pod template cannot mix seed `start --bootstrap` and joiner `start`. Use a Job on PVC-0, delete that Job (RWO), then start the StatefulSet. The [Operator](kubernetes-operator.md) does that sequence when `spec.topology` is `Sidecar`.
+
+## 1. Bootstrap ordinal 0
+
+```bash
+kubectl apply -f examples/k8s/sidecar-bootstrap.yaml
 ```
 
-N replicas = N Raft members. Scaling the StatefulSet scales Raft. A Deployment with a clusdr sidecar is the same mistake: replica count is membership.
+Wait for the Job to finish. Copy the join token if you will join by hand. Delete the Job so the StatefulSet can mount the RWO volume.
 
-## Disk and bootstrap
+Manifest: [`sidecar-bootstrap.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/sidecar-bootstrap.yaml).
 
-`emptyDir` forgets `node.id` (crash becomes a new join, not a [presence](../concepts/presence.md) restart). Use a PVC per ordinal.
+## 2. Start the StatefulSet
 
-The published image has **no shell**. One pod template cannot mix seed `start --bootstrap` and joiner `start`. Do not `clusdr init` on every ordinal (each init is a new `cluster.id`).
+```bash
+kubectl apply -f examples/k8s/sidecar-statefulset.yaml
+```
 
-Bootstrap ordinal 0 with a Job on a pre-created PVC, delete that Job (RWO), then start the StatefulSet without `--bootstrap`. Join `-1` and `-2` the same way as on a VM. The [Operator](kubernetes-operator.md) does that sequence when `spec.topology` is `Sidecar`.
+Headless Service DNS is the advertised `node.addr` / `raft.addr` (`$(POD_NAME).svc:7947`). The sidecar binds `0.0.0.0:7947`. The app in that pod dials `127.0.0.1:7947`.
 
-Headless Service DNS is the advertised `node.addr` / `raft.addr` (`$(POD_NAME).svc:7947`). The sidecar binds `0.0.0.0:7947`; the app still dials `127.0.0.1:7947`. Do not put a ClusterIP in front and `Dial` it from every replica. The Operator may Dial that headless name to `join`; that is not the app path.
+## 3. Join ordinals ≥ 1
 
-## Manifests
+Same token as on a VM, seed Runtime = ordinal 0’s headless name. Or apply the Sidecar `ClusdrCluster` and let the Operator join.
 
-- [`sidecar-bootstrap.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/sidecar-bootstrap.yaml)
-- [`sidecar-statefulset.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/sidecar-statefulset.yaml)
-- Operator sample: [`clusdrcluster-sidecar.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster-sidecar.yaml)
+## Checkpoint
 
-Walkthrough: the [examples/k8s README](https://github.com/clusdr/clusdr/blob/main/examples/k8s/README.md#sidecar-statefulset-exception). The [Helm](kubernetes-helm.md) chart does not install this topology.
+Three pods, three `alive` members. The app in the pod uses `Local()` with no `CLUSDR_GRPC_ADDR`. Scaling the StatefulSet scales Raft. Do not put a ClusterIP in front and `Dial` it from every replica.
+
+Walkthrough notes: [examples/k8s README](https://github.com/clusdr/clusdr/blob/main/examples/k8s/README.md#sidecar-statefulset-exception). The Helm chart does not install this topology.

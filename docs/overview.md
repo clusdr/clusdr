@@ -26,7 +26,7 @@ It does that without being a general-purpose coordination suite.
 - You want to replace etcd as Kubernetes storage
 - You want to replace the Kubernetes Lease API, probes, or EndpointSlice
 
-Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes. It **runs on** Kubernetes as a Linux host ([guide](guide/kubernetes.md), [Helm](guide/kubernetes-helm.md), [Operator](guide/kubernetes-operator.md)). A Go controller that only needs leader election should keep using `coordination.k8s.io`.
+Clusdr is not a database, queue, workflow engine, service mesh, or Kubernetes. It **runs on** Kubernetes as a Linux host ([Kubernetes](concepts/kubernetes.md)). A Go controller that only needs leader election should keep using `coordination.k8s.io`.
 
 ## Versus common alternatives
 

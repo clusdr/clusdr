@@ -15,5 +15,6 @@ Guarantees and vocabulary. Learn the product in the [guide](../guide/) first. Fl
 | [Presence](presence.md) | Crash vs reboot vs `join`? |
 | [Security](security.md) | How do join tokens and mTLS work? |
 | [Consistency](consistency.md) | What is on Raft, what is not? |
+| [Kubernetes](kubernetes.md) | Why a node is a Linux host, not etcd-for-kube |
 
 Start from [Architecture](../architecture.md) if you have not read it.

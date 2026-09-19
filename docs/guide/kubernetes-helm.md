@@ -1,45 +1,56 @@
-# Helm
+# Install with Helm
 
-The chart templates the [default topology](kubernetes.md#default-one-daemon-per-node): one daemon per node, `data.dir` on hostPath. It does not join Raft, does not install the CRD, and does not run the Operator.
+Template the DaemonSet topology from values. Join stays CLI. The chart does not install the CRD or the Operator.
 
-Install is OCI. There is no `helm repo add`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr).
+Why Helm is not the Operator: [Kubernetes](../concepts/kubernetes.md). Same topology by hand: [Run on Kubernetes](kubernetes.md).
+
+Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`.
+
+## 1. Data dir on each node
 
 ```bash
+# kind, cluster name clusdr
+for n in $(kind get nodes --name clusdr); do
+  docker exec "$n" mkdir -p /var/lib/clusdr
+  docker exec "$n" chown 65532:65532 /var/lib/clusdr
+done
+```
+
+## 2. Install
+
+```bash
+kubectl get nodes
 helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \
   --namespace clusdr --create-namespace \
   --set seed.nodeName=<node>
 ```
 
-`ghcr.io/clusdr/clusdr` is the **daemon image**, not this chart. The chart lives at `oci://ghcr.io/clusdr/charts/clusdr`.
+`ghcr.io/clusdr/clusdr` is the daemon image. The chart is `oci://ghcr.io/clusdr/charts/clusdr`.
 
-Contributor checkout: `helm install clusdr charts/clusdr --namespace clusdr --create-namespace --set seed.nodeName=<node>`. In-tree chart: [`charts/clusdr`](https://github.com/clusdr/clusdr/tree/main/charts/clusdr). Checkout only if you are changing the chart.
+Contributor checkout: `helm install clusdr charts/clusdr --namespace clusdr --create-namespace --set seed.nodeName=<node>`.
 
-## After install
+## 3. Join
 
-hostPath still needs `mkdir` + `chown 65532` on each node. NOTES print the loop. Copy the join token from the init hook logs, then join DaemonSet pods as **voters** until `voterCount` (default 3; the seed is already 1). Extra nodes: `join --observer`.
+Copy the join token from the init hook logs (NOTES print the loop). Join DaemonSet pods as **voters** until `voterCount` (default 3; the seed is already 1). Extra nodes: `join --observer`.
 
-Helm does not `init` DaemonSet pods and does not `--bootstrap` every ordinal. A restart with intact `dataDir` is `clusdr start`, not another `join`. Scaling a workload Deployment does not add Raft members.
+```bash
+SEED=<seed-node-ip>:7947
+TOKEN=<token-from-init>
+for p in $(kubectl get pods -n clusdr -l app.kubernetes.io/component=member -o name); do
+  kubectl exec -n clusdr "$p" -- /clusdr join --token "$TOKEN" "$SEED"
+done
+```
 
-## Values that matter
+## Checkpoint
+
+`kubectl exec -n clusdr deploy/clusdr-seed -- /clusdr members` shows an odd number of voters. `helm template … --set voterCount=4` fails.
 
 | Value | Meaning |
 |---|---|
-| `image.repository` | Published `durguto/clusdr` |
-| `image.tag` | Empty uses `appVersion` (the daemon tag). Override to pin |
-| `dataDir` | hostPath on the node (`/var/lib/clusdr`) |
-| `voterCount` | Odd target. Helm does not join |
 | `seed.nodeName` | Same node for init Job and seed Deployment |
+| `voterCount` | Odd target. Helm does not join |
+| `image.tag` | Empty uses `appVersion` |
+| `dataDir` | hostPath (`/var/lib/clusdr`) |
 | `probes.type` | `exec` (`clusdr health`) or `tcp` (7947) |
 
-`voterCount` must be odd (`helm template … --set voterCount=4` fails).
-
-The init Job is `pre-install,pre-upgrade` so the seed does not start on an empty disk. `clusdr init` is success when identity already exists.
-
-## What this chart is not
-
-- Join token, Raft add/remove, or a second control plane
-- Sidecar as the default — that is [Sidecar](kubernetes-sidecar.md) (YAML / Operator, not this chart)
-- The [Operator](kubernetes-operator.md) or the `ClusdrCluster` CRD
-- `helm repo add`
-
-Same topology without Helm: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s). Chart README: [`charts/clusdr`](https://github.com/clusdr/clusdr/blob/main/charts/clusdr/README.md).
+Chart README: [`charts/clusdr`](https://github.com/clusdr/clusdr/blob/main/charts/clusdr/README.md). Automatic join: [Operator](kubernetes-operator.md).

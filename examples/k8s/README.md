@@ -20,7 +20,7 @@ Image: published `durguto/clusdr` (example pins `0.2.0`). Probes call [`clusdr h
 
 Kube's native gRPC probe speaks `grpc.health.v1`, which this daemon does not implement.
 
-Scope: [Run on Kubernetes](../../docs/guide/kubernetes.md). Helm: [Helm](../../docs/guide/kubernetes-helm.md) (`oci://ghcr.io/clusdr/charts/clusdr`; join is still CLI). Operator: [Operator](../../docs/guide/kubernetes-operator.md). Sidecar: [Sidecar](../../docs/guide/kubernetes-sidecar.md). Addresses: [other hosts](../../docs/guide/other-hosts.md). Crash vs leave: [presence](../../docs/concepts/presence.md).
+Why: [Kubernetes](../../docs/concepts/kubernetes.md). How-to: [Run on Kubernetes](../../docs/guide/kubernetes.md) · [Helm](../../docs/guide/kubernetes-helm.md) · [Operator](../../docs/guide/kubernetes-operator.md) · [Sidecar](../../docs/guide/kubernetes-sidecar.md). Addresses: [other hosts](../../docs/guide/other-hosts.md). Crash vs leave: [presence](../../docs/concepts/presence.md).
 
 ## Three-node kind (or k3s)
 
@@ -98,7 +98,7 @@ kubectl apply -f examples/k8s/app.yaml   # replace the image first
 
 `app.yaml` uses the Downward API `status.hostIP:7947` — same as hostNetwork or hostPort daemons. Go can connect with bootstrap TLS. Other languages need the node's PEMs or `CLUSDR_TLS=disabled`.
 
-Full rules: [Apps on the node](../../docs/guide/kubernetes.md#apps-on-the-node).
+Full rules: [Kubernetes](../../docs/concepts/kubernetes.md).
 
 ## What these files do not do
 

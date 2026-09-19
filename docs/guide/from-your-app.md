@@ -1,24 +1,8 @@
 # Use it from your app
 
-The daemon you started in [step 2](first-member.md) is the cluster member. The application is a client of the daemon **on the same host**.
+Keep `clusdr start` running from [step 2](first-member.md). This page makes one local SDK call.
 
-```text
-app A ─┐
-app B ─┼─► clusdr daemon on this host ─► other clusdr daemons
-cli   ─┘
-```
-
-Two processes on one machine share one daemon. The app does not vote. It does not speak Raft.
-
-Keep `clusdr start` running. Then pick a language:
-
-| Language | Install | Full docs |
-|---|---|---|
-| Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](../sdk/go.md) |
-| Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = "0.2.0"` | [Rust SDK](../sdk/rust.md) |
-| TypeScript | `npm install clusdr` | [TypeScript SDK](../sdk/typescript.md) |
-| Java | `io.clusdr:clusdr` | [Java SDK](../sdk/java.md) |
+Pick a language. Full walkthroughs: [SDKs](../sdk/).
 
 ```go
 c, err := clusdr.Local()
@@ -55,14 +39,18 @@ try (Cluster c = Clusdr.local()) {
 }
 ```
 
-`Local` / `local()` / `Clusdr.local()` dial `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.
+| Language | Install |
+|---|---|
+| Go | `go get github.com/clusdr/clusdr/sdk` |
+| Python | `pip install clusdr` |
+| Rust | `clusdr = "0.2.0"` |
+| TypeScript | `npm install clusdr` |
+| Java | `io.clusdr:clusdr` |
 
-What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
+`Local` / `local()` / `Clusdr.local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.
 
-On Kubernetes the host is the **node**. Set `CLUSDR_GRPC_ADDR` to that node's Runtime (`status.hostIP:7947`). `127.0.0.1` inside the pod is the pod — unless the app shares a pod with a [clusdr sidecar](kubernetes-sidecar.md). [Apps on the node](kubernetes.md#apps-on-the-node).
+## Checkpoint
 
-Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, Rust, TypeScript, and Java): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+`Members` returns the same nodes you saw in `clusdr members`. You can lock a name.
 
-## Next
-
-Laptop defaults bind localhost. [Run on other hosts →](other-hosts.md)
+The tutorial ends here. Real NICs and Docker: [Run on other hosts](other-hosts.md). Examples: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).

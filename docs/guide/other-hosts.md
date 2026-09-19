@@ -1,10 +1,10 @@
 # Run on other hosts
 
-[Step 2](first-member.md) and [step 3](grow.md) used `127.0.0.1`. That cannot form a cluster across machines. You now point every peer at addresses they can actually dial.
+Point every peer at addresses they can dial. `127.0.0.1` from the tutorial cannot form a cluster across machines.
 
-`clusdr` is already on each host ([step 1](install.md)), or you use the published Linux image below.
+`clusdr` is already on each host ([Install](install.md)), or use the published Linux image below.
 
-## Addresses
+## 1. Set dialable addresses
 
 On **every** node:
 
@@ -15,51 +15,37 @@ On **every** node:
 | `grpc.addr` / `CLUSDR_GRPC_ADDR` | Bind address for the Runtime API |
 | `data.dir` | Unique per process |
 
-Config file vs data dir vs socket, laptop vs `/etc` + `/var/lib`: [Configuration](../reference/configuration.md).
+Laptop vs `/etc` + `/var/lib`: [Configuration](../reference/configuration.md).
+
+## 2. Form the cluster
 
 Seed: `clusdr init`, then `clusdr start --bootstrap`.  
 Others: `clusdr start` without bootstrap, then `clusdr join --token … <seed-runtime>`.
 
-After that, a reboot of the **same** `data.dir` is `clusdr start` again. Presence expiry does not eject the Raft server. `join` only after [`clusdr leave`](../reference/cli/leave.md) or a new `data.dir`. Do not `init` a second time.
+A reboot of the **same** `data.dir` is `clusdr start` again. `join` only after [`clusdr leave`](../reference/cli/leave.md) or a new `data.dir`. Do not `init` a second time.
 
-Prefer 3 or 5 **voters**. Extra machines that only need a local API: `join --observer` ([step 3](grow.md)).
+Prefer 3 or 5 **voters**. Extra machines that only need a local API: `join --observer`.
 
-Do not share `data.dir` between two processes. Back it up if you need identity and the log after a replace.
+TLS stays on unless every node and every client sets `CLUSDR_TLS=disabled`. Confirm certs with `clusdr certs show`.
 
-TLS stays on. Do not set `CLUSDR_TLS=disabled` unless every node and every client does. Confirm certs with `clusdr certs show`. Apps on a host load PEMs from that host's `data.dir`.
-
-## Docker Hub
-
-The pipeline publishes `durguto/clusdr` (linux/amd64 and linux/arm64). GHCR carries the same tags as `ghcr.io/clusdr/clusdr`.
+## 3. Optional: Docker image
 
 ```bash
 docker pull durguto/clusdr
 ```
 
-Image: distroless non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, exposes **7947**. Map **7946** if Raft peers sit outside the container network.
+Same tags on GHCR: `ghcr.io/clusdr/clusdr`. Distroless, non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, port **7947**. Map **7946** if Raft peers sit outside the container network.
 
-`docker compose` in the daemon tree is one node and does **not** run `init`. A compose healthcheck that calls `clusdr version` only proves the binary runs.
+In-tree `docker compose` is one node and does **not** run `init`.
 
-## Is it up?
-
-These checks are not interchangeable.
+## Checkpoint
 
 | Check | What it proves |
 |---|---|
 | `clusdr version` | Binary runs |
-| `clusdr status` | Control socket **file** exists (default `$HOME/.clusdr/clusdr.sock`) |
-| `clusdr health` / Health RPC | Process is serving gRPC. In this version `healthy` is always `true` and `role` is always `standalone` |
 | `clusdr members` | Membership + Runtime API |
+| `clusdr health` | Process is serving gRPC |
 
-Prefer `members` or `health` over Runtime TCP. Do not use `status` as a Kubernetes readiness probe ([Kubernetes](kubernetes.md)).
+Prefer `members` or `health`. Do not use `clusdr status` as a Kubernetes probe.
 
-## You are done with the guide
-
-You installed a binary, bootstrapped a member, grew the cluster, watched the stream, called it from an app, and pointed it at real addresses.
-
-The same host model on a Kubernetes node: [Run on Kubernetes](kubernetes.md). Helm / Operator / Sidecar are their own pages. Example YAML: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s).
-
-- Still deciding if this is the right tool: [Overview](../overview.md)
-- Guarantees (what is on Raft, how presence works): [concepts](../concepts/)
-- A flag, RPC, or SDK type: [reference](../reference/)
-- Token, TLS, dial, locks: [Errors](../reference/errors.md)
+Same host model on a node: [Run on Kubernetes](kubernetes.md).

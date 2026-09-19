@@ -1,68 +1,66 @@
 # Run on Kubernetes
 
-Kubernetes is a place to run the same Linux host model. It is not a Kubernetes replacement, not etcd for the apiserver, and not a substitute for kube’s own coordination.
+Run the default topology: one daemon per node, `data.dir` on hostPath. You want **3 members** (seed + two DaemonSet voters).
 
-If you have not formed a cluster on Linux yet, start at [other hosts](other-hosts.md). Example manifests: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s).
+Why this is not a kube replacement, and when to use the sidecar instead: [Kubernetes](../concepts/kubernetes.md). Helm and Operator are sibling how-tos.
 
-| You want | Page |
-|---|---|
-| One daemon per node (the default) | this page |
-| Template that DaemonSet from values | [Helm](kubernetes-helm.md) |
-| A `ClusdrCluster` object that forms the same topology | [Operator](kubernetes-operator.md) |
-| The replica **is** the Raft member | [Sidecar](kubernetes-sidecar.md) |
+Manifests: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s). Image pin in those files is `durguto/clusdr:0.2.0`.
 
-## What Kubernetes already does
+## 1. Data dir on each node
 
-Use kube for kube’s objects.
+hostPath is not chowned by `fsGroup`. Distroless uid **65532**.
 
-| Need | Use this |
-|---|---|
-| Controller leader election | [Lease API](https://kubernetes.io/docs/concepts/architecture/leases/) (`coordination.k8s.io`) |
-| Container liveness / readiness | probes |
-| Who is a replica of this Deployment | Service / EndpointSlice |
-| Watch kube objects | informers / client-go |
-
-A three-replica Go controller that only needs “who leads this Deployment” should keep using the Lease API. Clusdr does not replace that.
-
-## What clusdr is for
-
-Application coordination the apiserver should not hold:
-
-- Named [locks](../concepts/locks.md) and [leases](../concepts/leases.md) with fencing tokens (business keys, not pod names)
-- Mixed members: VM + pod + agent on one membership list
-- [Watch](../concepts/watch.md) and membership from SDKs that are not client-go
-
-The daemon is still the Raft member. The app is still not.
-
-```text
-Node
-├── Application pods     →  local SDK  →  this node’s daemon
-└── clusdr daemon        →  Raft to other nodes’ daemons
+```bash
+# kind, cluster name clusdr
+for n in $(kind get nodes --name clusdr); do
+  docker exec "$n" mkdir -p /var/lib/clusdr
+  docker exec "$n" chown 65532:65532 /var/lib/clusdr
+done
 ```
 
-## Default: one daemon per node
+On k3s or real nodes: the same `mkdir` + `chown` once per machine.
 
-Same as a Linux host. One clusdr process per node. Odd **voter** count. Extra nodes [observers](../concepts/observers.md). Scaling a Deployment does **not** add Raft members.
+## 2. Pin init and seed to one node
 
-`data.dir` lives on the node (hostPath or another node-local volume) so a DaemonSet pod restart is [`clusdr start`](../concepts/presence.md) with the same identity — not another `join`. Crash is `member.dead`; `clusdr leave` is `member.left`.
+```bash
+kubectl get nodes
+```
 
-Advertise dialable `node.addr` / `raft.addr` (node IP or DNS), not `0.0.0.0`. Health and readiness use the Runtime [Health](../reference/api/health.md) RPC, not `clusdr status` on the Unix socket.
+Set `spec.template.spec.nodeName` on both [`seed-init.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/seed-init.yaml) and [`seed.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/seed.yaml) to that name. They must share one hostPath.
 
-Bootstrap and join are the same CLI as on a VM. Three ways to get this topology:
+## 3. Apply seed, then the DaemonSet
 
-- YAML under [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s)
-- [Helm](kubernetes-helm.md) (`oci://ghcr.io/clusdr/charts/clusdr`) — join stays CLI
-- [Operator](kubernetes-operator.md) — a `ClusdrCluster` object, same `init` / `--bootstrap` / `join`
+```bash
+kubectl apply -f examples/k8s/namespace.yaml
+kubectl apply -f examples/k8s/seed-init.yaml
+kubectl wait -n clusdr --for=condition=complete job/clusdr-seed-init --timeout=60s
+kubectl logs -n clusdr job/clusdr-seed-init
+```
 
-Walkthrough (kind / k3s, hostPath, probes): the [examples/k8s README](https://github.com/clusdr/clusdr/blob/main/examples/k8s/README.md).
+Copy the **join token** (once). Then:
 
-## Apps on the node
+```bash
+kubectl apply -f examples/k8s/seed.yaml
+kubectl rollout status -n clusdr deploy/clusdr-seed
+kubectl apply -f examples/k8s/daemonset.yaml
+```
 
-The SDK does not change. `Local()` / `local()` still dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. There is no kube SDK and no `Dial` to a clusdr Service.
+## 4. Join DaemonSet pods as voters
 
-A pod is **not** the Linux host. `127.0.0.1:7947` inside the pod is that pod, not the node daemon — unless the app shares the node's netns (`hostNetwork`) or is a [sidecar](kubernetes-sidecar.md).
+Seed Runtime is `$(NODE_IP):7947` on the seed node (`kubectl get pod -n clusdr -o wide`).
 
-The example daemons use `hostNetwork`, so the Runtime is `$(NODE_IP):7947` on that node. Point the app there with the Downward API:
+```bash
+SEED=<seed-node-ip>:7947
+TOKEN=<token-from-init>
+
+for p in $(kubectl get pods -n clusdr -l app.kubernetes.io/component=member -o name); do
+  kubectl exec -n clusdr "$p" -- /clusdr join --token "$TOKEN" "$SEED"
+done
+```
+
+On a 3-node cluster that is two joins, both voters. A later extra node: add `--observer`.
+
+## 5. Point an app at the node Runtime
 
 ```yaml
 env:
@@ -74,57 +72,16 @@ env:
     value: "$(NODE_IP):7947"
 ```
 
-Same address if the daemon used `hostPort: 7947` instead of `hostNetwork`. Copy-paste Deployment: [`examples/k8s/app.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/app.yaml).
+Copy-paste Deployment: [`app.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/app.yaml). Python, Rust, TypeScript, and Java need PEMs from the node's `data.dir` or `CLUSDR_TLS=disabled` on **both** daemon and app.
 
-Go (one language is enough). `Local()` is unchanged; bootstrap TLS is enough when the data dir has no PEMs:
+Probes: `clusdr health` or `tcpSocket` port 7947. Never `clusdr status`.
 
-```go
-c, err := clusdr.Local()
-if err != nil {
-    // CLUSDR_GRPC_ADDR down, TLS, or Health not ready within 10s
-}
-defer c.Close()
-members, err := c.Members(ctx)
+## Checkpoint
+
+```bash
+kubectl exec -n clusdr deploy/clusdr-seed -- /clusdr members
 ```
 
-Python, Rust, TypeScript, and Java need PEMs (`CLUSDR_DATA_DIR` — the node's `data.dir`, often the same hostPath read-only) or `CLUSDR_TLS=disabled` on **both** daemon and app.
+Three `alive` voters. A seed pod delete with intact hostPath must keep the same id (dead, then alive) — not a new `join`.
 
-Do not create a ClusterIP/headless Service of clusdr and `Dial` it from every replica. That is Consul/etcd, and it is not `Local()`.
-
-## Sidecar is the exception
-
-Only when that **replica is the Raft member** (a small elected StatefulSet). Shared netns → `127.0.0.1` / `Local()`. N replicas = N members. Full page: [Sidecar](kubernetes-sidecar.md).
-
-Do not put a clusdr sidecar on every microservice pod. Default remains [one daemon per node](#default-one-daemon-per-node).
-
-## Helm, CRD, Operator
-
-Packaging of this page. Optional. The daemon and the SDKs do not require kube.
-
-| Layer | Job | Page |
-|---|---|---|
-| **Helm** | Template the DaemonSet from values. Join is still CLI | [Helm](kubernetes-helm.md) |
-| **CRD** | One cluster object: desired **host** topology | [Operator](kubernetes-operator.md) |
-| **Operator** | Reconcile that object with the same CLI (`init`, `--bootstrap`, `join`) | [Operator](kubernetes-operator.md) |
-
-## Not this
-
-- Replacing `coordination.k8s.io`, probes, or EndpointSlice
-- etcd storage for the kube-apiserver
-- A ClusterIP Service as the app’s clusdr endpoint (that is Consul/etcd)
-- An Operator that grows Raft when you scale a Deployment
-- A clusdr sidecar on a Deployment (or `emptyDir`) as the general app pattern
-- A mutating webhook that injects a clusdr sidecar on every pod
-
-## Related
-
-- [Run on other hosts](other-hosts.md)
-- [Helm](kubernetes-helm.md)
-- [Operator](kubernetes-operator.md)
-- [Sidecar](kubernetes-sidecar.md)
-- [Presence](../concepts/presence.md)
-- [Observers](../concepts/observers.md)
-- [Use it from your app](from-your-app.md)
-- [Limits](../reference/limits.md)
-- [Compatibility](../reference/compatibility.md)
-- [Examples: Kubernetes](https://github.com/clusdr/clusdr/tree/main/examples/k8s)
+Helm: [Helm](kubernetes-helm.md). Operator (join is automatic): [Operator](kubernetes-operator.md). Replica-is-member: [Sidecar](kubernetes-sidecar.md).

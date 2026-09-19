@@ -75,7 +75,7 @@ SDK errors are wrapped (`clusdr: daemon not ready at …`, `clusdr: lock "name":
 
 | You see | Cause | What to do |
 |---|---|---|
-| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member. On Kubernetes set `CLUSDR_GRPC_ADDR` to this node's Runtime, not `127.0.0.1` — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../guide/kubernetes.md#apps-on-the-node)) |
+| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member. On Kubernetes set `CLUSDR_GRPC_ADDR` to this node's Runtime, not `127.0.0.1` — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../concepts/kubernetes.md)) |
 | `clusdr: empty dial address` | `Dial("")` | Use `Local()` / `local()`, or pass `CLUSDR_GRPC_ADDR` |
 | `clusdr: publish rejected` / payload too large | Custom event over 64 KiB or invalid type | Shrink the payload. Publish is gossip, not Raft ([events](../concepts/events.md)) |
 | Watch reconnect misses `custom.*` | Not a bug | Custom events are ephemeral. Cluster events come back in the snapshot |

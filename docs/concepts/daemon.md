@@ -23,7 +23,7 @@ If `clusdr init` was never run, the process can still start and logs that identi
 
 ## Application
 
-Uses `clusdr.Local()` (Go) or `clusdr.local()` (Python). It dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. A Kubernetes pod is not the host: set `CLUSDR_GRPC_ADDR` to the node's Runtime — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) in the same pod (`127.0.0.1`). [Kubernetes](../guide/kubernetes.md#apps-on-the-node).
+Uses `clusdr.Local()` (Go) or `clusdr.local()` (Python). It dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. A Kubernetes pod is not the host: set `CLUSDR_GRPC_ADDR` to the node's Runtime — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) in the same pod (`127.0.0.1`). [Kubernetes](kubernetes.md).
 
 It is not a voter. It does not speak Raft. Two processes on one machine share the daemon.
 
@@ -37,5 +37,5 @@ It is not a voter. It does not speak Raft. Two processes on one machine share th
 
 - [Architecture](../architecture.md)
 - [Start the first member](../guide/first-member.md)
-- [Run on Kubernetes](../guide/kubernetes.md)
+- [Kubernetes](kubernetes.md)
 - [SDKs](../sdk/)

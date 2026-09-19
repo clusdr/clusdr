@@ -27,7 +27,7 @@ if err != nil {
 defer c.Close()
 ```
 
-`Local` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (10s). That wait is not configurable from a public option. On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../guide/kubernetes.md#apps-on-the-node)).
+`Local` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (10s). That wait is not configurable from a public option. On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../concepts/kubernetes.md)).
 
 ```go
 c, err := clusdr.Dial("127.0.0.1:8947", clusdr.WithDataDir("./data-b"))

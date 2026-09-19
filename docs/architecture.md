@@ -1,6 +1,6 @@
 # Architecture
 
-This page is the technical overview. Subsystems have their own concept pages.
+Why the process model looks this way. Subsystems have their own [concept](concepts/) pages. Flags and ports as a lookup table: [Configuration](reference/configuration.md).
 
 ## Process model
 
@@ -72,6 +72,4 @@ Quorum is majority. Three voters tolerate one failure. Prefer odd voter counts.
 - [Daemon and application](concepts/daemon.md)
 - [Consistency](concepts/consistency.md)
 - [Run on other hosts](guide/other-hosts.md)
-- [Run on Kubernetes](guide/kubernetes.md)
-- [Helm](guide/kubernetes-helm.md)
-- [Operator](guide/kubernetes-operator.md)
+- [Kubernetes](concepts/kubernetes.md)

@@ -22,7 +22,7 @@ CPython 3.10+. Rust 1.82+ (Tokio). Node.js 20+. Java 17+. Wire package `clusdr.v
 
 ## What the SDKs do
 
-- `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. On Kubernetes that is the **node** daemon ([guide](../guide/kubernetes.md#apps-on-the-node)), not a Service. Sidecar exception: `127.0.0.1` in that pod ([sidecar](../guide/kubernetes-sidecar.md))
+- `Local` / `local()` — apps. Address: `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. On Kubernetes that is the **node** daemon ([Kubernetes](../concepts/kubernetes.md)), not a Service. Sidecar exception: `127.0.0.1` in that pod ([sidecar](../guide/kubernetes-sidecar.md))
 - `Dial` / `dial(addr)` — tests and operators, not the default app path
 - Membership, leader, Watch, Publish
 - Optional Watch `topics` / `event_types` (same semantics as CLI `--topic` / `--type`)
