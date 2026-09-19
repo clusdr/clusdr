@@ -61,6 +61,7 @@ helm:
 	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'image: durguto/clusdr:0.2.0'
 	helm template clusdr charts/clusdr --namespace clusdr --set image.tag=dev | grep -q 'image: durguto/clusdr:dev'
 	if helm template clusdr charts/clusdr --namespace clusdr --set voterCount=4 >/dev/null 2>&1; then echo "voterCount=4 must fail" >&2; exit 1; fi
+	if helm template clusdr charts/clusdr --namespace clusdr --set probes.type=foo >/dev/null 2>&1; then echo "probes.type=foo must fail" >&2; exit 1; fi
 	if helm template clusdr charts/clusdr --namespace clusdr | grep -q 'kind: StatefulSet'; then echo "chart must not default sidecar STS" >&2; exit 1; fi
 	tmp=$$(mktemp -d); \
 	./scripts/package-chart.sh 0.0.0-ci "$$tmp"; \

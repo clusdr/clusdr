@@ -96,6 +96,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -117,6 +118,32 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/checksums.txt
+            dist/clusdr_*_linux_*.tar.gz
+
+      - name: Attach provenance to the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          # Scorecard Signed-Releases looks for *.intoto.jsonl on release assets.
+          # gh writes sha256:<digest>.jsonl in the current directory.
+          for i in 1 2 3 4 5 6; do
+            if gh attestation download dist/checksums.txt -R "${GITHUB_REPOSITORY}" -L 1; then
+              break
+            fi
+            sleep 5
+          done
+          sha=$(sha256sum dist/checksums.txt | awk '{print $1}')
+          jsonl="sha256:${sha}.jsonl"
+          test -f "$jsonl"
+          mv "$jsonl" dist/checksums.txt.intoto.jsonl
+          gh release upload "$tag" dist/checksums.txt.intoto.jsonl --clobber
 
       - name: Upload latest.json
         if: ${{ !contains(github.ref_name, '-') }}
@@ -152,6 +179,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -160,6 +188,8 @@ jobs:
       - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
           version: v3.16.4
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
       - name: Package and push
         env:
@@ -171,8 +201,16 @@ jobs:
           chmod +x scripts/package-chart.sh
           tgz=$(./scripts/package-chart.sh "$ver" dist)
           echo "$GH_TOKEN" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
-          helm push "$tgz" oci://ghcr.io/clusdr/charts
-          gh release upload "$tag" "$tgz" --clobber --repo clusdr/clusdr
+          # Artifact Hub looks for the legacy sha256-*.sig tag, not OCI referrers.
+          digest=$(helm push "$tgz" oci://ghcr.io/clusdr/charts 2>&1 | tee /dev/stderr | awk '/^Digest:/{print $2}')
+          test -n "$digest"
+          cosign sign --yes --new-bundle-format=false \
+            "ghcr.io/clusdr/charts/clusdr@${digest}"
+          cosign sign-blob --yes \
+            --output-signature "${tgz}.sig" \
+            --output-certificate "${tgz}.pem" \
+            "$tgz"
+          gh release upload "$tag" "$tgz" "${tgz}.sig" "${tgz}.pem" --clobber --repo clusdr/clusdr
 
       - uses: oras-project/setup-oras@5c0b487ce3fe0ce3ab0d034e63669e426e294e4d # v1.2.2
 
@@ -329,7 +367,7 @@ jobs:
           sign_list() {
             while IFS= read -r img; do
               [ -n "$img" ] || continue
-              cosign sign --yes "$img"
+              cosign sign --yes --new-bundle-format=false "$img"
             done
           }
           sign_list <<EOF

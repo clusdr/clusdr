@@ -8,8 +8,12 @@ Why that split exists: [Kubernetes](../concepts/kubernetes.md). Same topology by
 |---|---|---|
 | Chart | `oci://ghcr.io/clusdr/charts/clusdr` | There is no `helm repo add`; a repo URL will not resolve this OCI chart. |
 | Catalog | [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr) | Browse values and versions; install still uses the OCI URL above. |
+| Schema | `values.schema.json` | `helm template … --set voterCount=4` fails before you deploy an even quorum. |
+| Signed | Cosign on the OCI digest ([verify](verify-release.md)) | Artifact Hub Signed needs a tag cut after signing landed; `0.2.0` is checksum-only. |
 
-## 1. Data dir on each node
+Official is not a chart file. Request it from Artifact Hub after Verified publisher ([template](https://github.com/artifacthub/hub/issues/new?template=official-status.yml)).
+
+## 1. Give each node a disk the daemon can keep
 
 Skip this and the init Job fails with `Permission denied` on `/var/lib/clusdr` (distroless uid **65532**, hostPath is not chowned by `fsGroup`).
 
