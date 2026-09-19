@@ -17,7 +17,7 @@ clusdr start --bootstrap
 
 Leave that process running. TLS is on; the SDK loads `ca.crt` / `node.crt` / `node.key` from `CLUSDR_DATA_DIR` or `~/.clusdr`. If connect fails, [Errors](../docs/reference/errors.md).
 
-Python, Rust, TypeScript, and Java require those PEMs (or `CLUSDR_TLS=disabled`). Go falls back to bootstrap TLS if the data dir is empty.
+Every official SDK requires those PEMs (or `CLUSDR_TLS=disabled`). Missing files fail in every language.
 
 Rust packages depend on a sibling [`clusdr-rust`](https://github.com/clusdr/clusdr-rust) checkout (`../clusdr-rust` next to this repo). TypeScript packages depend on sibling [`clusdr-js`](https://github.com/clusdr/clusdr-js) (`../clusdr-js`). Java examples depend on `mvn install` of sibling [`clusdr-java`](https://github.com/clusdr/clusdr-java) (`../clusdr-java`).
 

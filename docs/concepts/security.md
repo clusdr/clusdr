@@ -25,9 +25,11 @@ Node-to-node gRPC uses certificates from that CA. Join bootstrap speaks TLS with
 
 Cert files in `data.dir`: `ca.crt`, `node.crt`, `node.key`.
 
-Apps on the same host: the SDK reads those PEMs from `CLUSDR_DATA_DIR`, `WithDataDir`, or `~/.clusdr`. Python, Rust, TypeScript, and Java **do not** skip-verify like Go bootstrap TLS — missing PEMs fail instead of connecting ([errors](../reference/errors.md#tls)).
+Apps on the same host: every official SDK locates those PEMs the same way — constructor override (`WithDataDir` / `data_dir` / `dataDir`), else `CLUSDR_DATA_DIR`, else `~/.clusdr`. Callers do not pass PEM bytes. All SDKs locate TLS material the same way by default — see [SDKs](../sdk/).
 
-Wrong CA → connection rejected. Server identity is the node id (SAN), not the dial hostname; clients skip hostname and verify the CA. If a polyglot client asks for `CLUSDR_TLS_SERVER_NAME`, set it to the **peer node id**.
+If the three files are present, every language presents the node cert and trusts the cluster CA. Wrong CA → connection rejected. Server identity is the node id (SAN), not the dial hostname.
+
+If the files are **missing**, every official SDK fails. Point the data dir at the daemon’s `data.dir`, or set `CLUSDR_TLS=disabled` / `insecure` (dev only) ([errors](../reference/errors.md#tls)). Set `CLUSDR_TLS_SERVER_NAME` only when the CN on `node.crt` is missing; the value is the **peer node id**. Go does not read that variable — it verifies the cluster CA without SNI.
 
 `clusdr certs show` prints CA fingerprint and node cert fields. Compare fingerprints across nodes after join.
 

@@ -94,14 +94,13 @@ func transportCreds(o options) (credentials.TransportCredentials, error) {
 	if dir == "" {
 		dir = envDataDir()
 	}
-	if dir == "" {
-		return bootstrapTLS(), nil
+	if dir == "" || !pemFilesPresent(dir) {
+		if dir == "" {
+			dir = "(no data dir)"
+		}
+		return nil, fmt.Errorf("clusdr: TLS enabled but %s/%s/%s missing in %s; set CLUSDR_TLS=disabled or pass WithInsecure()", caFile, certFile, keyFile, dir)
 	}
-	creds, err := clientFromDir(dir)
-	if err != nil {
-		return bootstrapTLS(), nil
-	}
-	return creds, nil
+	return clientFromDir(dir)
 }
 
 func newHolderID() (string, error) {

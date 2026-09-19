@@ -32,8 +32,7 @@ spec:
                   fieldPath: status.hostIP
             - name: CLUSDR_GRPC_ADDR
               value: "$(NODE_IP):7947"
-            # Go Local() can use bootstrap TLS with no PEMs.
-            # Other SDKs: mount the node's data.dir and set CLUSDR_DATA_DIR,
+            # Mount the node's data.dir and set CLUSDR_DATA_DIR,
             # or set CLUSDR_TLS=disabled on daemon and app (dev only).
             # - name: CLUSDR_DATA_DIR
             #   value: /var/lib/clusdr
