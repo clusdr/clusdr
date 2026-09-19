@@ -1,68 +1,108 @@
 # Use it from your app
 
-The daemon you started in [step 2](first-member.md) is the cluster member. The application is a client of the daemon **on the same host**.
+The application is a client of the daemon **on this host**. It does not vote and does not speak Raft. Two processes on one machine share one daemon. The snippets below make one local SDK call against the daemon you started in [step 2](first-member.md).
 
-```text
-app A ─┐
-app B ─┼─► clusdr daemon on this host ─► other clusdr daemons
-cli   ─┘
-```
+Keep that `clusdr start` running. If `clusdr members` fails in another terminal, `Local()` will fail the same way — start the daemon first.
 
-Two processes on one machine share one daemon. The app does not vote. It does not speak Raft.
+Install the SDK for one language, then run the snippet. Full walkthroughs: [SDKs](../sdk/). Runnable copies: [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
 
-Keep `clusdr start` running. Then pick a language:
+| Language | Install |
+|---|---|
+| Go | `go get github.com/clusdr/clusdr/sdk` |
+| Python | `pip install clusdr` |
+| Rust | `clusdr = "0.2.0"` in `Cargo.toml` |
+| TypeScript | `npm install clusdr` |
+| Java | `io.clusdr:clusdr` on the same version train |
 
-| Language | Install | Full docs |
-|---|---|---|
-| Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](../sdk/go.md) |
-| Python | `pip install clusdr` | [Python SDK](../sdk/python.md) |
-| Rust | `clusdr = "0.2.0"` | [Rust SDK](../sdk/rust.md) |
-| TypeScript | `npm install clusdr` | [TypeScript SDK](../sdk/typescript.md) |
-| Java | `io.clusdr:clusdr` | [Java SDK](../sdk/java.md) |
+TLS is on by default so the SDK presents the PEMs in `CLUSDR_DATA_DIR` or `~/.clusdr`. If `start` used `CLUSDR_TLS=disabled`, the SDK must too, or the handshake fails ([Errors](../reference/errors.md#tls)).
 
 ```go
-c, err := clusdr.Local()
-members, err := c.Members(ctx)
-lk, err := c.Lock(ctx, "scheduler", 15*time.Second)
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/clusdr/clusdr/sdk"
+)
+
+func main() {
+	ctx := context.Background()
+	c, err := clusdr.Local()
+	if err != nil {
+		log.Fatal(err) // daemon down, TLS, or Health not ready within 10s
+	}
+	defer c.Close()
+
+	members, err := c.Members(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(members)
+
+	lk, err := c.Lock(ctx, "scheduler.payments.nightly", 15*time.Second)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = lk.Token // store with any write that must be fenced
+	if err := c.Unlock(ctx, "scheduler.payments.nightly"); err != nil {
+		log.Fatal(err)
+	}
+}
 ```
 
 ```python
 from clusdr import local
 
 c = local()
-members = c.members()
-lk = c.lock("scheduler", ttl=15)
+print(c.members())
+lk = c.lock("scheduler.payments.nightly", ttl=15)
+c.unlock(lk.name)
+c.close()
 ```
 
 ```rust
-let c = clusdr::local(clusdr::Options::new()).await?;
-let members = c.members().await?;
-let lk = c.lock("scheduler", Some(std::time::Duration::from_secs(15))).await?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let c = clusdr::local(clusdr::Options::new()).await?;
+    println!("{:?}", c.members().await?);
+    let lk = c.lock("scheduler.payments.nightly", Some(std::time::Duration::from_secs(15))).await?;
+    c.unlock(&lk.name).await?;
+    Ok(())
+}
 ```
 
 ```ts
 import { local } from "clusdr";
 
 const c = await local();
-const members = await c.members();
-const lk = await c.lock("scheduler", 15);
+console.log(await c.members());
+const lk = await c.lock("scheduler.payments.nightly", 15);
+await c.unlock(lk.name);
+await c.close();
 ```
 
 ```java
+import io.clusdr.Clusdr;
+import io.clusdr.Cluster;
+import io.clusdr.Lock;
+import java.time.Duration;
+
 try (Cluster c = Clusdr.local()) {
-    List<Member> members = c.members();
-    Lock lk = c.lock("scheduler", Duration.ofSeconds(15));
+    System.out.println(c.members());
+    Lock lk = c.lock("scheduler.payments.nightly", Duration.ofSeconds(15));
+    c.unlock(lk.name());
 }
 ```
 
-`Local` / `local()` / `Clusdr.local()` dial `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`. TLS is on; certs come from `CLUSDR_DATA_DIR` or `~/.clusdr`.
+`Local` / `local()` / `Clusdr.local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (10s). Name the lock after the work (`scheduler.payments.nightly`), not `foo` — that is the exclusive job name your workers contend on. Release with `Unlock` / `unlock` on the **client**, not on the `Lock` value.
 
-What the app must not do: join the cluster, dial a remote Runtime API as the normal path, or treat `publish` as durable storage.
+Do not join the cluster from the app, do not `Dial` a remote node’s Runtime as the normal path, and do not treat `publish` as durable storage.
 
-On Kubernetes the host is the **node**. Set `CLUSDR_GRPC_ADDR` to that node's Runtime (`status.hostIP:7947`). `127.0.0.1` inside the pod is the pod — unless the app shares a pod with a [clusdr sidecar](kubernetes-sidecar.md). [Apps on the node](kubernetes.md#apps-on-the-node).
+## Checkpoint
 
-Model, env, holder, every SDK: **[SDKs](../sdk/)**. Copy-paste programs (Go, Python, Rust, TypeScript, and Java): [examples/](https://github.com/clusdr/clusdr/tree/main/examples).
+`Members` returns the same nodes you saw in `clusdr members`. You hold `scheduler.payments.nightly` until `Unlock` / `unlock`. If `Local()` times out, the daemon is down or TLS does not match ([Errors](../reference/errors.md#applications)).
 
-## Next
-
-Laptop defaults bind localhost. [Run on other hosts →](other-hosts.md)
+The tutorial ends here. Real NICs and Docker: [Run on other hosts](other-hosts.md).

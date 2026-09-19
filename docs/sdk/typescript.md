@@ -1,50 +1,72 @@
 # TypeScript SDK
 
-Package `clusdr` on npm. Node.js 20+. Applications call the daemon on this host. Shared model: [SDKs](./).
+The TypeScript SDK talks to the **local** daemon from a Node.js process. The application is not a cluster member: it does not vote or speak Raft.
+
+A daemon must already be running ([guide: first member](../guide/first-member.md)). Shared model: [SDKs](./).
+
+| | Value | Why it matters |
+|---|---|---|
+| Package | `clusdr` on npm | `npm install clusdr`. |
+| Runtime | Node.js 20+ | Older Node lacks the runtime APIs this client uses; there is no blocking (non-async) client. |
+| Version | same train as the daemon | A mismatched install talks `clusdr.v1alpha1` stubs the running process does not serve. |
 
 ```bash
 npm install clusdr
 ```
-
-Same version train as the daemon.
-
-A running daemon is required ([guide: first member](../guide/first-member.md)).
 
 Contributor checkout: `npm test` in the `clusdr-js` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`); the client loads that tree at runtime.
 
 ## Connect
 
 ```ts
-import { local } from "clusdr";
+import { ClusdrError, local } from "clusdr";
 
-const c = await local();
-// ...
+const c = await local().catch((err: unknown) => {
+  const message = err instanceof ClusdrError ? err.message : String(err);
+  throw new Error(`connect failed: ${message}`, { cause: err });
+});
+console.log(await c.members());
 await c.close();
 ```
 
-Or `await using`:
+Or `await using` (`close()` runs on dispose):
 
 ```ts
-import { local } from "clusdr";
+import { ClusdrError, local } from "clusdr";
 
-await using c = await local();
-console.log(await c.members());
+try {
+  await using c = await local();
+  console.log(await c.members());
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(`connect failed: ${err.message}`, { cause: err });
+  }
+  throw err;
+}
 ```
 
-`local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (`readyTimeout`, default 10s).
+If this fails, start the **local** daemon and present PEMs from that host’s `data.dir` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). TypeScript does not skip-verify the way Go bootstrap TLS does.
+
+`local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (`readyTimeout`, default 10s). On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md).
 
 ```ts
-import { dial } from "clusdr";
+import { ClusdrError, dial } from "clusdr";
 
-const c = await dial("127.0.0.1:8947", { dataDir: "./data-b" });
+const c = await dial("127.0.0.1:8947", { dataDir: "./data-b" }).catch((err: unknown) => {
+  const message = err instanceof ClusdrError ? err.message : String(err);
+  throw new Error(`connect failed: ${message}`, { cause: err });
+});
+await c.close();
 ```
 
-`dial` is `local()` with an explicit address (tests, a second daemon on this host). Do not `dial` a **remote** node's Runtime API as the normal app path — put a daemon on that host and call `local()` there.
+`dial` is `local()` with an explicit address (tests, a second daemon on this host). Do not `dial` a **remote** node's Runtime API as the normal app path — put a daemon on that host and call `local()` there. Empty `dial("")` throws `clusdr: empty dial address` ([Errors](../reference/errors.md#applications)).
 
 Unary methods are fine concurrently. Same connection = same holder (`unlock` is process-wide for that name). Several `watch()` loops on one client are fine.
 
 ```ts
-await local({
+import { local } from "clusdr";
+
+const c = await local({
   insecure: false,
   dataDir: "",
   holder: "",
@@ -52,18 +74,19 @@ await local({
   readyTimeout: 10,
   serverName: "",
 });
+await c.close();
 ```
 
 Same fields on `dial(addr, opts)`.
 
 | Option | Meaning |
 |---|---|
-| `insecure` | Plaintext. Also set if `CLUSDR_TLS=disabled` and `dataDir` is empty |
-| `dataDir` | Directory with `ca.crt` / `node.crt` / `node.key` |
-| `holder` | Lock/lease identity. Empty → `sdk-<uuid>` |
-| `requestTimeout` | Unary timeout in seconds (default 10) |
-| `readyTimeout` | Health wait on connect (default 10). `0` skips the wait |
-| `serverName` | TLS server name (peer node id). Else `CLUSDR_TLS_SERVER_NAME`, else CN of `node.crt` |
+| `insecure` | Plaintext. Also set if `CLUSDR_TLS=disabled` and `dataDir` is empty. Required when `start` disabled TLS, or the handshake fails ([Errors](../reference/errors.md#tls)). |
+| `dataDir` | Directory with `ca.crt` / `node.crt` / `node.key`. Missing files throw; there is no skip-verify fallback. |
+| `holder` | Lock/lease identity. Empty → `sdk-<uuid>`. Two processes cannot unlock each other unless they share this id ([Errors](../reference/errors.md#locks-and-leases)). |
+| `requestTimeout` | Unary timeout in seconds (default 10). `lock` waits at most this long unless you pass `timeout`. |
+| `readyTimeout` | Health wait on connect (default 10). `0` skips the wait — the first RPC then fails if the daemon is down. |
+| `serverName` | TLS server name (peer **node id**). Else `CLUSDR_TLS_SERVER_NAME`, else CN of `node.crt`. If none resolve, connect fails ([Errors](../reference/errors.md#tls)). |
 
 Every unary method also takes `timeout?: number` to override `requestTimeout` for that call.
 
@@ -85,7 +108,7 @@ close() -> void
 
 Every method is async except `watch`, which returns an async iterable immediately. `ttl` is seconds — `undefined` or `<= 0` sends `ttlMs = 0`; the daemon uses its default (15s).
 
-Unary calls retry `UNAVAILABLE`, `ABORTED`, and `RESOURCE_EXHAUSTED` until the monotonic deadline.
+Unary calls retry `UNAVAILABLE`, `ABORTED`, and `RESOURCE_EXHAUSTED` until the monotonic deadline. Other codes throw immediately.
 
 `close()` (and disposing with `await using`) stops Watch, unlocks locks, revokes leases, closes the channel.
 
@@ -94,27 +117,56 @@ Failures throw `ClusdrError` (or `TypeError` for a bad publish payload).
 ## Membership
 
 ```ts
-const members = await c.members();
-const leader = await c.leader();
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  for (const m of await c.members()) {
+    console.log(`${m.id} ${m.address} status=${m.status} role=${m.role} leader=${m.leader}`);
+  }
+  const leader = await c.leader();
+  console.log(`leader ${leader.id} at ${leader.address}`);
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
+} finally {
+  await c.close();
+}
 ```
 
-`Member`: `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (empty wire role becomes `"voter"`).
+`Member`: `id`, `address`, `status` (`alive` or `dead`), `leader`, `role` (empty wire role becomes `"voter"`). A left id is gone from `members()`.
 
-`leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=true`). No leader → `ClusdrError` wrapping Unavailable.
+`leader()` builds a member from `GetLeader` (`status="alive"`, `role="voter"`, `leader=true`). No leader → `ClusdrError` wrapping Unavailable ([Errors](../reference/errors.md#cluster)).
 
 ## Watch
 
+You do not pass `lastSeq`. The iterable stores `event.seq` and sends it as `lastSeq` on reconnect so cluster events resume after a drop. `custom.*` is still not replayed.
+
 ```ts
-for await (const event of c.watch()) {
-  if (event.type === "member.dead") {
-    // crash / miss; still in members()
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  for await (const event of c.watch()) {
+    if (event.type === "member.dead") {
+      console.log(`crash seq=${event.seq} still listed src=${event.source}`);
+    } else if (event.type === "member.left") {
+      console.log(`leave seq=${event.seq} gone from members src=${event.source}`);
+    } else if (event.type === "custom.deploy.payments.canary") {
+      console.log(`gossip seq=${event.seq} payload=${Buffer.from(event.payload).toString("utf8")}`);
+    } else {
+      console.log(`bus seq=${event.seq} ${event.type} src=${event.source}`);
+    }
   }
-  if (event.type === "member.left") {
-    // clusdr leave; gone from members()
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
   }
-  if (event.type === "custom.deployment") {
-    event.payload; // Uint8Array
-  }
+  throw err;
+} finally {
+  await c.close();
 }
 ```
 
@@ -123,8 +175,20 @@ The stream reconnects with `lastSeq` on drop (backoff 50ms → 2s). Breaking the
 `topics` / `eventTypes` match the CLI. Empty (default) is the full bus.
 
 ```ts
-for await (const event of c.watch({ topics: ["deployment"] })) {
-  // ...
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  for await (const event of c.watch({ topics: ["deploy.payments.canary"] })) {
+    console.log(event.type, event.seq, Buffer.from(event.payload).toString("utf8"));
+  }
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
+} finally {
+  await c.close();
 }
 ```
 
@@ -135,10 +199,22 @@ Non-empty `topics`: only `custom.<topic>`; **membership snapshot is omitted**. C
 ## Publish
 
 ```ts
-await c.publish("deployment", { sha: "abc" });
-await c.publish("deployment", '{"sha":"abc"}');
-await c.publish("deployment", Buffer.from('{"sha":"abc"}'));
-await c.publish("ping"); // empty payload
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  await c.publish("deploy.payments.canary", { sha: "7f3a1c2", env: "prod" });
+  await c.publish("deploy.payments.canary", '{"sha":"7f3a1c2","env":"prod"}');
+  await c.publish("deploy.payments.canary", Buffer.from('{"sha":"7f3a1c2","env":"prod"}'));
+  await c.publish("deploy.payments.canary");
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
+} finally {
+  await c.close();
+}
 ```
 
 | TypeScript type | On the wire |
@@ -149,37 +225,61 @@ await c.publish("ping"); // empty payload
 | object / array | compact JSON UTF-8 |
 | anything else | `TypeError` |
 
-SDK-side cap **64 KiB** (`ClusdrError` before the RPC). Topic rules are the daemon’s (1–128, `A–Z a–z 0–9 . _ -`).
+SDK-side cap **64 KiB** (`ClusdrError` before the RPC). Topic rules are the daemon’s (1–128, `A–Z a–z 0–9 . _ -`). Over size or `accepted=false` → `ClusdrError` ([Errors](../reference/errors.md#applications)).
 
-Not on the Raft log. `accepted=false` → `ClusdrError`.
+Not on the Raft log. A Watch reconnect does not replay this signal.
 
 ## Locks
 
-Exclusive name on the Raft log. Store `lk.token` with fenced writes.
+Exclusive name on the Raft log. Name it after the job (`scheduler.payments.nightly`). Store `lk.token` with fenced writes.
 
 ```ts
-const lk = await c.lock("scheduler", 15);
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
 try {
-  void [lk.name, lk.holder, lk.token, lk.deadline];
+  const lk = await c.lock("scheduler.payments.nightly", 15);
+  console.log(lk.name, lk.holder, lk.token, lk.deadline);
+  await c.unlock("scheduler.payments.nightly");
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
 } finally {
-  await c.unlock("scheduler");
+  await c.close();
 }
 ```
 
-`lock` blocks until acquired or `timeout`. Calling it again for a name this connection already holds returns the existing `Lock` and does not re-RPC.
+`lock` blocks until acquired or `timeout` (default `requestTimeout`, 10s). Another holder that keeps the name longer than that throws; it does not hang. Calling it again for a name this connection already holds returns the existing `Lock` and does not re-RPC.
 
 ```ts
-const lk = await c.tryLock("scheduler", 15);
-if (lk === null) {
-  // someone else holds it — not an error
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  const lk = await c.tryLock("scheduler.payments.nightly", 15);
+  if (lk === null) {
+    console.log("held by another replica");
+  } else {
+    console.log("acquired", lk.token);
+    await c.unlock("scheduler.payments.nightly");
+  }
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
+} finally {
+  await c.close();
 }
 ```
 
 That matches Python (`None`) and Rust (`Ok(None)`), not Go’s `(lk, false, nil)`.
 
-`unlock` of a name this client does not hold → `ClusdrError`.
+`unlock` of a name this client does not hold → `ClusdrError` ([Errors](../reference/errors.md#locks-and-leases)).
 
-Background renew: timer, interval about TTL/3 (minimum 50ms). Observer daemon rejects lock mutations (`FAILED_PRECONDITION` → `ClusdrError`).
+Background renew: timer, interval about TTL/3 (minimum 50ms). Observer daemon rejects lock mutations (`FAILED_PRECONDITION` → `ClusdrError`). Take the lock on a voter, or `clusdr promote` that node.
 
 No `listLocks` in this package.
 
@@ -188,21 +288,38 @@ No `listLocks` in this package.
 Named TTL grant. `lease` never waits on another owner; it fails if the name is taken.
 
 ```ts
-const ls = await c.lease("worker-1", 15);
-ls.stopRenew(); // grant then expires at ls.deadline; not a revoke
-await c.renew("worker-1");
-await c.revoke("worker-1");
+import { ClusdrError, local } from "clusdr";
+
+const c = await local();
+try {
+  const ls = await c.lease("worker.payments.ingest-1", 15);
+  console.log(ls.name, ls.owner, ls.token, ls.deadline);
+  ls.stopRenew();
+  await c.renew("worker.payments.ingest-1");
+  await c.revoke("worker.payments.ingest-1");
+} catch (err) {
+  if (err instanceof ClusdrError) {
+    throw new Error(err.message, { cause: err });
+  }
+  throw err;
+} finally {
+  await c.close();
+}
 ```
 
-`close()` **revokes**. Observers can grant leases. `presence.<nodeID>` is the daemon’s lease, not yours.
+`stopRenew` stops background renew; the grant then expires at `ls.deadline`. That is not a revoke. `close()` **revokes**.
+
+Observers can grant leases. `presence.<nodeID>` is the daemon’s lease, not yours.
 
 `Lease`: `name`, `owner`, `token`, `deadline`.
+
+`renew` / `revoke` of a name this client does not hold → `ClusdrError` ([Errors](../reference/errors.md#locks-and-leases)).
 
 ## TLS
 
 On unless `insecure: true` or `CLUSDR_TLS=disabled` (and no `dataDir`).
 
-PEMs from `dataDir` or `CLUSDR_DATA_DIR` or `~/.clusdr`. If the three files are **missing**, the client throws `ClusdrError` and tells you to disable TLS. It does **not** fall back to skip-verify bootstrap TLS. That is stricter than the Go SDK (same as Python and Rust).
+PEMs from `dataDir` or `CLUSDR_DATA_DIR` or `~/.clusdr`. If the three files are **missing**, the client throws `ClusdrError` and tells you to disable TLS. It does **not** fall back to skip-verify bootstrap TLS. That is stricter than the Go SDK (same as Python and Rust) ([Errors](../reference/errors.md#tls)).
 
 Server name: `serverName`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. If none of those resolve, connect fails. gRPC uses `grpc.ssl_target_name_override` with that name. Peer identity is still the cluster CA, not the dial hostname.
 
@@ -212,14 +329,14 @@ Server name: `serverName`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.c
 
 | Situation | What you see |
 |---|---|
-| Daemon down / Health timeout | `clusdr: daemon not ready at …` |
+| Daemon down / Health timeout | `clusdr: daemon not ready at …` ([Errors](../reference/errors.md#applications)) |
 | Empty `dial("")` | `clusdr: empty dial address` |
-| TLS files missing | `clusdr: TLS enabled but ca.crt/… missing in …` |
-| TLS name unknown | `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` |
+| TLS files missing | `clusdr: TLS enabled but ca.crt/… missing in …` ([Errors](../reference/errors.md#tls)) |
+| TLS name unknown | `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` ([Errors](../reference/errors.md#tls)) |
 | Bad publish type | `TypeError` |
-| Publish too large | `ClusdrError` (64 KiB) |
+| Publish too large | `ClusdrError` (64 KiB) ([Errors](../reference/errors.md#applications)) |
 | `tryLock` held by other | `null` |
-| Unlock / revoke name you do not hold | `ClusdrError`, no success path |
+| Unlock / revoke name you do not hold | `ClusdrError`, no success path ([Errors](../reference/errors.md#locks-and-leases)) |
 
 ## Not in this package
 

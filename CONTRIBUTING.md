@@ -91,7 +91,7 @@ Major new functionality must include automated tests in the same change (or a sh
 
 ## Docs
 
-If you change configuration, CLI, proto, SDK, or defaults, update the matching page under `docs/` in the **same** change (concepts, tasks, or reference — not a dump on one page). Do not put roadmap or design notes in `docs/`.
+If you change configuration, CLI, proto, SDK, or defaults, update the matching page under `docs/` in the **same** change. Each page is one type: tutorial (`docs/guide/` steps 1–5), how-to (other hosts, Kubernetes apply pages), reference, or explanation (overview, architecture, `docs/concepts/`). Do not mix types on one page. Do not put roadmap or design notes in `docs/`.
 
 ## Layout
 

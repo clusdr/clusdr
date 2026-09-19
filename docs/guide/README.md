@@ -1,25 +1,13 @@
-# Guide
+# Tutorial
 
-Read these pages **in order**. Each one leaves a cluster you use on the next page. Do not skip ahead to a flag or an RPC.
-
-```text
-1. Install the binary
-2. Start the first member
-3. Grow the cluster
-4. Watch and publish
-5. Use it from your app
-6. Run on other hosts
-```
+A Linux laptop goes from an empty `PATH` to a local three-process cluster and one SDK call. Read the pages **in order**. Each page leaves a process or file the next page uses; skipping ahead makes `join` and `Local()` fail for reasons that look like product bugs.
 
 1. [Install the binary](install.md) — `clusdr` on `PATH`
 2. [Start the first member](first-member.md) — identity, Raft, one row in `members`
 3. [Grow the cluster](grow.md) — a second voter, then an observer
-4. [Watch and publish](watch.md) — what changed, and a signal that is not Raft
-5. [Use it from your app](from-your-app.md) — local SDK, locks, leases
-6. [Run on other hosts](other-hosts.md) — real addresses, Docker Hub, health
+4. [Watch and publish](watch.md) — the stream, then one deploy signal
+5. [Use it from your app](from-your-app.md) — `Local()` / `local()`
 
-Same host model on a node (not a sequential step; not a kube replacement): [Run on Kubernetes](kubernetes.md) · [Helm](kubernetes-helm.md) · [Operator](kubernetes-operator.md) · [Sidecar](kubernetes-sidecar.md).
+Finish the checkpoint at the end of each page before you continue. If a command errors, the page names the fix or links to [Errors](../reference/errors.md).
 
-After the guide: [Overview](../overview.md) if you are still deciding, [concepts](../concepts/) for guarantees, [reference](../reference/) for a flag or RPC. Something failed: [Errors](../reference/errors.md).
-
-Contributor builds stay in [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md).
+When you need a real NIC, a container, or Kubernetes, leave the tutorial: [Run on other hosts](other-hosts.md). Guarantees: [Concepts](../concepts/). A flag: [Reference](../reference/).

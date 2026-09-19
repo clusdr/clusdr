@@ -1,25 +1,12 @@
 # Grow the cluster
 
-You have one running seed from [step 2](first-member.md) and the join token from `init`. Now add another daemon.
+A second voter and an observer are extra **processes**, not extra laptops. Each daemon needs its own `data.dir`, ports, socket, and `node.id`. Reusing `~/.clusdr` for the second process fails the BoltDB flock. `node.addr` must be a host:port the other process can dial — `0.0.0.0` is a bind address, not an advertisement, and join will not be able to call back.
 
-A member is a **process**, not a laptop. Two daemons on one machine is a real cluster as long as each has its own `data.dir`, ports, socket, and `node.id`.
+Keep the seed `clusdr start --bootstrap` from [step 2](first-member.md) running, and keep the join token `clusdr init` printed once (the `join token :` line). If that terminal is gone and you did not copy the token, you cannot recover it from disk — only the hash is stored. Start over with a fresh `data.dir` or `clusdr init --force` on a cluster that has no peers yet ([Errors](../reference/errors.md)).
 
-`node.addr` must be a host:port peers can dial. `0.0.0.0` is a bind address, not an advertisement.
+A cluster you keep wants **3 or 5 voters** so one death does not lose majority. This laptop walkthrough uses two voter processes so you can see `join`. Quorum rules: [Observers](../concepts/observers.md).
 
-## Why a second voter
-
-The leader is the only writer of membership, locks, and leases. If the only voter dies, there is no quorum and no new leader.
-
-| Voters | Majority | What you can lose |
-|---|---|---|
-| 1 | 1 | Nothing. The node dies, the cluster is gone |
-| 2 | 2 | Nothing. One death loses majority |
-| 3 | 2 | One voter |
-| 5 | 3 | Two voters |
-
-Laptop walkthrough uses two processes so you can see `join`. A cluster you care about wants **3 or 5 voters**.
-
-## Start the joiner
+## 1. Start the joiner
 
 Write `b.yaml` in a working directory. Do not reuse `~/.clusdr`.
 
@@ -28,7 +15,7 @@ node:
   id: node-b
   addr: 127.0.0.1:8947
 cluster:
-  id: ""          # empty is fine; mismatch is rejected only when both sides set a value
+  id: ""
 data:
   dir: ./data-b
 grpc:
@@ -38,42 +25,39 @@ raft:
   addr: 127.0.0.1:8946
 ```
 
-Start it **without** `--bootstrap`:
+Empty `cluster.id` is fine. A mismatch is rejected only when **both** sides set a value.
 
 ```bash
 clusdr start --config b.yaml
 ```
 
-This process has identity on disk after you join. It is not in the Raft configuration yet.
+No `--bootstrap`. This process has identity on disk after you join. It is not in the Raft configuration yet.
 
-## Join
+## 2. Join
 
-Another terminal, same token you saved:
+Use the token from step 2’s `init`. The address is the seed’s **Runtime API** (`127.0.0.1:7947`), not Raft (`7946`).
 
 ```bash
-clusdr --config b.yaml join --token <token-from-init> 127.0.0.1:7947
+TOKEN='<paste the join token from init>'
+clusdr --config b.yaml join --token "$TOKEN" 127.0.0.1:7947
 ```
 
-`<addr>` is the seed's Runtime API, not Raft.
-
-Then, against the seed (default ports):
+Then, against the seed (default ports, no `--config`):
 
 ```bash
 clusdr members
 ```
 
-Two `alive` rows. Join goes through the **leader**. If you had pointed `join` at a follower, that daemon forwards.
+Two `alive` rows. Join goes through the **leader**. If you point `join` at a follower, that daemon forwards.
 
-Wrong token → `UNAUTHORIZED`. Cluster ids set on both sides and different → rejected.
+Wrong token → `UNAUTHORIZED` — you pasted a different string than `init` printed, or you ran `--force` after a peer joined ([Errors](../reference/errors.md#join)). Cluster ids set on both sides and different → rejected; leave `cluster.id` empty on the joiner unless you copied the seed’s id on purpose.
 
-## Add a replica that does not vote
+## 3. Add an observer
 
-A 4th or 10th voter in another rack makes failover slower and that node's death count against majority. An **observer** receives the Raft log and serves a local app, but does not vote.
-
-Same token. Quorum does not change.
+A fourth voter in another rack makes failover slower and that node’s death count against majority. An **observer** receives the Raft log and serves a local app, but does not vote.
 
 ```yaml
-# obs.yaml — own dir and ports, like b.yaml
+# obs.yaml
 node:
   id: node-obs
   addr: 127.0.0.1:9947
@@ -88,30 +72,22 @@ raft:
 
 ```bash
 clusdr start --config obs.yaml
-clusdr --config obs.yaml join --observer --token <token-from-init> 127.0.0.1:7947
+clusdr --config obs.yaml join --observer --token "$TOKEN" 127.0.0.1:7947
 clusdr members
 ```
 
-Role column shows `observer`. That daemon **rejects locks** (`FailedPrecondition`). Watch, publish, and leases still work — presence must, or a dead observer would stay listed as alive.
-
-Promote later if you want a vote:
+Role column shows `observer`. That daemon **rejects locks** (`FailedPrecondition`) until you promote it — Watch, publish, and leases still work so a dead observer can be marked dead.
 
 ```bash
 clusdr promote node-obs
 ```
 
-Empty `clusdr promote` promotes the local node. Already a voter → success. Unknown id → error. After promote, lock RPCs work on that daemon.
+Empty `clusdr promote` promotes the local node. Already a voter → success. Unknown id → error. There is no demote in this version.
 
-There is no demote in this version.
+## Checkpoint
 
-## What “alive” means
+Three rows: two voters (one `leader`) and one `observer`. Keep the daemons running.
 
-Each daemon holds a presence lease `presence.<nodeID>`. If it expires, Watch shows `member.dead` and the member stays listed as `dead`. The Raft server **stays**. Heartbeats are the slower backup. `clusdr leave` is the only remove (`member.left`, gone from the list).
+Next: [Watch and publish →](watch.md)
 
-Default TTL is **3s** (how fast `member.dead` after a laptop kill). A reboot of the same `data.dir` is `clusdr start`, not another `join`. Full operator path: [presence](../concepts/presence.md).
-
-Kill the observer: the voter list and quorum stay put. Kill a voter in a 3-node cluster: the other two elect.
-
-## Next
-
-Keep the daemons running. [Watch and publish →](watch.md)
+Crash vs `leave`: [Presence](../concepts/presence.md).

@@ -1,6 +1,8 @@
 # Errors
 
-What operators and apps actually see. This is a lookup page, not a substitute for the [guide](../guide/). Caps that are not bugs live in [Limits](limits.md).
+Every string below is something an operator or app actually sees, mapped to a cause and a fix. Open this when a command or SDK call failed and you need the next action.
+
+It is not a substitute for the [guide](../guide/). Caps that are not bugs live in [Limits](limits.md).
 
 Prefer `clusdr members` when you want to know if the Runtime API is up. `clusdr status` only checks that the Unix socket **file** exists.
 
@@ -33,7 +35,7 @@ Followers forward Join to the leader. `NOT_LEADER` after that means there is no 
 
 ## TLS
 
-TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
+TLS is **on** by default (`tls.mode: enabled` / `CLUSDR_TLS` unset). A mixed cluster — one side plaintext, the other mTLS — fails the handshake instead of falling back. Set `CLUSDR_TLS=disabled` only for local development, and then on **every** node and every client.
 
 | You see | Cause | What to do |
 |---|---|---|
@@ -75,7 +77,7 @@ SDK errors are wrapped (`clusdr: daemon not ready at …`, `clusdr: lock "name":
 
 | You see | Cause | What to do |
 |---|---|---|
-| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member. On Kubernetes set `CLUSDR_GRPC_ADDR` to this node's Runtime, not `127.0.0.1` — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../guide/kubernetes.md#apps-on-the-node)) |
+| `clusdr: daemon not ready at …` | Dial ok-ish but Health not ready within ~10s, or daemon down | Start the **local** daemon. The app never dials a remote member. On Kubernetes set `CLUSDR_GRPC_ADDR` to this node's Runtime, not `127.0.0.1` — unless the app is a [sidecar](../guide/kubernetes-sidecar.md) ([Kubernetes](../concepts/kubernetes.md)) |
 | `clusdr: empty dial address` | `Dial("")` | Use `Local()` / `local()`, or pass `CLUSDR_GRPC_ADDR` |
 | `clusdr: publish rejected` / payload too large | Custom event over 64 KiB or invalid type | Shrink the payload. Publish is gossip, not Raft ([events](../concepts/events.md)) |
 | Watch reconnect misses `custom.*` | Not a bug | Custom events are ephemeral. Cluster events come back in the snapshot |

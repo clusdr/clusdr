@@ -7,7 +7,7 @@ description: Notable changes in each clusdr release.
 
 # Changelog
 
-Notable changes in each release. The daemon and the language SDKs share one version number.
+Notable changes in each release. The daemon and the language SDKs share one version number, so a tag you already installed is the same train on every language. Not a substitute for [Compatibility](compatibility.md).
 
 ## 0.2.0 — 2026-09-17
 

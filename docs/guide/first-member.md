@@ -1,78 +1,46 @@
 # Start the first member
 
-Clusdr is not a library you embed. It is a **daemon on this host**. Your app will talk only to that process. The daemon is the Raft member.
+clusdr is not a library you embed. Your app talks only to this process, and this process is the Raft member. The steps below turn the binary from [step 1](install.md) into one running voter.
 
-```text
-your app  ──►  clusdr daemon on this machine  ──►  other clusdr daemons
-```
+If `clusdr` is not on `PATH`, go back to [Install](install.md) — every command below assumes `clusdr version` already works.
 
-Same idea as a local Docker engine: containers do not join a swarm by themselves; the engine does.
-
-You need `clusdr` on `PATH` from [step 1](install.md).
-
-## Create identity
+## 1. Create identity
 
 ```bash
 clusdr init
 ```
 
-This writes `clusdr.yaml` in the current directory (or `--config`), a cluster id, a node id, a cluster CA, a seed certificate, and a **join token**. It does not start anything.
+This writes `clusdr.yaml` in the current directory (or `--config`), a cluster id, a node id, a cluster CA, a seed certificate, and a **join token**. It does not start anything. Without this file and disk identity, `start --bootstrap` can still run but logs that identity is missing — that is not a cluster, and [step 3](grow.md) cannot join.
 
-The YAML is short: ids, advertised `node.addr`, log. Other knobs stay at built-in defaults until you add them. How to edit that file, and a server layout: [Configuration](../reference/configuration.md).
+The token is printed **once**, on a line like `join token : <value>`. Copy the value. You need it in [step 3](grow.md). The hash is stored; the plaintext is not. If you lose it, a second `init` without `--force` succeeds only when this `data.dir` is already initialized and **does not print a new token**. `--force` overwrites the file and prints a new token — do that only if no peer has joined yet, or existing peers will reject the new hash ([Errors](../reference/errors.md)).
 
-The token is printed **once**. Copy it. You need it in [step 3](grow.md). The hash is stored; the plaintext is not.
+TLS is on so peer traffic is encrypted without extra setup. `CLUSDR_TLS=disabled` is only for a closed laptop loop, and then **every** node and every client must set it or handshakes fail.
 
-`--force` overwrites an existing config file. A second `init` without `--force` is an error unless this `data.dir` is already initialized (then it is success and does not print a new token).
-
-TLS is on. `CLUSDR_TLS=disabled` is only for local experiments, and then every node and every client must set it.
-
-## Bootstrap Raft
+## 2. Bootstrap Raft
 
 ```bash
 clusdr start --bootstrap
 ```
 
-This process is now the first voter and the leader. Leave it running.
+Leave it running in this terminal. `--bootstrap` is only for the first Raft member. Passing it again on a node that already bootstrapped is safe (idempotent). Passing it on a second process that shares `data.dir` is not — BoltDB flocks the store and the second process fails to open it.
 
-`--bootstrap` is only for the first Raft member. Passing it again on a node that already bootstrapped is safe.
+Data, certs, and the control socket live under `$HOME/.clusdr` unless you changed `data.dir`. Two processes must not share one `data.dir`.
 
-If you never ran `init`, `start` still runs and logs that identity is missing. That is not a cluster.
+## 3. Ask who is here
 
-Data, certs, and the control socket live under `$HOME/.clusdr`. Two processes must not share one `data.dir`.
-
-## Ask who is here
-
-Open another terminal. No extra env:
+Another terminal. No extra env — the CLI dials `127.0.0.1:7947` by default:
 
 ```bash
 clusdr members
 clusdr leader
 ```
 
-Success: one row, status `alive`, role `leader`. `leader` prints that same node.
+If `members` cannot dial, the `start` process is not up or not listening on 7947. Check that terminal’s logs. Do not use `clusdr status` as the check: it only asks whether `$HOME/.clusdr/clusdr.sock` exists.
 
-`clusdr members` is the check that the Runtime API is up. It dials `127.0.0.1:7947`.
+## Checkpoint
 
-`clusdr status` only asks whether the Unix socket file exists (`$HOME/.clusdr/clusdr.sock`). A daemon that failed to bind the socket looks “down”. Prefer `members`.
+`members` shows one row, status `alive`, role `leader`. `leader` prints that same node.
 
-## See the first events
+Keep this `start` running. Next: [Grow the cluster →](grow.md)
 
-```bash
-clusdr watch
-```
-
-You get a snapshot (`member.join`, `leader.changed`, `seq = 0`), then `watch.sync`, then a live stream. Ctrl-C stops it.
-
-That stream is how applications learn “who joined / who left / who leads” without polling. You will publish on it in [step 4](watch.md) and consume it from code in [step 5](from-your-app.md).
-
-## What you just built
-
-- One voter. Writes (membership, locks, leases) go through this process.
-- One leader. There is no failover yet — there is nobody else to elect.
-- A CA and a join token. The next machine cannot wander in.
-
-Keep this `start` running. Next page adds a second daemon on the same laptop.
-
-## Next
-
-[Grow the cluster →](grow.md)
+How the YAML is edited later: [Configuration](../reference/configuration.md). Why the app is not this process: [Daemon](../concepts/daemon.md).

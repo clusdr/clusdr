@@ -1,6 +1,6 @@
 # Compatibility
 
-What this version is built and tested against. Anything else is unclaimed.
+This version is built and tested against the layers in the tables below. Pick a toolchain, SDK, or host OS from that list. Anything else is unclaimed — do not treat an unlisted platform as supported.
 
 ## Supported
 
@@ -23,7 +23,7 @@ What this version is built and tested against. Anything else is unclaimed.
 | Consensus | Hashicorp Raft |
 | Default OS assumption | Linux (Unix control socket) |
 | Multi-host cluster | Linux daemons on different machines. Set dialable `raft.addr` and advertised `node.addr` ([other hosts](../guide/other-hosts.md)). Localhost defaults are laptop-only |
-| Kubernetes | A place to run the Linux host model ([guide](../guide/kubernetes.md)). Helm: [Helm](../guide/kubernetes-helm.md) (`oci://ghcr.io/clusdr/charts/clusdr`; Artifact Hub is the catalog). Operator: [Operator](../guide/kubernetes-operator.md) (`clusdr.io/download/clusdr-operator.yaml`; `spec.leave` is `clusdr leave`; a bounced pod is not leave). Sidecar: [Sidecar](../guide/kubernetes-sidecar.md) (replica is the member). Apps use `CLUSDR_GRPC_ADDR` = node Runtime or sidecar `127.0.0.1`. Not a replacement for Lease / probes / EndpointSlice / etcd-for-kube |
+| Kubernetes | A place to run the Linux host model ([Kubernetes](../concepts/kubernetes.md)). How-to: [YAML](../guide/kubernetes.md), [Helm](../guide/kubernetes-helm.md), [Operator](../guide/kubernetes-operator.md), [Sidecar](../guide/kubernetes-sidecar.md). Not a replacement for Lease / probes / EndpointSlice / etcd-for-kube |
 
 CI in this train is same-host (multiple processes / in-memory partition). Two-VM jobs are not in the matrix; that is a test gap, not “Raft is best effort.”
 
@@ -32,7 +32,7 @@ CI in this train is same-host (multiple processes / in-memory partition). Two-VM
 | Layer | Note |
 |---|---|
 | `docker compose up` | One container, `clusdr start`, no `init`. Identity warning in logs. Healthcheck is `clusdr version`, not cluster Health |
-| `CLUSDR_TLS=disabled` | Plaintext. Development only |
+| `CLUSDR_TLS=disabled` | Plaintext. Development only. A mixed cluster fails the handshake ([errors](errors.md#tls)) |
 | `go install` of `cmd/clusdr` | Requires a Go toolchain. Not the operator path |
 
 ## Not supported

@@ -1,96 +1,38 @@
 # Install the binary
 
-You need one program: `clusdr`. It is the daemon and the CLI. Do not clone the repository to run a cluster.
+`clusdr` is one program: the daemon and the CLI. Putting it on `PATH` is how you run a cluster without cloning the repository. Cloning is the contributor path ([CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md)) and leaves you with an unstripped `dev` binary.
 
-## Put it on PATH
-
-Linux, amd64 or arm64. Windows and macOS are not documented hosts.
+| | Value | Why it matters |
+|---|---|---|
+| OS | Linux | Windows and macOS are not documented hosts; the script will not hand you a working cluster there. |
+| Arch | amd64 or arm64 | Other architectures have no published binary. |
 
 ```bash
 curl -fsSL https://clusdr.io/install.sh | sh
 ```
 
-That puts the latest release into `/usr/local/bin`. Another prefix:
+That writes the latest release into `/usr/local/bin`. If that directory is not writable (permission denied), pick a prefix you own:
 
 ```bash
 curl -fsSL https://clusdr.io/install.sh | BINDIR=~/bin sh
 ```
 
-The script checks SHA-256 against `checksums.txt`. Pin a tag with `CLUSDR_VERSION=0.2.0`. Override the archive origin with `CLUSDR_DOWNLOAD_ORIGIN`.
+Then ensure `~/bin` is on `PATH`, or the next page’s `clusdr init` will say `command not found`.
 
-Archives come from [GitHub Releases](https://github.com/clusdr/clusdr/releases). `https://clusdr.io/download/<file>` 302s there (versioned names pin the tag). Direct GitHub URL if you need it:
+Pin a tag when you need a known build: `CLUSDR_VERSION=0.2.0`. The script checks SHA-256 against `checksums.txt` from the same release; a truncated download fails that check instead of installing a half file.
 
-```bash
-curl -fsSL https://github.com/clusdr/clusdr/releases/latest/download/install.sh | sh
-```
+Sigstore signatures on that checksum file, the image, and the Helm chart live on [Verify a release](verify-release.md). `v0.2.0` and earlier are checksum-only.
 
-Or unpack `clusdr_<version>_linux_<arch>.tar.gz` from the [GitHub Release](https://github.com/clusdr/clusdr/releases). Checksums sit next to the archives. `install.sh` checks SHA-256 for you.
-
-A GitHub Release is built by `.github/workflows/release.yml` on a tag in `clusdr/clusdr` (GitHub Actions, not a laptop). From the next release after this lands, `checksums.txt` has a Sigstore signature (`checksums.txt.sig` and `checksums.txt.pem`). Archives also ship an SPDX SBOM.
-
-```bash
-# after downloading checksums.txt, checksums.txt.sig, checksums.txt.pem
-cosign verify-blob \
-  --certificate checksums.txt.pem \
-  --signature checksums.txt.sig \
-  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  checksums.txt
-```
-
-Images on GHCR (same for `clusdr-operator`):
-
-```bash
-cosign verify ghcr.io/clusdr/clusdr:vX.Y.Z \
-  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-```
-
-The Helm chart on GHCR uses the same identity:
-
-```bash
-cosign verify ghcr.io/clusdr/charts/clusdr:X.Y.Z \
-  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-```
-
-`v0.2.0` and earlier were checksum-only. Signed blobs, image signatures, and the signed chart start at the first release cut after this landed.
-
-## Check it
+## Checkpoint
 
 ```bash
 clusdr version
 ```
 
-A release binary prints the tag, commit, and build time. A binary built from source prints `dev`.
+A release binary prints the tag, commit, and build time. A binary you compiled yourself prints `dev` — that is fine for hacking, not for the tutorial’s later checksum story.
 
-You have not started a cluster yet. Defaults when you do:
+You have not started a cluster yet. No `CLUSDR_*` is required on this laptop.
 
-| Knob | Default |
-|---|---|
-| `data.dir` | `$HOME/.clusdr` |
-| Runtime API | `127.0.0.1:7947` |
-| Raft | `127.0.0.1:7946` |
-| Control socket | `$HOME/.clusdr/clusdr.sock` |
+Next: [Start the first member →](first-member.md)
 
-No `CLUSDR_*` is required on a laptop.
-
-## Other ways to get the binary
-
-**Docker Hub** (the published Linux image; used later on [other hosts](other-hosts.md)):
-
-```bash
-docker pull durguto/clusdr
-```
-
-Same image on GHCR: `docker pull ghcr.io/clusdr/clusdr`.
-
-The image is distroless, non-root, `ENTRYPOINT /clusdr`, `CMD start`, volume `/var/lib/clusdr`, port **7947**. Map Raft **7946** if peers sit outside the container network.
-
-**From source** is for people changing the daemon: [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md). `clusdr-bench` is not a release artifact.
-
-**The SDK is not this install.** Apps: [SDKs](../sdk/). First call in [step 5](from-your-app.md). They still need this daemon on the same machine.
-
-## Next
-
-[Start the first member →](first-member.md)
+Signatures on the checksum file, the Docker image, or a source build: [Verify a release](verify-release.md), [Run on other hosts](other-hosts.md). The SDK is [step 5](from-your-app.md); it still needs this daemon on the same machine.

@@ -1,6 +1,8 @@
 # LeaseService
 
-Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+LeaseService is named TTL grants backed by Raft. Use it from apps for presence-style ownership that must not block. `Grant` does not wait; if the name is taken, the call returns not-granted. Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+
+Same token, TTL, and name rules as locks. Store the fencing token; a stale revoke fails ([errors](../errors.md#locks-and-leases)). Observers **can** hold application leases. Presence grants use `presence.<nodeID>` and mark a dead member `dead` without `leave`.
 
 `Grant` does not block. Same token / TTL / name rules as locks.
 
@@ -19,7 +21,7 @@ Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
 
 **RevokeRequest:** `name`, `owner`, `fencing_token`. **RevokeResponse:** `revoked`, `message`.
 
-Presence leases use the name `presence.<nodeID>`.
+Presence leases use the name `presence.<nodeID>`. Name charset `1–128` of `A–Z a–z 0–9 . _ -`. Table cap 4096 ([errors](../errors.md#locks-and-leases)).
 
 ## See also
 

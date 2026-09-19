@@ -1,12 +1,14 @@
 # Configuration
 
+One daemon is configured in three places: YAML, `data.dir`, and `CLUSDR_*`. Pin paths, ports, or TLS here after `clusdr init`. This is not a second product mode and it does not start the process.
+
 Three places, three jobs:
 
-| Thing | Default | Role |
-|---|---|---|
-| YAML | `clusdr.yaml` in the current directory (`--config`) | This process’s knobs |
-| `data.dir` | `$HOME/.clusdr` (`HOME` unset → `/var/lib/clusdr`) | Identity, Raft log, certs |
-| `grpc.control_socket` | `$HOME/.clusdr/clusdr.sock` | `clusdr status` file check |
+| Thing | Default | Role | Why it matters |
+|---|---|---|---|
+| YAML | `clusdr.yaml` in the current directory (`--config`) | This process’s knobs | `~` is not expanded; a typo only shows up at `start` unless you `config validate`. |
+| `data.dir` | `$HOME/.clusdr` (`HOME` unset → `/var/lib/clusdr`) | Identity, Raft log, certs | Two processes sharing this dir is undefined (BoltDB flock / certs). |
+| `grpc.control_socket` | `$HOME/.clusdr/clusdr.sock` | `clusdr status` file check | Not a Kubernetes probe; prefer `clusdr members`. |
 
 `install.sh` does not create any of these. It only puts the binary on `PATH`. YAML appears at `clusdr init`. Data dir and socket appear when that process first writes them (`init` / `start`).
 
@@ -35,7 +37,7 @@ log:
     format: text
 ```
 
-`--force` overwrites this file **and** prints a new join token. That is not how you change ports or `data.dir`.
+`--force` overwrites this file **and** prints a new join token. That is not how you change ports or `data.dir`. Existing peers keep the old token hash and will reject the new one ([errors](errors.md#join)).
 
 `node.id` and `cluster.id` are also in `data.dir` (`state.db`). Do not invent new ids in YAML for a node that already has a store.
 
@@ -159,6 +161,8 @@ lease:
 
 `leader_lease_timeout` must be ≤ `heartbeat_timeout`. If an override breaks that, load clamps lease to half the heartbeat.
 
+TLS is **on** unless every node and client sets `CLUSDR_TLS=disabled`. A mixed cluster fails the handshake ([errors](errors.md#tls)).
+
 ## Environment
 
 | Variable | Sets |
@@ -186,7 +190,7 @@ lease:
 
 CLI `--bootstrap` injects `CLUSDR_RAFT_BOOTSTRAP=true` for that process only.
 
-SDK extra: `CLUSDR_TLS_SERVER_NAME` is read by the **Python** client only.
+SDK extra: `CLUSDR_TLS_SERVER_NAME` is read by the Python, Rust, TypeScript, and Java clients. Set it to the **peer node id**. The Go SDK does not read this variable.
 
 `CLUSDR_SHUTDOWN_TIMEOUT` is **not** implemented.
 

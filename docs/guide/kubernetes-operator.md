@@ -1,72 +1,72 @@
-# Operator
+# Install the Operator
 
-The Operator reconciles one `ClusdrCluster` into the same host topology the YAML and the [Helm](kubernetes-helm.md) chart already describe. It talks to daemons over the Runtime/Control API. It does not embed Raft.
+`clusdr-operator` reconciles one `ClusdrCluster` by talking to daemons over the Runtime API and running the same `init` / `--bootstrap` / `join` sequence a human would. It does not embed Raft. Join is automatic; `leave` is only `spec.leave` — deleting a pod is not leave, so a bounce must not shrink quorum.
 
-Crash is `member.dead`. [`clusdr leave`](../reference/cli/leave.md) is `member.left`. Status is liveness only: `alive` or `dead`.
+Field list: [ClusdrCluster](../reference/clusdrcluster.md). Why DaemonSet vs Sidecar: [Kubernetes](../concepts/kubernetes.md).
 
-## Install
+## 1. Install CRD and Operator
 
 ```bash
 kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
 kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
-kubectl apply -f https://raw.githubusercontent.com/clusdr/clusdr/main/examples/k8s/clusdrcluster.yaml
 ```
 
-Pin a tag with `clusdr-crds-0.2.0.yaml` / `clusdr-operator-0.2.0.yaml` on the same origin. Fallback: GitHub Releases (`…/releases/latest/download/clusdr-crds.yaml`). Contributor checkout: `kubectl apply -k config/crd` then `kubectl apply -k config/operator`.
+Pin a tag with `clusdr-crds-0.2.0.yaml` / `clusdr-operator-0.2.0.yaml` on the same origin if you need a known CRD. Contributor: `kubectl apply -k config/crd` then `kubectl apply -k config/operator`.
 
-Image: `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`). Same tag as the daemon. Not baked into `durguto/clusdr`.
+Image: `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`). Same tag as the daemon. The CRD is not in the Helm chart — installing only the chart leaves `kubectl get clusdrcluster` unknown.
 
-The CRD is not in the Helm chart. Sample objects: [`clusdrcluster.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster.yaml) (DaemonSet) and [`clusdrcluster-sidecar.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster-sidecar.yaml) (Sidecar). Do not apply both unless you mean **two** clusters.
+## 2. Data dir and seed node
 
-## What the object means
+hostPath still needs `mkdir` + `chown 65532` on each node or the seed Job cannot write identity ([Run on Kubernetes](kubernetes.md#1-data-dir-on-each-node)).
 
-`kubectl get clusdrcluster` works after applying the CRD.
+```bash
+kubectl get nodes
+```
 
-| Field | Meaning |
-|---|---|
-| `spec.topology` | `DaemonSet` (default) or `Sidecar` |
-| `spec.voterCount` | Odd. Extra DaemonSet nodes join as observers |
-| `spec.image` | Daemon image |
-| `spec.dataDir` | Node-local dir / PVC |
-| `spec.seedNodeName` | Same disk for `init` and `--bootstrap` |
-| `spec.leave` | clusdr `node.id` values. The Operator runs [`clusdr leave`](../reference/cli/leave.md) for those ids |
+You will set `spec.seedNodeName` to one of those names so init and `--bootstrap` share one disk.
 
-There is no `ClusdrMember`. There is no field that tells apps to `Dial` a Service.
+## 3. Apply a cluster object
 
-Status is filled from [`Members()`](../reference/cli/members.md) / Health, not EndpointSlice: `clusterID`, `leader`, `members[]` (`alive` / `dead`), plus `phase` (`Pending` / `Ready` / `Error` / `Unsupported`).
+```bash
+kubectl apply -f https://raw.githubusercontent.com/clusdr/clusdr/main/examples/k8s/clusdrcluster.yaml
+NODE=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+kubectl patch clusdrcluster clusdr -n clusdr --type merge \
+  -p "{\"spec\":{\"seedNodeName\":\"${NODE}\"}}"
+```
 
-## How it forms the cluster
+Pick the node you actually prepared. Sidecar sample: [`clusdrcluster-sidecar.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster-sidecar.yaml). Do not apply both unless you mean **two** clusters (two Raft groups, two tokens).
 
-Same CLI a human would type: `init` once, one `--bootstrap`, then `join` / `join --observer`. Distroless has **no shell**, so Jobs do seed `init` (and sidecar `--bootstrap` on PVC-0; the Job is then deleted so the StatefulSet can mount the RWO volume). The join token is a Secret, not git.
+`voterCount` must be odd; the CRD CEL rule rejects even values at apply time.
 
-DaemonSet: Operator dials `hostIP:7947`. Sidecar: headless DNS of the ordinal. The app still uses `Local()` — node Runtime, or `127.0.0.1` in the sidecar pod ([Apps on the node](kubernetes.md#apps-on-the-node), [Sidecar](kubernetes-sidecar.md)).
+## 4. Watch it form
 
-A pod restart with intact `data.dir` / PVC is `clusdr start`: the id stays in `Members()` (`dead` then `alive`). The Operator does not `join` again and does not `leave`. Only `spec.leave` drops a Raft id.
+```bash
+kubectl get clusdrcluster clusdr -n clusdr -w
+```
 
-hostPath still needs `mkdir` + `chown 65532` on each node. Set `spec.seedNodeName` so init and `--bootstrap` share one disk. The Operator uses tcp probes on port 7947. Helm can use `clusdr health`.
+Phase moves `Pending` → `Ready`. Token is a Secret, not git. Distroless has no shell: the Operator runs seed `init` (and sidecar `--bootstrap` on PVC-0, then deletes that Job so the RWO volume can mount).
 
-Bounce a member (same node, same hostPath) — the id stays; it must not disappear:
+If phase stays `Pending` with “waiting for sidecar bootstrap” or seed init, the Job failed — describe it. `Error` + “join token missing” means init logs were empty; fix the Job, do not hand-edit Raft.
+
+## 5. Leave (only when you mean it)
+
+A missing or restarted pod is **not** leave. To drop a Raft id for good:
+
+```bash
+kubectl get clusdrcluster clusdr -n clusdr -o jsonpath='{.status.members}' ; echo
+kubectl patch clusdrcluster clusdr -n clusdr --type merge \
+  -p '{"spec":{"leave":["<id-from-status.members>"]}}'
+```
+
+Bounce a member (same node, same hostPath) and check the id stays:
 
 ```bash
 kubectl delete pod -n clusdr -l app.kubernetes.io/component=member
 kubectl get clusdrcluster clusdr -n clusdr -o jsonpath='{.status.members}' ; echo
 ```
 
-Drop a node for good (`member.left`):
+If the id disappeared, you patched `leave` or the disk was empty.
 
-```bash
-kubectl patch clusdrcluster clusdr -n clusdr --type merge \
-  -p '{"spec":{"leave":["<clusdr-node-id>"]}}'
-```
+## Checkpoint
 
-A missing or restarted pod is **not** leave. Sidecar replicas = `voterCount`; scaling that StatefulSet scales Raft. Scaling a workload Deployment does not.
-
-## What the Operator is not
-
-- `AddVoter` when a Deployment scales
-- Treating a crash or missing pod as leave
-- Sidecar injection
-- A replacement for the [Lease API](https://kubernetes.io/docs/concepts/architecture/leases/) (Operator HA, if added, would use that too)
-- Raft inside the Operator process
-
-In-tree: [`config/crd`](https://github.com/clusdr/clusdr/tree/main/config/crd), [`config/operator`](https://github.com/clusdr/clusdr/tree/main/config/operator). Build the image yourself is the contributor path (`docker build -f Dockerfile.operator`).
+`kubectl get clusdrcluster` shows Phase `Ready` and a Leader. `status.members` matches `clusdr members` on the seed. Sidecar replicas = `voterCount`; scaling a workload Deployment does not add Raft members.
