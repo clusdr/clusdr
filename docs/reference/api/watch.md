@@ -1,6 +1,8 @@
 # WatchService
 
-Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+WatchService streams cluster events from the local daemon. Use it from apps and [`clusdr watch`](../../reference/cli/watch.md) to see membership, leadership, lock/lease expiry, and custom topics. Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+
+On every new stream the server sends a snapshot of current members, then live events. Custom events are ephemeral: a reconnect misses `custom.*` that happened while you were down ([errors](../errors.md#applications)). Crash is `member.dead`, not `member.left`.
 
 ## `Watch`
 
@@ -21,6 +23,8 @@ Snapshot events use `seq = 0`. Then `watch.sync`. Optional `watch.gap` if `last_
 **Types:** `member.join`, `member.dead`, `member.left`, `leader.changed`, `lock.expired`, `lease.granted`, `lease.expired`, `lease.revoked`, `custom.<topic>`, `watch.sync`, `watch.gap`.
 
 Snapshot (`seq = 0`): each listed member → `member.join` if alive, `member.dead` if dead. Left ids are absent. Crash is not `member.left`.
+
+Dial the Runtime API (`grpc.addr`). Transport failures: [errors](../errors.md#daemon-and-dial), [errors](../errors.md#tls).
 
 ## See also
 

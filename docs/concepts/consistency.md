@@ -1,13 +1,13 @@
 # Consistency
 
-Strong consistency via Raft for cluster metadata.
+clusdr uses Raft for **cluster metadata**: who is a member, who holds a lock or lease, who is leader. That is a quorum write. Application data, files, and custom-event payloads are not on that log. If you need a strongly consistent user database, put it in your own store; this page is about what the daemon itself guarantees.
 
 ## Replicated (quorum write)
 
 - Membership and leadership
 - Locks and leases (including presence)
 
-The leader is the only writer. Followers and observers forward mutations they cannot commit (except observer **locks**, which are rejected).
+The leader is the only writer. Followers and observers forward mutations they cannot commit (except observer **locks**, which are rejected — [observers](observers.md)). A minority partition cannot grant a lock the majority never saw.
 
 ## Not replicated
 

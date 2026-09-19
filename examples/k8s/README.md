@@ -1,8 +1,8 @@
 # Kubernetes examples
 
-Example manifests. Same topology as the Helm chart (`oci://ghcr.io/clusdr/charts/clusdr`; in-tree [`charts/clusdr`](../../charts/clusdr)). CRD kind: [`clusdrcluster.yaml`](clusdrcluster.yaml). Operator: [`config/operator`](../../config/operator) (forms Raft from the CR). These YAML files are the hand-applied path; they are not the Operator.
+These manifests apply the same Linux host model as the how-to pages: one daemon per node, `data.dir` on that node, advertised addresses peers can dial. They do **not** install the Operator or call `join` for you. Read or apply them when you want the YAML without Helm.
 
-Same Linux host model: one daemon per node, `data.dir` on the node, advertised addresses peers can dial. App Deployments do not join Raft.
+Same topology as the Helm chart (`oci://ghcr.io/clusdr/charts/clusdr`; in-tree [`charts/clusdr`](../../charts/clusdr)). CRD samples: [`clusdrcluster.yaml`](clusdrcluster.yaml) / [`clusdrcluster-sidecar.yaml`](clusdrcluster-sidecar.yaml). Operator install: [`config/operator`](../../config/operator). App Deployments do not join Raft.
 
 | File | What |
 |---|---|
@@ -68,8 +68,8 @@ kubectl apply -f examples/k8s/daemonset.yaml
 Seed Runtime is `$(NODE_IP):7947` on the seed node (`kubectl get pod -n clusdr -o wide`).
 
 ```bash
-SEED=<seed-node-ip>:7947
-TOKEN=<token-from-init>
+TOKEN=$(kubectl logs -n clusdr job/clusdr-seed-init | awk '/join token/{print $NF}')
+SEED="$(kubectl get pod -n clusdr -l app.kubernetes.io/component=seed -o jsonpath='{.items[0].status.hostIP}'):7947"
 
 for p in $(kubectl get pods -n clusdr -l app.kubernetes.io/component=member -o name); do
   kubectl exec -n clusdr "$p" -- /clusdr join --token "$TOKEN" "$SEED"
@@ -177,8 +177,8 @@ kubectl rollout status -n clusdr statefulset/clusdr-sidecar
 Seed Runtime is the headless name:
 
 ```bash
+TOKEN=$(kubectl logs -n clusdr job/clusdr-sidecar-bootstrap -c init | awk '/join token/{print $NF}')
 SEED=clusdr-sidecar-0.clusdr-sidecar.clusdr.svc.cluster.local:7947
-TOKEN=<token-from-init>
 
 for o in 1 2; do
   kubectl exec -n clusdr clusdr-sidecar-$o -c clusdr -- /clusdr join --token "$TOKEN" "$SEED"

@@ -1,6 +1,8 @@
 # Errors
 
-What operators and apps actually see. This is a lookup page, not a substitute for the [guide](../guide/). Caps that are not bugs live in [Limits](limits.md).
+Every string below is something an operator or app actually sees, mapped to a cause and a fix. Open this when a command or SDK call failed and you need the next action.
+
+It is not a substitute for the [guide](../guide/). Caps that are not bugs live in [Limits](limits.md).
 
 Prefer `clusdr members` when you want to know if the Runtime API is up. `clusdr status` only checks that the Unix socket **file** exists.
 
@@ -33,7 +35,7 @@ Followers forward Join to the leader. `NOT_LEADER` after that means there is no 
 
 ## TLS
 
-TLS is on unless **every** node and client sets `CLUSDR_TLS=disabled`.
+TLS is **on** by default (`tls.mode: enabled` / `CLUSDR_TLS` unset). A mixed cluster — one side plaintext, the other mTLS — fails the handshake instead of falling back. Set `CLUSDR_TLS=disabled` only for local development, and then on **every** node and every client.
 
 | You see | Cause | What to do |
 |---|---|---|

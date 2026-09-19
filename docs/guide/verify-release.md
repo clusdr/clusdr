@@ -1,17 +1,21 @@
 # Verify a release
 
-Confirm a GitHub Release or an OCI image/chart was built by `clusdr/clusdr` on GitHub Actions.
+A GitHub Release artifact or an OCI image/chart is signed by the `clusdr/clusdr` GitHub Actions workflow, not by a laptop. Cosign checks that identity so you do not run a binary someone rebuilt locally.
 
-You already have the files or can pull the tag. Cosign identity:
+You need [Cosign](https://docs.sigstore.dev/cosign/system_config/installation/) on `PATH`.
 
-- certificate identity matches `https://github.com/clusdr/clusdr/`
+`v0.2.0` and earlier are checksum-only. Signed blobs, image signatures, and a signed chart exist only on tags cut after signing landed. If `cosign verify` says there is no signature, you are on an older tag — use SHA-256 against `checksums.txt` or pick a newer release.
+
+Identity that must match:
+
+- certificate identity starts with `https://github.com/clusdr/clusdr/`
 - OIDC issuer is `https://token.actions.githubusercontent.com`
 
-`v0.2.0` and earlier are checksum-only. Signed blobs, image signatures, and a signed chart start at the first release cut after signing landed.
+A verify that succeeds against another repo’s identity is the wrong check.
 
 ## Checksums
 
-Download `checksums.txt`, `checksums.txt.sig`, and `checksums.txt.pem` from the [GitHub Release](https://github.com/clusdr/clusdr/releases).
+From the [GitHub Release](https://github.com/clusdr/clusdr/releases) for that tag, download `checksums.txt`, `checksums.txt.sig`, and `checksums.txt.pem` into the current directory.
 
 ```bash
 cosign verify-blob \
@@ -22,24 +26,28 @@ cosign verify-blob \
   checksums.txt
 ```
 
-`install.sh` already checks SHA-256 against `checksums.txt`. This step checks the signature on that file.
+`install.sh` already checks SHA-256 against `checksums.txt`. This step checks that the checksum file itself was signed by the release workflow. If the blob verify fails, do not trust `sha256sum` against that file.
 
 ## Images
 
+Replace `vX.Y.Z` with the tag you pulled (example: `v0.2.0`).
+
 ```bash
-cosign verify ghcr.io/clusdr/clusdr:vX.Y.Z \
+cosign verify ghcr.io/clusdr/clusdr:v0.2.0 \
   --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-Same identity for `ghcr.io/clusdr/clusdr-operator`.
+Same identity for `ghcr.io/clusdr/clusdr-operator`. Docker Hub tags are the same image; Cosign signatures live on GHCR.
 
 ## Helm chart
 
+The chart tag is the version **without** `v` (example: `0.2.0`).
+
 ```bash
-cosign verify ghcr.io/clusdr/charts/clusdr:X.Y.Z \
+cosign verify ghcr.io/clusdr/charts/clusdr:0.2.0 \
   --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-The chart tag is the version without `v`.
+If verify says the tag has no signature, the chart was published before Cosign signing — install only if you accept checksum-only, or wait for a signed tag.

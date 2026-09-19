@@ -1,6 +1,6 @@
 # Kubernetes
 
-Kubernetes is a place to run the same Linux host model. It is not a Kubernetes replacement, not etcd for the apiserver, and not a substitute for kube’s own coordination.
+Kubernetes is a place to run the same Linux host model you already ran on VMs. It is not a Kubernetes replacement, not etcd for the apiserver, and not a substitute for kube’s own coordination. If you treat clusdr as “the cluster for kube objects,” you will fight Lease, probes, and EndpointSlice instead of using them.
 
 The daemon is still the Raft member. The application is still not. `Local()` / `local()` still means “the daemon on **this host**.”
 
@@ -31,7 +31,7 @@ Apps are not on the node’s loopback. `127.0.0.1:7947` inside a pod is that pod
 
 **Sidecar (exception).** Only when that **replica is the Raft member** (a small elected StatefulSet). Shared netns → `127.0.0.1` / `Local()`. N replicas = N members. Headless DNS is the advertised peer address. The Operator may Dial that name to `join`; the app still uses `Local()`.
 
-Do not put a clusdr sidecar on every microservice pod.
+Do not put a clusdr sidecar on every microservice pod — that grows Raft with every deploy replica.
 
 ## Helm vs Operator
 
@@ -39,11 +39,11 @@ Packaging of the same host model. The daemon and the SDKs do not require kube.
 
 | Layer | Job |
 |---|---|
-| **Helm** | Template the DaemonSet. Join stays CLI |
+| **Helm** | Template the DaemonSet. Join stays CLI so you see the token and the seed address |
 | **CRD** | Desired **host** topology. Raft stays the member list |
-| **Operator** | Same CLI in-cluster: `init`, one `--bootstrap`, `join` / `join --observer`. Token is a Secret. `leave` only via `spec.leave` |
+| **Operator** | Same CLI in-cluster: `init`, one `--bootstrap`, `join` / `join --observer`. Token is a Secret. `leave` is only `spec.leave` |
 
-Helm does not form Raft. The Operator does. A crash or missing pod is not leave.
+Helm does not form Raft. The Operator does. A crash or missing pod is not leave — do not patch `spec.leave` to “fix” a bounce.
 
 ## Not this
 

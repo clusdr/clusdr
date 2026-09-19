@@ -1,8 +1,8 @@
 # LockService
 
-Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
+LockService is cluster-wide exclusive locks backed by Raft. Use it from apps that need a named hold with a fencing token. Leader commits; followers forward. Application module [`buf.build/clusdr/api`](https://buf.build/clusdr/api).
 
-Leader commits; followers forward. An **observer** rejects Lock / TryLock / Unlock / Renew (`FailedPrecondition`: `observer cannot mutate locks`). ListLocks is allowed.
+An **observer** rejects Lock / TryLock / Unlock / Renew (`FailedPrecondition`: `observer cannot mutate locks`) and does **not** forward — take locks on a voter, or promote that node ([errors](../errors.md#locks-and-leases)). ListLocks is allowed. Store the fencing token; a stale unlock fails.
 
 | RPC | Request / response | Behavior |
 |---|---|---|
@@ -19,6 +19,8 @@ Leader commits; followers forward. An **observer** rejects Lock / TryLock / Unlo
 **UnlockRequest:** `name`, `holder`, `fencing_token`. **UnlockResponse:** `released`, `message`.
 
 **LockServiceRenewRequest:** `name`, `holder`, `fencing_token`, `ttl_ms`. **LockServiceRenewResponse:** `renewed`, `message`, `fencing_token`, `deadline_unix_ms`.
+
+Name charset `1–128` of `A–Z a–z 0–9 . _ -`. Table cap 4096 ([errors](../errors.md#locks-and-leases)).
 
 ## See also
 

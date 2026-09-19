@@ -1,6 +1,8 @@
 # HeartbeatService
 
-Node-to-node liveness pings. Internal module [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal). Applications do not call this.
+HeartbeatService is the node-to-node liveness ping. Applications do not call this. The daemon uses it as the slower backup to presence: missed pings mark a peer **not-alive** and keep the Raft id. Internal module [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal).
+
+Neither heartbeat misses nor presence expiry call `RemoveServer`. A crash is `clusdr start` with the same `data.dir`, not `join`. Only [`Leave`](join.md) removes the Raft server.
 
 ## `Ping`
 
@@ -8,7 +10,7 @@ Node-to-node liveness pings. Internal module [`buf.build/clusdr/internal`](https
 
 **Request:** `sender_id`. **Response:** `node_id`, `alive`.
 
-Defaults: interval 2s, timeout 1s, 3 misses before a peer is marked not-alive. [Presence](../../concepts/presence.md) is the faster liveness path. Neither removes the Raft server.
+Defaults: interval 2s, timeout 1s, 3 misses before a peer is marked not-alive. [Presence](../../concepts/presence.md) is the faster liveness path (`lease.presence_ttl`, default 3s).
 
 ## See also
 

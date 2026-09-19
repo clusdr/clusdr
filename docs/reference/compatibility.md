@@ -1,6 +1,6 @@
 # Compatibility
 
-What this version is built and tested against. Anything else is unclaimed.
+This version is built and tested against the layers in the tables below. Pick a toolchain, SDK, or host OS from that list. Anything else is unclaimed — do not treat an unlisted platform as supported.
 
 ## Supported
 
@@ -32,7 +32,7 @@ CI in this train is same-host (multiple processes / in-memory partition). Two-VM
 | Layer | Note |
 |---|---|
 | `docker compose up` | One container, `clusdr start`, no `init`. Identity warning in logs. Healthcheck is `clusdr version`, not cluster Health |
-| `CLUSDR_TLS=disabled` | Plaintext. Development only |
+| `CLUSDR_TLS=disabled` | Plaintext. Development only. A mixed cluster fails the handshake ([errors](errors.md#tls)) |
 | `go install` of `cmd/clusdr` | Requires a Go toolchain. Not the operator path |
 
 ## Not supported

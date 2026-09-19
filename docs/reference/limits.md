@@ -1,6 +1,6 @@
 # Limits
 
-Product boundaries of this version. Not a bug list. Same story as [Overview](../overview.md).
+Product boundaries of this version are not defects. Raising a payload or a table size here is a version change, not a config knob. Same story as [Overview](../overview.md).
 
 ## Scope
 
@@ -18,14 +18,16 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 
 ## Numeric caps
 
-| Cap | Value |
-|---|---|
-| Custom event payload | 64 KiB |
-| Topic / lock / lease name | 1–128 characters (`A–Z a–z 0–9 . _ -`) |
-| Locks in the table | 4096 |
-| Leases in the table | 4096 |
-| Lock/lease TTL | 1ms–24h (default 15s) |
-| Watch client buffer (SDK) | 64 events |
+Over a name or table cap, the RPC fails — [errors](errors.md#locks-and-leases), [errors](errors.md#applications).
+
+| Cap | Value | Why it matters |
+|---|---|---|
+| Custom event payload | 64 KiB | Larger publishes are rejected; they are not stored on Raft. |
+| Topic / lock / lease name | 1–128 characters (`A–Z a–z 0–9 . _ -`) | Illegal names fail before a grant or publish. |
+| Locks in the table | 4096 | The 4097th lock fails; release unused names. |
+| Leases in the table | 4096 | Same cap as locks; presence leases count. |
+| Lock/lease TTL | 1ms–24h (default 15s) | After TTL the name expires (`lock.expired` / `lease.expired`) so a dead holder does not keep it. |
+| Watch client buffer (SDK) | 64 events | A slow receiver blocks the client read loop; the daemon bus still drops. |
 
 ## Cluster
 
@@ -37,10 +39,13 @@ Product boundaries of this version. Not a bug list. Same story as [Overview](../
 
 ## Distribution
 
-- Release binaries embed the tag via ldflags. Source builds print `dev`
-- Install channels: Linux install script, Docker Hub `durguto/clusdr` (GHCR mirror `ghcr.io/clusdr/clusdr`), operator image `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`), Helm `oci://ghcr.io/clusdr/charts/clusdr` ([Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)), operator YAML `https://clusdr.io/download/clusdr-crds.yaml` + `clusdr-operator.yaml`
-- Python SDK: `pip install clusdr`
-- Rust SDK: crate `clusdr` ([github.com/clusdr/clusdr-rust](https://github.com/clusdr/clusdr-rust))
-- TypeScript SDK: `npm install clusdr` ([github.com/clusdr/clusdr-js](https://github.com/clusdr/clusdr-js))
-- Java SDK: `io.clusdr:clusdr` ([github.com/clusdr/clusdr-java](https://github.com/clusdr/clusdr-java))
-- Apache-2.0 ([LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE))
+| Channel | Value | Why it matters |
+|---|---|---|
+| Release binary | tag via ldflags | Source builds print `dev` and are off the [compatibility](compatibility.md) train. |
+| Linux install | `https://clusdr.io/install.sh` | amd64/arm64 only. |
+| Daemon image | Docker Hub `durguto/clusdr` (GHCR `ghcr.io/clusdr/clusdr`) | Same tag as the release. |
+| Operator image | `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`) | Not baked into the daemon image. |
+| Helm | `oci://ghcr.io/clusdr/charts/clusdr` | No `helm repo add`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). |
+| Operator YAML | `https://clusdr.io/download/clusdr-crds.yaml` + `clusdr-operator.yaml` | CRD is not in the Helm chart. |
+| Python / Rust / TS / Java | `pip` / crate / `npm` / `io.clusdr:clusdr` | Same version train as the daemon. |
+| License | Apache-2.0 | [LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE) |

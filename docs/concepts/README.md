@@ -1,6 +1,8 @@
 # Concepts
 
-Guarantees and vocabulary. Learn the product in the [guide](../guide/) first. Flags and RPCs live under [reference](../reference/).
+clusdr’s guarantees are here: who is a member, what a crash does, what Raft stores, what Watch delivers. Flags and RPCs live under [Reference](../reference/). The same words appear in the [glossary](../glossary.md); if a tutorial restates a definition in one sentence so you can stay on that page, that is on purpose.
+
+This is not a first-run walkthrough. If you have not started a daemon yet, begin at [Get started](../guide/) and come back when a term needs a precise meaning.
 
 | Page | Question it answers |
 |---|---|
