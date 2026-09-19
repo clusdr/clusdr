@@ -38,7 +38,7 @@ Wrong CA → connection rejected. Server identity is the node id (SAN), not the 
 - **Lost disk** — `data.dir` is the member. Anyone with that directory is that member.
 - **`CLUSDR_TLS=disabled`** — plaintext. Only a closed laptop loop.
 
-How to report a hole: [SECURITY.md](../../SECURITY.md). How a release is built and checked: [Install](../guide/install.md).
+How to report a hole: [SECURITY.md](https://github.com/clusdr/clusdr/blob/main/SECURITY.md). How a release is built and checked: [Install](../guide/install.md).
 
 ## Related
 
