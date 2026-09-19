@@ -136,7 +136,14 @@ git push origin vX.Y.Z
 
 A hyphen in the tag (`-rc.1`) is a prerelease: GitHub Release is marked prerelease, images and the chart use that version, `:latest` / `latest.json` / Artifact Hub metadata / BSR tag push / language SDK registries do **not** move. A tag with no hyphen (`vX.Y.Z`) is GA and publishes all of those.
 
-`clusdr.io/download/<file>` 302s to the GitHub Release. Images: `durguto/clusdr` and `durguto/clusdr-operator` (GHCR mirrors `ghcr.io/clusdr/clusdr` and `ghcr.io/clusdr/clusdr-operator`). Chart: `helm push` to `oci://ghcr.io/clusdr/charts` (`clusdr-<version>.tgz` also lands on the GitHub Release). Do not push the chart to `ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**. The GA job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
+`clusdr.io/download/<file>` 302s to the GitHub Release. Images: `durguto/clusdr` and
+`durguto/clusdr-operator` (GHCR mirrors `ghcr.io/clusdr/clusdr` and
+`ghcr.io/clusdr/clusdr-operator`). Chart: `helm push` to `oci://ghcr.io/clusdr/charts`
+(`clusdr-<version>.tgz` also lands on the GitHub Release). Cosign then signs the chart
+digest (legacy `sha256-*.sig` tag so Artifact Hub can see it). Do not push the chart to
+`ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**.
+The GA job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
+The GitHub Release also gets `checksums.txt.sig` and `checksums.txt.intoto.jsonl`.
 
 One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next GA push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml` and `clusdr-operator.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there.
 

@@ -46,7 +46,15 @@ cosign verify ghcr.io/clusdr/clusdr:vX.Y.Z \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-`v0.2.0` and earlier were checksum-only. Signed blobs start at the first release cut after this landed.
+The Helm chart on GHCR uses the same identity:
+
+```bash
+cosign verify ghcr.io/clusdr/charts/clusdr:X.Y.Z \
+  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+`v0.2.0` and earlier were checksum-only. Signed blobs, image signatures, and the signed chart start at the first release cut after this landed.
 
 ## Check it
 
