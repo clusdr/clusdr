@@ -31,7 +31,7 @@
 //
 // TLS is on unless CLUSDR_TLS=disabled or [WithInsecure]. Certs are
 // ca.crt, node.crt, node.key from [WithDataDir], else CLUSDR_DATA_DIR, else
-// ~/.clusdr. Missing PEMs fall back to bootstrap TLS (skip hostname).
+// ~/.clusdr. Missing PEMs fail; there is no skip-verify fallback.
 //
 // # Surface
 //

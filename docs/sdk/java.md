@@ -39,7 +39,7 @@ public final class Connect {
 }
 ```
 
-If this fails, start the **local** daemon and present PEMs from that host’s `data.dir` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). Java does not skip-verify the way Go bootstrap TLS does.
+If this fails, start the **local** daemon and match TLS to `clusdr start` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). All SDKs locate PEMs the same way ([Security](../concepts/security.md)).
 
 `local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (`readyTimeout`, default 10s). On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md).
 
@@ -98,7 +98,7 @@ Same fields on `dial(addr, opts)`.
 | Option | Meaning |
 |---|---|
 | `insecure` | Plaintext. Also set if `CLUSDR_TLS=disabled` and `dataDir` is empty. Required when `start` disabled TLS, or the handshake fails ([Errors](../reference/errors.md#tls)). |
-| `dataDir` | Directory with `ca.crt` / `node.crt` / `node.key`. Missing files throw; there is no skip-verify fallback. |
+| `dataDir` | Optional override for `ca.crt` / `node.crt` / `node.key`. Default: `CLUSDR_DATA_DIR` or `~/.clusdr`. Missing files throw. |
 | `holder` | Lock/lease identity. Empty → `sdk-<uuid>`. Two processes cannot unlock each other unless they share this id ([Errors](../reference/errors.md#locks-and-leases)). |
 | `requestTimeout` | Unary timeout (default 10s). `lock` waits at most this long unless you pass a per-call `Duration`. |
 | `readyTimeout` | Health wait on connect (default 10s). Zero skips the wait — the first RPC then fails if the daemon is down. |
@@ -373,9 +373,9 @@ Observers can grant leases. `presence.<nodeID>` is the daemon’s lease, not you
 
 On unless `insecure(true)` or `CLUSDR_TLS=disabled` (and no `dataDir`).
 
-PEMs from `dataDir` or `CLUSDR_DATA_DIR` or `~/.clusdr`. If the three files are **missing**, the client throws `ClusdrException` and tells you to disable TLS. It does **not** fall back to skip-verify bootstrap TLS. That is stricter than the Go SDK (same as Python, Rust, and TypeScript) ([Errors](../reference/errors.md#tls)).
+Lookup is the same as every official SDK: `dataDir`, else `CLUSDR_DATA_DIR`, else `~/.clusdr`. Callers do not pass PEM bytes. Missing files throw `ClusdrException` ([Errors](../reference/errors.md#tls)).
 
-Server name: `serverName`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. If none of those resolve, connect fails. gRPC uses `overrideAuthority` with that name. Peer identity is still the cluster CA, not the dial hostname.
+Server name: `serverName`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. Needed only when the CN is missing — gRPC requires a name; Go verifies the CA without SNI. Peer identity is still the cluster CA, not the dial hostname.
 
 ## Errors
 

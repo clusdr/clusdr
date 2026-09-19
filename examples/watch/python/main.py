@@ -3,8 +3,7 @@
 The process is an application. It does not vote. It talks only to the
 daemon on this host (CLUSDR_GRPC_ADDR or 127.0.0.1:7947).
 
-Python requires PEMs in CLUSDR_DATA_DIR or ~/.clusdr unless TLS is off.
-It does not skip-verify the way the Go SDK does on a missing data dir.
+Python locates PEMs in CLUSDR_DATA_DIR or ~/.clusdr unless TLS is off.
 
     clusdr init && clusdr start --bootstrap
     pip install clusdr

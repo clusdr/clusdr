@@ -96,7 +96,7 @@ The app is not a Raft member. Keep `clusdr.Local()` (Go) / `local()`. Set `CLUSD
 kubectl apply -f examples/k8s/app.yaml   # replace the image first
 ```
 
-`app.yaml` uses the Downward API `status.hostIP:7947` — same as hostNetwork or hostPort daemons. Go can connect with bootstrap TLS. Other languages need the node's PEMs or `CLUSDR_TLS=disabled`.
+`app.yaml` uses the Downward API `status.hostIP:7947` — same as hostNetwork or hostPort daemons. All SDKs look for PEMs in `CLUSDR_DATA_DIR` or `~/.clusdr`. Missing files fail in every language — mount the node’s PEMs or set `CLUSDR_TLS=disabled`.
 
 Full rules: [Kubernetes](../../docs/concepts/kubernetes.md).
 
