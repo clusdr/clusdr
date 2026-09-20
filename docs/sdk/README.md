@@ -38,7 +38,7 @@ Two apps on one machine share one daemon, the same way two processes share a loc
 - Watch reconnects with `last_seq`. Cluster events resume; `custom.*` is gossip and is not replayed — publish again if that signal still matters ([Errors](../reference/errors.md#applications)).
 - On connect, wait for the Health RPC (default 10s) or fail. A silent skip would let the first RPC hang on a down daemon.
 
-TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` in `CLUSDR_DATA_DIR` or `~/.clusdr`. If `start` used plaintext and the SDK did not (or the reverse), the handshake fails ([Errors](../reference/errors.md#tls)).
+TLS is on unless `CLUSDR_TLS=disabled`. All SDKs locate TLS material the same way by default — see [Security](../concepts/security.md). Certs: `ca.crt`, `node.crt`, `node.key` from the constructor override, else `CLUSDR_DATA_DIR`, else `~/.clusdr`. If `start` used plaintext and the SDK did not (or the reverse), the handshake fails ([Errors](../reference/errors.md#tls)).
 
 ## What they do not do
 
@@ -53,7 +53,7 @@ TLS is on unless `CLUSDR_TLS=disabled`. Certs: `ca.crt`, `node.crt`, `node.key` 
 | `CLUSDR_GRPC_ADDR` | Both | Runtime address. Default `127.0.0.1:7947`. Wrong port → `daemon not ready` even when `clusdr status` sees a socket ([Errors](../reference/errors.md#applications)). |
 | `CLUSDR_TLS` | Both | `disabled` / `off` / `false` / `0` → plaintext. Must match every node and every client or the handshake fails ([Errors](../reference/errors.md#tls)). |
 | `CLUSDR_DATA_DIR` | Both | Directory with PEMs. Else `~/.clusdr`. Point it at **this host’s** `data.dir` so the app presents the same CA as the daemon. |
-| `CLUSDR_TLS_SERVER_NAME` | Python, Rust, TypeScript, Java | TLS server name override (peer **node id**). Go verifies the cluster CA and does not need this. The others fail connect if no `server_name` / `serverName`, no env, and no CN on `node.crt` ([Errors](../reference/errors.md#tls)). |
+| `CLUSDR_TLS_SERVER_NAME` | Python, Rust, TypeScript, Java | Optional SNI override (peer **node id**). Needed only when `node.crt` has no CN — those gRPC stacks require a server name. Go verifies the cluster CA and does not read this variable ([Errors](../reference/errors.md#tls)). |
 
 ## Holder
 

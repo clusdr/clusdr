@@ -41,7 +41,7 @@ except ClusdrError as exc:
     raise SystemExit(f"connect failed: {exc}") from exc
 ```
 
-If this fails, start the **local** daemon and present PEMs from that host’s `data.dir` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). Python does not skip-verify the way Go bootstrap TLS does.
+If this fails, start the **local** daemon and match TLS to `clusdr start` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). All SDKs locate PEMs the same way ([Security](../concepts/security.md)).
 
 `local()` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (`ready_timeout`, default 10s). On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md).
 
@@ -78,7 +78,7 @@ Same keyword arguments on `dial`.
 | Argument | Meaning |
 |---|---|
 | `insecure` | Plaintext. Also set if `CLUSDR_TLS=disabled` and `data_dir` is empty. Required when `start` disabled TLS, or the handshake fails ([Errors](../reference/errors.md#tls)). |
-| `data_dir` | Directory with `ca.crt` / `node.crt` / `node.key`. Missing files raise; there is no skip-verify fallback. |
+| `data_dir` | Optional override for `ca.crt` / `node.crt` / `node.key`. Default: `CLUSDR_DATA_DIR` or `~/.clusdr`. Missing files raise. |
 | `holder` | Lock/lease identity. Empty → `sdk-<uuid>`. Two processes cannot unlock each other unless they share this id ([Errors](../reference/errors.md#locks-and-leases)). |
 | `request_timeout` | Unary timeout in seconds (default 10). `lock` waits at most this long unless you pass `timeout`. |
 | `ready_timeout` | Health wait on connect (default 10). `0` skips the wait — the first RPC then fails if the daemon is down. |
@@ -288,9 +288,9 @@ Observers can grant leases. `presence.<nodeID>` is the daemon’s lease, not you
 
 On unless `insecure=True` or `CLUSDR_TLS=disabled` (and no `data_dir`).
 
-PEMs from `data_dir` or `CLUSDR_DATA_DIR` or `~/.clusdr`. If the three files are **missing**, Python raises `ClusdrError` and tells you to disable TLS or pass `insecure=True`. It does **not** fall back to skip-verify bootstrap TLS. That is stricter than the Go SDK ([Errors](../reference/errors.md#tls)).
+Lookup is the same as every official SDK: `data_dir`, else `CLUSDR_DATA_DIR`, else `~/.clusdr`. Callers do not pass PEM bytes. Missing files raise `ClusdrError` ([Errors](../reference/errors.md#tls)).
 
-Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. If none of those resolve, connect fails. gRPC uses `grpc.ssl_target_name_override` with that name. Peer identity is still the cluster CA, not the dial hostname.
+Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. Needed only when the CN is missing — gRPC requires a name; Go verifies the CA without SNI. Peer identity is still the cluster CA, not the dial hostname.
 
 ## Errors
 

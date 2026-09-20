@@ -40,9 +40,8 @@ TLS is **on** by default (`tls.mode: enabled` / `CLUSDR_TLS` unset). A mixed clu
 | You see | Cause | What to do |
 |---|---|---|
 | Certificate / handshake errors after join | One side plaintext, the other mTLS; or different CAs | Same `tls.mode` everywhere. Apps load `ca.crt` / `node.crt` / `node.key` from **that host’s** `data.dir` |
-| Python / Rust / TypeScript / Java: `clusdr: TLS enabled but ca.crt/node.crt/node.key missing in …` | No PEMs in `data_dir` / `dataDir` / `CLUSDR_DATA_DIR` / `~/.clusdr` | Point `data_dir` / `dataDir` at the daemon’s data dir, or `CLUSDR_TLS=disabled` / `insecure` (dev only). These clients do **not** skip-verify like Go bootstrap TLS ([Python](../sdk/python.md), [Rust](../sdk/rust.md), [TypeScript](../sdk/typescript.md), [Java](../sdk/java.md)) |
-| Python / Rust / TypeScript / Java: `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` | No `server_name` / `serverName`, env, or CN on `node.crt` | Set `server_name` / `serverName` or `CLUSDR_TLS_SERVER_NAME` to the **peer node id** |
-| Go SDK connects, Python / Rust / TypeScript / Java does not | Go falls back to bootstrap TLS when PEMs are missing | Give those clients the PEMs or disable TLS on both |
+| Any SDK: `clusdr: TLS enabled but ca.crt/node.crt/node.key missing in …` | Lookup (`data_dir` / `dataDir` / `WithDataDir` / `CLUSDR_DATA_DIR` / `~/.clusdr`) found no files | Point the data dir at the daemon’s `data.dir`, or `CLUSDR_TLS=disabled` / `insecure` (dev only) ([Python](../sdk/python.md), [Rust](../sdk/rust.md), [TypeScript](../sdk/typescript.md), [Java](../sdk/java.md), [Go](../sdk/go.md)) |
+| Python / Rust / TypeScript / Java: `clusdr: TLS hostname unknown; set CLUSDR_TLS_SERVER_NAME …` | Files loaded but no `server_name` / `serverName`, env, or CN on `node.crt` | Set `server_name` / `serverName` or `CLUSDR_TLS_SERVER_NAME` to the **peer node id**. Go verifies the CA and does not need this |
 
 `clusdr certs show` prints the CA fingerprint. Compare it across nodes. Server identity is the node id (SAN), not the dial hostname.
 

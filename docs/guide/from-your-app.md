@@ -14,7 +14,7 @@ Install the SDK for one language, then run the snippet. Full walkthroughs: [SDKs
 | TypeScript | `npm install clusdr` |
 | Java | `io.clusdr:clusdr` on the same version train |
 
-TLS is on by default so the SDK presents the PEMs in `CLUSDR_DATA_DIR` or `~/.clusdr`. If `start` used `CLUSDR_TLS=disabled`, the SDK must too, or the handshake fails ([Errors](../reference/errors.md#tls)).
+TLS is on by default. Every official SDK locates PEMs the same way (`CLUSDR_DATA_DIR` or `~/.clusdr`) — see [Security](../concepts/security.md). If `start` used `CLUSDR_TLS=disabled`, the SDK must too, or the handshake fails ([Errors](../reference/errors.md#tls)).
 
 ```go
 package main
