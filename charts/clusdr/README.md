@@ -17,7 +17,7 @@
 
 Example chart. **Not** an Operator, CRD, or sidecar injector.
 
-Same as [`examples/k8s`](../../examples/k8s): one seed voter, DaemonSet on every other node, `data.dir` on hostPath. Join is still [`clusdr join`](../../docs/reference/cli/join.md). Sidecar StatefulSet is **not** this chart ([14.4 YAML](../../examples/k8s/sidecar-statefulset.yaml)).
+One seed voter, a DaemonSet on every other node, `data.dir` on hostPath. Join is still [`clusdr join`](https://clusdr.io/docs/reference/cli/join). Sidecar StatefulSet is **not** this chart — see [sidecar](https://clusdr.io/docs/guide/kubernetes-sidecar).
 
 Published on each `v*` tag as OCI (not `ghcr.io/clusdr/clusdr` — that is the daemon image). GitHub Release has the `.tgz`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`. Values are validated by `values.schema.json`. The OCI digest is Cosign-signed on publish.
 
@@ -27,7 +27,7 @@ helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \
   --set seed.nodeName=<node>
 ```
 
-Contributor checkout: `helm install clusdr charts/clusdr --namespace clusdr --create-namespace --set seed.nodeName=<node>`.
+From a git checkout: `helm install clusdr charts/clusdr --namespace clusdr --create-namespace --set seed.nodeName=<node>`.
 
 Copy the join token from the init hook logs, then join DaemonSet pods as **voters** until `voterCount` (default 3; seed is already 1). Extra nodes: `join --observer`. NOTES prints the loop.
 
@@ -50,4 +50,4 @@ Hooks: the init Job is `pre-install,pre-upgrade` so the seed does not start on a
 
 Scaling a workload Deployment does not add Raft members. Restart with intact `dataDir` is `clusdr start`, not another `join`.
 
-This chart **never** installs CRDs (Helm CRD lifecycle; same split as cert-manager / prometheus-operator). Permanent — not a later fold-in. `ClusdrCluster` is [`config/crd`](../../config/crd) / the Operator bundle. The Operator that joins Raft is [`config/operator`](../../config/operator), not this chart. Sidecar STS is CR/YAML, not `helm install`. Cordon/drain/PreStop is reboot, not `leave`.
+This chart does not install CRDs. Automatic join is the [Operator](https://clusdr.io/docs/guide/kubernetes-operator) (`https://clusdr.io/download/clusdr-operator-bundle.yaml`), not `helm install`. Sidecar is a CR or YAML, not this chart. Cordon, drain, and PreStop are reboot, not `leave`.

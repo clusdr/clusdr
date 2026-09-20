@@ -44,7 +44,7 @@ CI in this train is same-host (multiple processes / in-memory partition). Two-VM
 | apt / rpm / Snap / Homebrew | Not published. Use the install script or the image |
 | HTTP/JSON Runtime API | gRPC only |
 | Kubernetes sidecar injection | Not in tree. Sidecar topology is an explicit `ClusdrCluster` / YAML StatefulSet, not a webhook |
-| CRDs in the DaemonSet Helm chart | Never. Permanent. Install the Operator bundle |
+| CRDs in the DaemonSet Helm chart | Never. Install the Operator bundle |
 | Drain / PreStop / eviction → `clusdr leave` | Those are reboot ([presence](../concepts/presence.md)). Today `leave` is `spec.leave`. A later automation may fire only on **Node object delete** |
 
 API package name **v1alpha1** means the wire shape can still change. [Limits](limits.md).

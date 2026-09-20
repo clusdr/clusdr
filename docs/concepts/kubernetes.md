@@ -49,7 +49,7 @@ The DaemonSet chart **never** carries CRDs. Permanent architecture, same split a
 
 ## Crash, drain, leave
 
-Cordon, drain, eviction, and a pod PreStop are a **reboot**: `member.dead`, disk stays, [`clusdr start`](presence.md). They are not `leave`. Today the only RemoveServer path is `spec.leave` / [`clusdr leave`](../reference/cli/leave.md). A later automation (not shipped) may `leave` only when the Kubernetes **Node object is deleted** (autoscaler decommission, `kubectl delete node`). Implementing PreStop → `leave` is a Phase 13 bug.
+Cordon, drain, eviction, and a pod PreStop are a **reboot**: `member.dead`, disk stays, [`clusdr start`](presence.md). They are not `leave`. Today the only RemoveServer path is `spec.leave` / [`clusdr leave`](../reference/cli/leave.md). A later automation (not shipped) may `leave` only when the Kubernetes **Node object is deleted** (autoscaler decommission, `kubectl delete node`). PreStop must not call `leave`.
 
 ## Not this
 
