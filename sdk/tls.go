@@ -25,6 +25,16 @@ func dialAddr(addr string, creds credentials.TransportCredentials) (*grpc.Client
 	return grpc.NewClient(addr, grpc.WithTransportCredentials(creds))
 }
 
+func pemFilesPresent(dir string) bool {
+	for _, name := range []string{caFile, certFile, keyFile} {
+		st, err := os.Stat(filepath.Join(dir, name))
+		if err != nil || !st.Mode().IsRegular() {
+			return false
+		}
+	}
+	return true
+}
+
 func clientFromDir(dir string) (credentials.TransportCredentials, error) {
 	ca, err := os.ReadFile(filepath.Join(dir, caFile))
 	if err != nil {
@@ -39,13 +49,6 @@ func clientFromDir(dir string) (credentials.TransportCredentials, error) {
 		return nil, err
 	}
 	return clientTLS(ca, certPEM, keyPEM)
-}
-
-func bootstrapTLS() credentials.TransportCredentials {
-	return credentials.NewTLS(&tls.Config{
-		MinVersion:         tls.VersionTLS12,
-		InsecureSkipVerify: true, //nolint:gosec // G402: identity is CA, not dial hostname
-	})
 }
 
 func clientTLS(caPEM, certPEM, keyPEM []byte) (credentials.TransportCredentials, error) {

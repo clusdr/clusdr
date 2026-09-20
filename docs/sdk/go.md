@@ -426,11 +426,11 @@ Observers **can** grant leases. `presence.<nodeID>` is the daemon’s own livene
 
 On unless `CLUSDR_TLS=disabled` or `WithInsecure()`. A mixed cluster (one side plaintext) fails the handshake ([Errors](../reference/errors.md#tls)).
 
-Lookup order for PEMs: `WithDataDir`, else `CLUSDR_DATA_DIR`, else `~/.clusdr`.
+Lookup order for PEMs is the same in every official SDK: `WithDataDir`, else `CLUSDR_DATA_DIR`, else `~/.clusdr`. Callers do not pass PEM bytes. All SDKs locate TLS material the same way by default — see [Security](../concepts/security.md).
 
-If that directory has no usable certs, the client falls back to **bootstrap TLS** (TLS 1.2+, skip hostname, no client cert). That is enough to reach a daemon that still accepts join-style TLS; a cluster that requires a node cert will reject you. Python, Rust, TypeScript, and Java do **not** do this fallback — missing PEMs fail instead.
+If that directory has no usable certs, connect fails — same as Python, Rust, TypeScript, and Java. Set `CLUSDR_TLS=disabled` or `WithInsecure()` only for plaintext ([Errors](../reference/errors.md#tls)).
 
-When PEMs load: client cert + cluster CA. Peer identity is the CA, not the dial hostname (`InsecureSkipVerify` + `VerifyPeerCertificate` against the CA).
+When PEMs load: client cert + cluster CA. Peer identity is the CA, not the dial hostname (`InsecureSkipVerify` + `VerifyPeerCertificate` against the CA). Go does not read `CLUSDR_TLS_SERVER_NAME`.
 
 ## Errors
 
@@ -440,6 +440,7 @@ Returned errors are wrapped (`clusdr: members: …`, `clusdr: lock "name": …`)
 |---|---|
 | Daemon down / Health timeout | `clusdr: daemon not ready at …` or `clusdr: dial …` ([Errors](../reference/errors.md#applications)) |
 | Empty `Dial("")` | `clusdr: empty dial address` |
+| TLS files missing | `clusdr: TLS enabled but ca.crt/… missing in …` ([Errors](../reference/errors.md#tls)) |
 | Transient RPC | retried until deadline |
 | No leader | `Unavailable` on `Leader` ([Errors](../reference/errors.md#cluster)) |
 | Observer + lock | `FailedPrecondition` ([Errors](../reference/errors.md#locks-and-leases)) |

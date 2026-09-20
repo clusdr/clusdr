@@ -20,7 +20,7 @@ func TestClientFromDir_Missing(t *testing.T) {
 	}
 }
 
-func TestTransportCreds_InsecureAndBootstrap(t *testing.T) {
+func TestTransportCreds_InsecureAndMissing(t *testing.T) {
 	creds, err := transportCreds(options{insecure: true})
 	if err != nil {
 		t.Fatal(err)
@@ -30,22 +30,14 @@ func TestTransportCreds_InsecureAndBootstrap(t *testing.T) {
 	}
 
 	missing := filepath.Join(t.TempDir(), "no-such")
-	creds, err = transportCreds(options{dataDir: missing})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if creds == nil || creds.Info().SecurityProtocol == insecure.NewCredentials().Info().SecurityProtocol {
-		t.Fatal("missing cert dir should bootstrap TLS, not plaintext")
+	if _, err = transportCreds(options{dataDir: missing}); err == nil {
+		t.Fatal("missing cert dir should error")
 	}
 
 	t.Setenv("CLUSDR_DATA_DIR", "")
 	t.Setenv("HOME", t.TempDir())
-	creds, err = transportCreds(options{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if creds == nil {
-		t.Fatal("empty data dir should bootstrap TLS")
+	if _, err = transportCreds(options{}); err == nil {
+		t.Fatal("empty data dir should error")
 	}
 }
 
@@ -65,10 +57,4 @@ func TestDialAddr_Lazy(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = conn.Close()
-}
-
-func TestBootstrapTLS(t *testing.T) {
-	if bootstrapTLS() == nil {
-		t.Fatal("nil")
-	}
 }

@@ -190,7 +190,7 @@ TLS is **on** unless every node and client sets `CLUSDR_TLS=disabled`. A mixed c
 
 CLI `--bootstrap` injects `CLUSDR_RAFT_BOOTSTRAP=true` for that process only.
 
-SDK extra: `CLUSDR_TLS_SERVER_NAME` is read by the Python, Rust, TypeScript, and Java clients. Set it to the **peer node id**. The Go SDK does not read this variable.
+SDK extra: `CLUSDR_TLS_SERVER_NAME` is read by the Python, Rust, TypeScript, and Java clients when `node.crt` has no CN. Set it to the **peer node id**. The Go SDK does not read this variable. All five SDKs locate PEM files the same way ([Security](../concepts/security.md)).
 
 `CLUSDR_SHUTDOWN_TIMEOUT` is **not** implemented.
 

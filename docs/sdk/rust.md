@@ -32,7 +32,7 @@ async fn main() -> Result<(), clusdr::Error> {
 }
 ```
 
-If this fails, start the **local** daemon and present PEMs from that host’s `data.dir` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). Rust does not skip-verify the way Go bootstrap TLS does.
+If this fails, start the **local** daemon and match TLS to `clusdr start` ([Errors](../reference/errors.md#applications), [TLS](../reference/errors.md#tls)). All SDKs locate PEMs the same way ([Security](../concepts/security.md)).
 
 `local` dials `CLUSDR_GRPC_ADDR` or `127.0.0.1:7947`, then waits on the Health RPC (`ready_timeout`, default 10s). On Kubernetes, `127.0.0.1` is the pod — set `CLUSDR_GRPC_ADDR` to the node Runtime, unless the app is a [sidecar](../guide/kubernetes-sidecar.md).
 
@@ -75,7 +75,7 @@ Same fields on `dial(addr, opts)`.
 | Option | Meaning |
 |---|---|
 | `insecure` | Plaintext. Also set if `CLUSDR_TLS=disabled` and `data_dir` is empty. Required when `start` disabled TLS, or the handshake fails ([Errors](../reference/errors.md#tls)). |
-| `data_dir` | Directory with `ca.crt` / `node.crt` / `node.key`. Missing files error; there is no skip-verify fallback. |
+| `data_dir` | Optional override for `ca.crt` / `node.crt` / `node.key`. Default: `CLUSDR_DATA_DIR` or `~/.clusdr`. Missing files error. |
 | `holder` | Lock/lease identity. Empty → `sdk-<hex>` (UUID without hyphens). Two processes cannot unlock each other unless they share this id ([Errors](../reference/errors.md#locks-and-leases)). |
 | `request_timeout` | Unary timeout (default 10s). `lock` waits at most this long. |
 | `ready_timeout` | Health wait on connect (default 10s). Zero skips the wait — the first RPC then fails if the daemon is down. |
@@ -310,9 +310,9 @@ Observers can grant leases. `presence.<nodeID>` is the daemon’s lease, not you
 
 On unless `insecure(true)` or `CLUSDR_TLS=disabled` (and no `data_dir`).
 
-PEMs from `data_dir` or `CLUSDR_DATA_DIR` or `~/.clusdr`. If the three files are **missing**, the client errors and tells you to disable TLS. It does **not** fall back to skip-verify bootstrap TLS. That is stricter than the Go SDK (same as Python) ([Errors](../reference/errors.md#tls)).
+Lookup is the same as every official SDK: `data_dir`, else `CLUSDR_DATA_DIR`, else `~/.clusdr`. Callers do not pass PEM bytes. Missing files error ([Errors](../reference/errors.md#tls)).
 
-Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. If none of those resolve, connect fails. Peer identity is still the cluster CA, not the dial hostname.
+Server name: `server_name`, else `CLUSDR_TLS_SERVER_NAME`, else the CN of `node.crt`. Needed only when the CN is missing — tonic requires a name; Go verifies the CA without SNI. Peer identity is still the cluster CA, not the dial hostname.
 
 ## Errors
 
