@@ -28,6 +28,7 @@ Prerelease. Images, chart, operator YAML, and cosign signatures use this tag. `:
 ### Fixed
 
 - Go SDK: missing client PEMs fail the TLS setup instead of dialing plaintext. Other official SDKs already failed closed.
+- Release: `cosign sign-blob` keeps `--new-bundle-format=false` so `checksums.txt.sig` / `.pem` and the chart blob signature are written (new Cosign defaults to a bundle path and ignores those flags).
 
 ## 0.2.0 — 2026-09-17
 
