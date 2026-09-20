@@ -201,6 +201,7 @@ jobs:
           chmod +x scripts/package-chart.sh
           tgz=$(./scripts/package-chart.sh "$ver" dist)
           echo "$GH_TOKEN" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
+          echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
           # Artifact Hub looks for the legacy sha256-*.sig tag, not OCI referrers.
           digest=$(helm push "$tgz" oci://ghcr.io/clusdr/charts 2>&1 | tee /dev/stderr | awk '/^Digest:/{print $2}')
           test -n "$digest"
