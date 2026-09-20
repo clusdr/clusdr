@@ -1,10 +1,5 @@
-# Example only. Not a clusdr member. Not a Service of clusdr.
-#
-# Your application on the node. Local() / local() dials CLUSDR_GRPC_ADDR.
-# With the DaemonSet/seed hostNetwork example, 127.0.0.1 inside this pod is
-# not the daemon — use the node IP (Downward API).
-#
-# Replace spec.template.spec.containers[0].image with your app.
+# Not a clusdr member. Not a Service of clusdr.
+# Sidecar topology: skip this — Local() on 127.0.0.1.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,16 +27,17 @@ spec:
                   fieldPath: status.hostIP
             - name: CLUSDR_GRPC_ADDR
               value: "$(NODE_IP):7947"
-            # Mount the node's data.dir and set CLUSDR_DATA_DIR,
-            # or set CLUSDR_TLS=disabled on daemon and app (dev only).
-            # - name: CLUSDR_DATA_DIR
-            #   value: /var/lib/clusdr
-          # volumeMounts:
-          #   - name: clusdr-data
-          #     mountPath: /var/lib/clusdr
-          #     readOnly: true
-      # volumes:
-      #   - name: clusdr-data
-      #     hostPath:
-      #       path: /var/lib/clusdr
-      #       type: Directory
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            # Dev without PEMs: CLUSDR_TLS=disabled on daemon and app.
+            # - name: CLUSDR_TLS
+            #   value: disabled
+          volumeMounts:
+            - name: clusdr-data
+              mountPath: /var/lib/clusdr
+              readOnly: true
+      volumes:
+        - name: clusdr-data
+          hostPath:
+            path: /var/lib/clusdr
+            type: Directory

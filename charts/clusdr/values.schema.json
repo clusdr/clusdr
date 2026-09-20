@@ -42,6 +42,30 @@
       "minLength": 1,
       "pattern": "^/"
     },
+    "prepare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "repository": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tag": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pullPolicy": {
+              "type": "string",
+              "enum": ["Always", "IfNotPresent", "Never"]
+            }
+          }
+        }
+      }
+    },
     "voterCount": {
       "description": "Odd voter target. Helm does not join Raft.",
       "type": "integer",

@@ -33,6 +33,20 @@ spec:
       securityContext:
         runAsUser: 65532
         runAsGroup: 65532
+      initContainers:
+        - name: prepare
+          image: busybox:1.37.0
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p \"$CLUSDR_DATA_DIR\" && chown 65532:65532 \"$CLUSDR_DATA_DIR\""]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
       containers:
         - name: init
           image: durguto/clusdr:0.2.0

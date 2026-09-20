@@ -29,12 +29,18 @@ spec:
         - name: Voters
           type: integer
           jsonPath: .spec.voterCount
+        - name: Seed
+          type: string
+          jsonPath: .status.seedNodeName
         - name: Phase
           type: string
           jsonPath: .status.phase
         - name: Leader
           type: string
           jsonPath: .status.leader
+        - name: WARNING
+          type: string
+          jsonPath: .status.warning
         - name: Age
           type: date
           jsonPath: .metadata.creationTimestamp
@@ -80,7 +86,10 @@ spec:
                   default: /var/lib/clusdr
                 seedNodeName:
                   type: string
-                  description: Kubernetes node name for seed init + start --bootstrap (shared hostPath).
+                  description: >
+                    Kubernetes node for seed init + start --bootstrap (shared hostPath).
+                    Optional. The Operator picks a Ready node and writes status.seedNodeName
+                    first when this is empty. A set value wins.
                 leave:
                   type: array
                   description: >
@@ -95,6 +104,11 @@ spec:
               properties:
                 clusterID:
                   type: string
+                seedNodeName:
+                  type: string
+                  description: >
+                    Node pinned for init + --bootstrap. Written before the Job.
+                    A resourceVersion conflict means another reconcile already claimed.
                 leader:
                   type: string
                   description: clusdr node.id of the Raft leader, if any.
@@ -130,3 +144,9 @@ spec:
                   description: Operator view (Pending, Ready, Error, Unsupported). Not kube Ready.
                 message:
                   type: string
+                warning:
+                  type: string
+                  description: >
+                    Short printer-column note. Two or more ClusdrCluster
+                    objects in the apiserver set "two clusters" (two Raft
+                    groups). Not a validating webhook.

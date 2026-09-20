@@ -1,21 +1,16 @@
 This chart is the DaemonSet example (one daemon per node). It is not an Operator
-and it does not join Raft. Sidecar StatefulSet is not this chart
-(examples/k8s/sidecar-statefulset.yaml).
+and it does not join Raft. It never carries CRDs. Sidecar StatefulSet is not
+this chart (examples/k8s/sidecar-statefulset.yaml).
 
-1. hostPath is not chowned by fsGroup. Distroless uid 65532:
+1. A prepare DaemonSet chowns {{ .Values.dataDir }} (uid 65532). Pin seed Job
+   + Deployment to the same node (--set seed.nodeName=...). Drain / PreStop
+   is clusdr start, not leave.
 
-   for n in $(kind get nodes --name clusdr); do
-     docker exec "$n" mkdir -p {{ .Values.dataDir }}
-     docker exec "$n" chown 65532:65532 {{ .Values.dataDir }}
-   done
-
-2. Pin seed Job + Deployment to the same node (--set seed.nodeName=...).
-
-3. Join token (once) from the init hook:
+2. Join token (once) from the init hook:
 
    kubectl logs -n {{ .Release.Namespace }} job/{{ include "clusdr.fullname" . }}-seed-init
 
-4. Seed Runtime is $(NODE_IP):7947 on the seed node
+3. Seed Runtime is $(NODE_IP):7947 on the seed node
    (kubectl get pod -n {{ .Release.Namespace }} -o wide).
 
    SEED=<seed-node-ip>:7947
@@ -35,7 +30,7 @@ and it does not join Raft. Sidecar StatefulSet is not this chart
      fi
    done
 
-5. kubectl exec -n {{ .Release.Namespace }} deploy/{{ include "clusdr.fullname" . }}-seed -- /clusdr members
+4. kubectl exec -n {{ .Release.Namespace }} deploy/{{ include "clusdr.fullname" . }}-seed -- /clusdr members
 
    Scaling a workload Deployment does not add members. Restart with intact
    {{ .Values.dataDir }} is clusdr start, not another join.

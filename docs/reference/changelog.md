@@ -9,6 +9,26 @@ description: Notable changes in each clusdr release.
 
 Notable changes in each release. The daemon and the language SDKs share one version number, so a tag you already installed is the same train on every language. Not a substitute for [Compatibility](compatibility.md).
 
+## Unreleased
+
+## 0.2.1-rc.1 — 2026-09-20
+
+Prerelease. Images, chart, operator YAML, and cosign signatures use this tag. `:latest`, `latest.json`, Artifact Hub metadata, BSR, and language SDK registries stay on 0.2.0.
+
+### Added
+
+- `clusdr-soak`: 24h in-process join/leave + lock/lease churn, then heap, goroutine, and slog noise checks. CI runs the same loop compressed. Not a release artifact.
+- Kubernetes: prepare DaemonSet (`mkdir` + `chown 65532` on hostPath). Helm and the Operator render it. No `docker exec` onto the node.
+- Operator: omit `spec.seedNodeName`. It writes `status.seedNodeName` on the CR first (optimistic concurrency), then pins init + `--bootstrap` to that node. Helm still requires `--set seed.nodeName`.
+- Operator: one apply — `https://clusdr.io/download/clusdr-operator-bundle.yaml` (CRDs, then RBAC + Deployment). The two-file apply stays as pin/fallback. Not a Helm chart of the Operator.
+- `kubectl get clusdrcluster` WARNING column: two or more `ClusdrCluster` objects set `status.warning` to `two clusters`. Not a validating webhook.
+- App snippet: Downward API `status.hostIP` → `CLUSDR_GRPC_ADDR`, PEM mount or `CLUSDR_TLS=disabled` (dev). Same block in from-your-app, Operator guide, and `examples/k8s/app.yaml`. Not a webhook. Sidecar stays `Local()` / `127.0.0.1`.
+- Docs: the DaemonSet Helm chart **never** carries CRDs (permanent; Helm CRD lifecycle). Drain / PreStop / eviction are reboot, not `leave`. Future leave trigger is a deleted Node object only.
+
+### Fixed
+
+- Go SDK: missing client PEMs fail the TLS setup instead of dialing plaintext. Other official SDKs already failed closed.
+
 ## 0.2.0 — 2026-09-17
 
 ### Added

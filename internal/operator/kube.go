@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -19,6 +20,79 @@ import (
 type Kube struct {
 	Core kubernetes.Interface
 	Dyn  dynamic.Interface
+}
+
+func (k Kube) ReadyNodes(ctx context.Context) ([]string, error) {
+	list, err := k.Core.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, n := range list.Items {
+		if n.Spec.Unschedulable {
+			continue
+		}
+		ready := false
+		for _, cond := range n.Status.Conditions {
+			if cond.Type == corev1.NodeReady && cond.Status == corev1.ConditionTrue {
+				ready = true
+				break
+			}
+		}
+		if ready {
+			out = append(out, n.Name)
+		}
+	}
+	return out, nil
+}
+
+func (k Kube) ClaimSeed(ctx context.Context, c Cluster, node string) error {
+	u, err := k.Dyn.Resource(GVR).Namespace(c.Namespace).Get(ctx, c.Name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	if c.ResourceVersion != "" {
+		u.SetResourceVersion(c.ResourceVersion)
+	}
+	status, _, _ := unstructured.NestedMap(u.Object, "status")
+	if status == nil {
+		status = map[string]any{}
+	}
+	status["seedNodeName"] = node
+	if err := unstructured.SetNestedMap(u.Object, status, "status"); err != nil {
+		return err
+	}
+	_, err = k.Dyn.Resource(GVR).Namespace(c.Namespace).UpdateStatus(ctx, u, metav1.UpdateOptions{})
+	return err
+}
+
+func (k Kube) ClusterCount(ctx context.Context) (int, error) {
+	list, err := k.Dyn.Resource(GVR).Namespace(metav1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return 0, err
+	}
+	return len(list.Items), nil
+}
+
+func (k Kube) EnsurePrepare(ctx context.Context, spec Spec, c Cluster) error {
+	want := PrepareDaemonSet(c.Namespace, c.Name, c.UID, spec)
+	_, err := k.Core.AppsV1().DaemonSets(c.Namespace).Get(ctx, want.Name, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		_, err = k.Core.AppsV1().DaemonSets(c.Namespace).Create(ctx, want, metav1.CreateOptions{})
+	}
+	return err
+}
+
+func (k Kube) PrepareReady(ctx context.Context, c Cluster) (bool, error) {
+	ds, err := k.Core.AppsV1().DaemonSets(c.Namespace).Get(ctx, prepareName(c.Name), metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	want := ds.Status.DesiredNumberScheduled
+	return want > 0 && ds.Status.NumberReady >= want, nil
 }
 
 func (k Kube) EnsureJob(ctx context.Context, spec Spec, c Cluster) error {

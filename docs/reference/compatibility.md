@@ -24,6 +24,7 @@ This version is built and tested against the layers in the tables below. Pick a 
 | Default OS assumption | Linux (Unix control socket) |
 | Multi-host cluster | Linux daemons on different machines. Set dialable `raft.addr` and advertised `node.addr` ([other hosts](../guide/other-hosts.md)). Localhost defaults are laptop-only |
 | Kubernetes | A place to run the Linux host model ([Kubernetes](../concepts/kubernetes.md)). How-to: [YAML](../guide/kubernetes.md), [Helm](../guide/kubernetes-helm.md), [Operator](../guide/kubernetes-operator.md), [Sidecar](../guide/kubernetes-sidecar.md). Not a replacement for Lease / probes / EndpointSlice / etcd-for-kube |
+| Helm chart vs CRD | DaemonSet chart `oci://ghcr.io/clusdr/charts/clusdr` **never** carries CRDs (Helm CRD lifecycle). CRD + Operator: `clusdr-operator-bundle.yaml`. Same split as cert-manager / prometheus-operator |
 
 CI in this train is same-host (multiple processes / in-memory partition). Two-VM jobs are not in the matrix; that is a test gap, not “Raft is best effort.”
 
@@ -43,5 +44,7 @@ CI in this train is same-host (multiple processes / in-memory partition). Two-VM
 | apt / rpm / Snap / Homebrew | Not published. Use the install script or the image |
 | HTTP/JSON Runtime API | gRPC only |
 | Kubernetes sidecar injection | Not in tree. Sidecar topology is an explicit `ClusdrCluster` / YAML StatefulSet, not a webhook |
+| CRDs in the DaemonSet Helm chart | Never. Permanent. Install the Operator bundle |
+| Drain / PreStop / eviction → `clusdr leave` | Those are reboot ([presence](../concepts/presence.md)). Today `leave` is `spec.leave`. A later automation may fire only on **Node object delete** |
 
 API package name **v1alpha1** means the wire shape can still change. [Limits](limits.md).

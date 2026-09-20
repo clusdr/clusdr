@@ -48,11 +48,13 @@ This is GitHub Flow plus SemVer tags (`vX.Y.Z-rc.N`, then `vX.Y.Z`). There is no
 
 ```bash
 make test    # go test -race ./... and sdk/
-make cover   # statement coverage (examples and clusdr-bench excluded); prints totals
+make cover   # statement coverage (examples, clusdr-bench, clusdr-soak excluded); prints totals
 make vet
 make lint    # golangci-lint on the Go modules (see .golangci-lint-version)
 make build
 make build-operator
+make bench    # latency load generator
+make soak     # 24h stability binary (CI runs the same loop compressed)
 make smoke    # init + start + health + members, then stop
 make hooks    # install local pre-commit and commit-msg hooks
 ```
@@ -85,7 +87,7 @@ On a pull request, check that tests cover the new path (or the PR says why not),
 
 ## Tests
 
-Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage locally (examples and `clusdr-bench` excluded). CI’s Test job writes the same profiles (`coverage.out`, `sdk-coverage.out`) and uploads them as an artifact; it does not fail the build on a percentage.
+Major new functionality must include automated tests in the same change (or a short note in the PR explaining why tests are not applicable). Docs-only and comment-only changes are exempt. Run the suite with `make test` (see the pull-request Testing checklist). `make cover` prints statement coverage locally (examples, `clusdr-bench`, and `clusdr-soak` excluded). CI’s Test job writes the same profiles (`coverage.out`, `sdk-coverage.out`) and uploads them as an artifact; it does not fail the build on a percentage.
 
 `make build` does not strip symbols. GitHub Release binaries use `-s -w`.
 
@@ -98,6 +100,7 @@ If you change configuration, CLI, proto, SDK, or defaults, update the matching p
 ```text
 cmd/clusdr          daemon CLI
 cmd/clusdr-bench    load generator
+cmd/clusdr-soak     long-running stability run
 cmd/clusdr-operator Kubernetes operator (ClusdrCluster → DaemonSet)
 config/crd          ClusdrCluster CRD
 config/operator     operator RBAC + Deployment
@@ -145,7 +148,7 @@ digest (legacy `sha256-*.sig` tag so Artifact Hub can see it). Do not push the c
 The GA job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
 The GitHub Release also gets `checksums.txt.sig` and `checksums.txt.intoto.jsonl`.
 
-One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next GA push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml` and `clusdr-operator.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there.
+One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next GA push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml`, `clusdr-operator.yaml`, and `clusdr-operator-bundle.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there. Hero apply is the bundle.
 
 Repo secrets (not in git):
 

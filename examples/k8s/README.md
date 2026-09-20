@@ -7,6 +7,7 @@ Same topology as the Helm chart (`oci://ghcr.io/clusdr/charts/clusdr`; in-tree [
 | File | What |
 |---|---|
 | [namespace.yaml](namespace.yaml) | `clusdr` namespace |
+| [prepare.yaml](prepare.yaml) | DaemonSet: `mkdir` + `chown 65532` on hostPath (not the daemon image) |
 | [seed-init.yaml](seed-init.yaml) | Job: `clusdr init` on the seed node's hostPath |
 | [seed.yaml](seed.yaml) | One voter: `clusdr start --bootstrap` |
 | [daemonset.yaml](daemonset.yaml) | One daemon on every **other** node |
@@ -28,17 +29,13 @@ You want **3 members**. Seed is one voter. The DaemonSet skips the seed's node, 
 
 ### 1. Data dir on each node
 
-hostPath is not chowned by `fsGroup`. Distroless runs as uid **65532**.
+hostPath is not chowned by `fsGroup`. Distroless runs as uid **65532**. Apply [prepare.yaml](prepare.yaml) (root `mkdir` + `chown`, busybox, not privileged). You do not `docker exec` onto the node.
 
 ```bash
-# kind, cluster name clusdr
-for n in $(kind get nodes --name clusdr); do
-  docker exec "$n" mkdir -p /var/lib/clusdr
-  docker exec "$n" chown 65532:65532 /var/lib/clusdr
-done
+kubectl apply -f examples/k8s/namespace.yaml
+kubectl apply -f examples/k8s/prepare.yaml
+kubectl rollout status -n clusdr ds/clusdr-prepare
 ```
-
-On k3s / real nodes: the same `mkdir` + `chown` once per machine.
 
 ### 2. Same node for init and seed
 
@@ -49,7 +46,6 @@ Control-plane tainted (kind): the files already tolerate that taint. Still set `
 ### 3. Apply
 
 ```bash
-kubectl apply -f examples/k8s/namespace.yaml
 kubectl apply -f examples/k8s/seed-init.yaml
 kubectl wait -n clusdr --for=condition=complete job/clusdr-seed-init --timeout=60s
 kubectl logs -n clusdr job/clusdr-seed-init
@@ -96,7 +92,7 @@ The app is not a Raft member. Keep `clusdr.Local()` (Go) / `local()`. Set `CLUSD
 kubectl apply -f examples/k8s/app.yaml   # replace the image first
 ```
 
-`app.yaml` uses the Downward API `status.hostIP:7947` — same as hostNetwork or hostPort daemons. All SDKs look for PEMs in `CLUSDR_DATA_DIR` or `~/.clusdr`. Missing files fail in every language — mount the node’s PEMs or set `CLUSDR_TLS=disabled`.
+`app.yaml` is the same copy-paste as [from your app](../../docs/guide/from-your-app.md) and the [Operator](../../docs/guide/kubernetes-operator.md) guide: Downward API `status.hostIP` → `CLUSDR_GRPC_ADDR`, PEM hostPath or `CLUSDR_TLS=disabled` (dev). Sidecar topology still uses `Local()` on `127.0.0.1` — do not set `hostIP` there.
 
 Full rules: [Kubernetes](../../docs/concepts/kubernetes.md).
 
@@ -114,13 +110,12 @@ Full rules: [Kubernetes](../../docs/concepts/kubernetes.md).
 Same sequence as this README, without a human `clusdr join`. Separate image `durguto/clusdr-operator` (same tag; GHCR `ghcr.io/clusdr/clusdr-operator`).
 
 ```bash
-kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
-kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 kubectl apply -f examples/k8s/clusdrcluster.yaml
-# set spec.seedNodeName to the seed node
+# omit spec.seedNodeName — the Operator writes status.seedNodeName, then init
 # sidecar instead (not next to the DaemonSet CR):
 # kubectl apply -f examples/k8s/clusdrcluster-sidecar.yaml
-kubectl get clusdrcluster -n clusdr
+kubectl get clusdrcluster -n clusdr   # WARNING column if both sample CRs are applied
 ```
 
 Contributor: `kubectl apply -k config/crd` then `kubectl apply -k config/operator`. Local image: `docker build -f Dockerfile.operator` then `kind load`.

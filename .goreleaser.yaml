@@ -62,7 +62,8 @@ release:
 
     - [Run on Kubernetes](https://clusdr.io/docs/guide/kubernetes): same Linux host model, one daemon per node
     - Helm chart: `helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version {{.Version}}`. Join is still `clusdr join`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)
-    - `ClusdrCluster` CRD and `clusdr-operator`. Install with `https://clusdr.io/download/clusdr-crds.yaml` and `clusdr-operator.yaml`. Image: `durguto/clusdr-operator`
+    - `ClusdrCluster` CRD and `clusdr-operator`. One apply: `https://clusdr.io/download/clusdr-operator-bundle.yaml`. Image: `durguto/clusdr-operator`
+    - Operator: omit `spec.seedNodeName` — it writes `status.seedNodeName`, then init + `--bootstrap`. Prepare DaemonSet chowns hostPath. `WARNING` column if two CRs exist
     - `clusdr health` (Runtime RPC) and `clusdr leave` (the only way to remove a Raft member)
     - Linux archives and `install.sh` from GitHub Releases (`https://clusdr.io/download/` 302s there)
     - Buf for proto; BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal)
@@ -73,6 +74,9 @@ release:
     - Member status is `alive` or `dead` only
     - `clusdr init` succeeds (no new token) when identity already exists
     - gRPC message names follow Buf STANDARD. RPC paths and field numbers are unchanged
+    - Go SDK: missing client PEMs fail TLS setup instead of dialing plaintext
+
+    A hyphen in this tag is a prerelease: `:latest`, `latest.json`, Artifact Hub metadata, BSR, and language SDK registries stay on the last GA.
 
     ## Install
 
@@ -89,8 +93,7 @@ release:
     ```
 
     ```bash
-    kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
-    kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+    kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
     ```
 
     SDKs (same version train): `go get github.com/clusdr/clusdr/sdk`, `pip install clusdr`, `clusdr = "{{.Version}}"`, `npm install clusdr`, `io.clusdr:clusdr:{{.Version}}`.

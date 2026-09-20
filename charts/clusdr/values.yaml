@@ -20,7 +20,15 @@ image:
   pullPolicy: IfNotPresent
 
 # hostPath on each node. Distroless uid 65532; hostPath is not chowned by fsGroup.
+# The prepare DaemonSet (and an init container on seed/member pods) mkdir+chown.
 dataDir: /var/lib/clusdr
+
+# Separate image: the daemon is distroless and has no shell.
+prepare:
+  image:
+    repository: busybox
+    tag: "1.37.0"
+    pullPolicy: IfNotPresent
 
 # Odd voter target. Helm does not join. After install: join DaemonSet pods as
 # voters until this count (seed is already 1), then join --observer on extras.

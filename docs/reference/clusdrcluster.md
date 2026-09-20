@@ -11,7 +11,7 @@
 
 `status.members` is a mirror of [`Members()`](cli/members.md) once the Operator is running. It is not kube Ready and not EndpointSlice.
 
-Install the CRD: `https://clusdr.io/download/clusdr-crds.yaml`. Apply a sample: [`clusdrcluster.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster.yaml). How to run the Operator: [Operator](../guide/kubernetes-operator.md). Why two topologies: [Kubernetes](../concepts/kubernetes.md).
+Install the Operator (CRD included): `https://clusdr.io/download/clusdr-operator-bundle.yaml`. Apply a sample: [`clusdrcluster.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/clusdrcluster.yaml). How to run the Operator: [Operator](../guide/kubernetes-operator.md). Why two topologies: [Kubernetes](../concepts/kubernetes.md).
 
 ## spec
 
@@ -21,10 +21,10 @@ Install the CRD: `https://clusdr.io/download/clusdr-crds.yaml`. Apply a sample: 
 | `voterCount` | odd integer ≥ 1 | (required) | Voter target. Extra DaemonSet nodes join as observers. CEL: `self % 2 == 1` |
 | `image` | string | `durguto/clusdr:0.2.0` | Daemon image |
 | `dataDir` | string | `/var/lib/clusdr` | Node-local `data.dir` (hostPath or PVC) |
-| `seedNodeName` | string | | Kubernetes node for seed `init` + `--bootstrap` (shared hostPath) |
+| `seedNodeName` | string | | Optional pin. Empty: the Operator picks a Ready node, writes `status.seedNodeName`, then starts init + `--bootstrap` on that node |
 | `leave` | string[] | | clusdr `node.id` values to [`clusdr leave`](cli/leave.md). A missing pod is not leave |
 
-`spec.leave` is the only RemoveServer path the Operator will take. A crashed or rescheduled pod keeps its Raft id; restart is `clusdr start` with the same `data.dir`, not another `join`.
+`spec.leave` is the only RemoveServer path the Operator will take. A crashed, drained, evicted, or PreStop’d pod keeps its Raft id; restart is `clusdr start` with the same `data.dir`, not another `join`. Future leave automation (not shipped) is a **deleted Node object** only — not PreStop.
 
 ## status
 
@@ -33,6 +33,7 @@ Filled by `clusdr-operator` from Runtime `Members` / Health, not from kube Ready
 | Field | Meaning |
 |---|---|
 | `clusterID` | Cluster id |
+| `seedNodeName` | Node pinned for init + `--bootstrap`. Written before the Job. The CR `resourceVersion` is the lock (not a kube Lease) |
 | `leader` | clusdr `node.id` of the Raft leader, if any |
 | `members[]` | Mirror of `Members()` |
 | `members[].id` | Node id |
@@ -42,8 +43,9 @@ Filled by `clusdr-operator` from Runtime `Members` / Health, not from kube Ready
 | `observedGeneration` | Last reconciled generation |
 | `phase` | `Pending` \| `Ready` \| `Error` \| `Unsupported` |
 | `message` | Operator note |
+| `warning` | Short printer-column string. Two or more `ClusdrCluster` objects → `two clusters` (two Raft groups). Not a webhook |
 
-`kubectl get clusdrcluster` columns: Topology, Voters, Phase, Leader, Age.
+`kubectl get clusdrcluster` columns: Topology, Voters, Seed, Phase, Leader, WARNING, Age.
 
 ## printer / probes
 

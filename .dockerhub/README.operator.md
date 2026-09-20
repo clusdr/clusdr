@@ -44,12 +44,11 @@ Platforms: **linux/amd64**, **linux/arm64**. Distroless, non-root (`65532`). No 
 Do not `docker run` this. Apply the published YAML; it pins this image.
 
 ```bash
-kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
-kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 kubectl apply -f https://raw.githubusercontent.com/clusdr/clusdr/main/examples/k8s/clusdrcluster.yaml
 ```
 
-Pin with `clusdr-crds-0.2.0.yaml` / `clusdr-operator-0.2.0.yaml` on the same origin. Sidecar CR: `examples/k8s/clusdrcluster-sidecar.yaml`. Do not apply DaemonSet and Sidecar CRs unless you mean two clusters.
+Pin with `clusdr-operator-bundle-0.2.0.yaml`, or the two-file apply (`clusdr-crds.yaml` then `clusdr-operator.yaml`). Sidecar CR: `examples/k8s/clusdrcluster-sidecar.yaml`. Do not apply DaemonSet and Sidecar CRs unless you mean two clusters.
 
 ## Image contract
 
