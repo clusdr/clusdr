@@ -4,19 +4,34 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
   - package-ecosystem: gomod
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
   - package-ecosystem: gomod
     directory: /sdk
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
   - package-ecosystem: gomod
     directory: /api
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
