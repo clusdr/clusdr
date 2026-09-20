@@ -91,7 +91,7 @@ jobs:
         run: |
           # One suite: race + coverprofile. A second Coverage job was a second
           # dice roll on Raft SLO/chaos tests (PR green, main red).
-          pkgs=$(go list ./... | grep -Ev '/examples/|/cmd/clusdr-bench')
+          pkgs=$(go list ./... | grep -Ev '/examples/|/cmd/clusdr-bench|/cmd/clusdr-soak')
           go test -race -count=1 -p 1 -coverprofile=coverage.out $pkgs
           go tool cover -func=coverage.out | tail -1
           go test -C sdk -race -count=1 -coverprofile=../sdk-coverage.out ./...
@@ -124,6 +124,7 @@ jobs:
           make build VERSION=ci COMMIT=${{ github.sha }}
           make build-operator VERSION=ci COMMIT=${{ github.sha }}
           make bench
+          make soak
 
       - name: Verify binary runs
         run: |

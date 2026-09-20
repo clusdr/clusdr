@@ -42,3 +42,4 @@ CLI commands that talk to the daemon (`members`, `join`, …) must use the same 
 | `clusdr leases` | [leases](leases.md) |
 | `clusdr certs show` | [certs](certs.md) |
 | `clusdr-bench` | [bench](bench.md) (separate binary) |
+| `clusdr-soak` | [soak](soak.md) (separate binary) |

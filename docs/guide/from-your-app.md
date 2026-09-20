@@ -101,8 +101,60 @@ try (Cluster c = Clusdr.local()) {
 
 Do not join the cluster from the app, do not `Dial` a remote node’s Runtime as the normal path, and do not treat `publish` as durable storage.
 
+## On Kubernetes (DaemonSet)
+
+A pod’s `127.0.0.1` is that pod, not the node daemon. Copy this Deployment. Sidecar topology still uses `Local()` on `127.0.0.1` — do not set `hostIP` there. Not a webhook, not a kube SDK.
+
+```yaml
+# Not a clusdr member. Not a Service of clusdr.
+# Sidecar topology: skip this — Local() on 127.0.0.1.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: default
+  labels:
+    app.kubernetes.io/name: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: app
+    spec:
+      containers:
+        - name: app
+          image: your.registry/app:tag
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: CLUSDR_GRPC_ADDR
+              value: "$(NODE_IP):7947"
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+            # Dev without PEMs: CLUSDR_TLS=disabled on daemon and app.
+            # - name: CLUSDR_TLS
+            #   value: disabled
+          volumeMounts:
+            - name: clusdr-data
+              mountPath: /var/lib/clusdr
+              readOnly: true
+      volumes:
+        - name: clusdr-data
+          hostPath:
+            path: /var/lib/clusdr
+            type: Directory
+```
+
+Same file: [`examples/k8s/app.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/app.yaml).
+
 ## Checkpoint
 
-`Members` returns the same nodes you saw in `clusdr members`. You hold `scheduler.payments.nightly` until `Unlock` / `unlock`. If `Local()` times out, the daemon is down or TLS does not match ([Errors](../reference/errors.md#applications)).
+`Members` returns the same nodes you saw in `clusdr members`. You hold `scheduler.payments.nightly` until `Unlock` / `unlock`. If `Local()` times out, the daemon is down or TLS does not match ([Errors](../reference/errors.md#applications)). On Kubernetes the same `Local()` call needs the Deployment snippet above.
 
 The tutorial ends here. Real NICs and Docker: [Run on other hosts](other-hosts.md).

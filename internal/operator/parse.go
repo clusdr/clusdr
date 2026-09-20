@@ -12,10 +12,11 @@ func ClusterFrom(u *unstructured.Unstructured) (Cluster, error) {
 		return Cluster{}, fmt.Errorf("nil ClusdrCluster")
 	}
 	c := Cluster{
-		Namespace:  u.GetNamespace(),
-		Name:       u.GetName(),
-		UID:        string(u.GetUID()),
-		Generation: u.GetGeneration(),
+		Namespace:       u.GetNamespace(),
+		Name:            u.GetName(),
+		UID:             string(u.GetUID()),
+		Generation:      u.GetGeneration(),
+		ResourceVersion: u.GetResourceVersion(),
 	}
 	spec, _, _ := unstructured.NestedMap(u.Object, "spec")
 	c.Spec.Topology, _, _ = unstructured.NestedString(spec, "topology")
@@ -33,6 +34,8 @@ func ClusterFrom(u *unstructured.Unstructured) (Cluster, error) {
 			}
 		}
 	}
+	status, _, _ := unstructured.NestedMap(u.Object, "status")
+	c.StatusSeed, _, _ = unstructured.NestedString(status, "seedNodeName")
 	return c, nil
 }
 
@@ -53,6 +56,10 @@ func statusMap(st Status) map[string]any {
 		"observedGeneration": st.ObservedGeneration,
 		"phase":              st.Phase,
 		"message":            st.Message,
+		"warning":            st.Warning,
+	}
+	if st.SeedNodeName != "" {
+		out["seedNodeName"] = st.SeedNodeName
 	}
 	return out
 }

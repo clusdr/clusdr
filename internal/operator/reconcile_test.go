@@ -16,6 +16,8 @@ type fakePlatform struct {
 	pods           []PodAddr
 	status         Status
 	ensureJob      int
+	ensurePrepare  int
+	prepareBlocked bool
 	ensureSeed     int
 	ensureDS       int
 	putToken       string
@@ -26,8 +28,44 @@ type fakePlatform struct {
 	deleteJob      int
 	bootReady      bool
 	jobExists      bool
+	readyNodes     []string
+	readyErr       error
+	claimedSeed    string
+	claims         int
+	claimErr       error
+	clusterCount   int
 }
 
+func (f *fakePlatform) ReadyNodes(context.Context) ([]string, error) {
+	if f.readyErr != nil {
+		return nil, f.readyErr
+	}
+	if f.readyNodes != nil {
+		return append([]string(nil), f.readyNodes...), nil
+	}
+	return []string{"kind-worker"}, nil
+}
+func (f *fakePlatform) ClusterCount(context.Context) (int, error) {
+	if f.clusterCount > 0 {
+		return f.clusterCount, nil
+	}
+	return 1, nil
+}
+func (f *fakePlatform) ClaimSeed(_ context.Context, _ Cluster, node string) error {
+	if f.claimErr != nil {
+		return f.claimErr
+	}
+	f.claims++
+	f.claimedSeed = node
+	return nil
+}
+func (f *fakePlatform) EnsurePrepare(context.Context, Spec, Cluster) error {
+	f.ensurePrepare++
+	return nil
+}
+func (f *fakePlatform) PrepareReady(context.Context, Cluster) (bool, error) {
+	return !f.prepareBlocked, nil
+}
 func (f *fakePlatform) EnsureJob(context.Context, Spec, Cluster) error {
 	f.ensureJob++
 	return nil
@@ -165,8 +203,26 @@ func TestReconcileEvenVotersError(t *testing.T) {
 	if kube.status.Phase != "Error" {
 		t.Fatalf("phase %q", kube.status.Phase)
 	}
-	if kube.ensureJob != 0 {
+	if kube.ensureJob != 0 || kube.ensurePrepare != 0 {
 		t.Fatal("bad spec must not create Jobs")
+	}
+}
+
+func TestReconcileWaitsForPrepare(t *testing.T) {
+	t.Parallel()
+	kube := &fakePlatform{prepareBlocked: true}
+	r := &Reconciler{Kube: kube, Joiner: &fakeJoiner{}}
+	if err := r.Reconcile(context.Background(), testCluster()); err != nil {
+		t.Fatal(err)
+	}
+	if kube.ensurePrepare != 1 {
+		t.Fatalf("ensurePrepare=%d", kube.ensurePrepare)
+	}
+	if kube.ensureJob != 0 {
+		t.Fatal("must not init before hostPath is prepared")
+	}
+	if kube.status.Phase != "Pending" {
+		t.Fatalf("phase %q", kube.status.Phase)
 	}
 }
 

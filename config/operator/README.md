@@ -1,13 +1,12 @@
 # clusdr-operator: same CLI in-cluster (init once, one --bootstrap, join).
 #
 # Public install (image is on the same tag as the daemon):
-#   kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
-#   kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+#   kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 #   kubectl apply -f examples/k8s/clusdrcluster.yaml
 #   # or sidecar (do not apply next to the DaemonSet CR):
 #   # kubectl apply -f examples/k8s/clusdrcluster-sidecar.yaml
 #
-# GitHub fallback: releases/latest/download/clusdr-crds.yaml
+# GitHub fallback: releases/latest/download/clusdr-operator-bundle.yaml
 # Contributor: kubectl apply -k config/crd && kubectl apply -k config/operator
 # Local image: docker build -f Dockerfile.operator && kind load
 #

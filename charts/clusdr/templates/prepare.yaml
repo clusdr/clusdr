@@ -1,0 +1,51 @@
+# hostPath is not chowned by fsGroup. Distroless uid 65532.
+# Root, not privileged. Not the daemon image (no shell).
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "clusdr.fullname" . }}-prepare
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clusdr.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prepare
+spec:
+  selector:
+    matchLabels:
+      {{- include "clusdr.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: prepare
+  template:
+    metadata:
+      labels:
+        {{- include "clusdr.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: prepare
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+        - name: prepare
+          image: {{ include "clusdr.prepareImage" . }}
+          imagePullPolicy: {{ .Values.prepare.image.pullPolicy }}
+          command: ["sh", "-c", "mkdir -p \"$CLUSDR_DATA_DIR\" && chown 65532:65532 \"$CLUSDR_DATA_DIR\" && exec sleep infinity"]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: {{ .Values.dataDir | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.dataDir }}
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              memory: 16Mi
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.dataDir }}
+            type: DirectoryOrCreate

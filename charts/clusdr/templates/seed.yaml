@@ -34,6 +34,7 @@ spec:
       securityContext:
         runAsUser: 65532
         runAsGroup: 65532
+      {{- include "clusdr.prepareInit" . | nindent 6 }}
       containers:
         - name: clusdr
           image: {{ include "clusdr.image" . }}

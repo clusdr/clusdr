@@ -12,10 +12,11 @@ func TestClusterFromSpec(t *testing.T) {
 		"apiVersion": "clusdr.io/v1alpha1",
 		"kind":       "ClusdrCluster",
 		"metadata": map[string]any{
-			"name":       "clusdr",
-			"namespace":  "clusdr",
-			"uid":        "abc",
-			"generation": int64(4),
+			"name":            "clusdr",
+			"namespace":       "clusdr",
+			"uid":             "abc",
+			"generation":      int64(4),
+			"resourceVersion": "22",
 		},
 		"spec": map[string]any{
 			"topology":     "DaemonSet",
@@ -25,6 +26,9 @@ func TestClusterFromSpec(t *testing.T) {
 			"seedNodeName": "kind-worker",
 			"leave":        []any{"node-b"},
 		},
+		"status": map[string]any{
+			"seedNodeName": "kind-worker",
+		},
 	}}
 	c, err := ClusterFrom(u)
 	if err != nil {
@@ -32,6 +36,9 @@ func TestClusterFromSpec(t *testing.T) {
 	}
 	if c.Name != "clusdr" || c.Spec.VoterCount != 3 || c.Spec.SeedNodeName != "kind-worker" {
 		t.Fatalf("%+v", c)
+	}
+	if c.ResourceVersion != "22" || c.StatusSeed != "kind-worker" {
+		t.Fatalf("lock %+v", c)
 	}
 	if c.Generation != 4 {
 		t.Fatalf("generation %d", c.Generation)

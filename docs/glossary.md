@@ -24,8 +24,8 @@ This is a lookup table, not an introduction — start at [Get started](./) if yo
 | **Custom event** | `custom.<topic>` from `Publish`. Gossip, not Raft — reconnect does not replay missed publishes. |
 | **v1alpha1** | Current wire package name. Shape can still change; pin daemon and SDK to the same version train. |
 | **Kubernetes** | A place to run the Linux host model ([Kubernetes](concepts/kubernetes.md)). Not a replacement for Lease, probes, EndpointSlice, or etcd. |
-| **Helm** | DaemonSet chart `charts/clusdr`, published as `oci://ghcr.io/clusdr/charts/clusdr` ([Helm](guide/kubernetes-helm.md)). Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). Not an Operator; does not join Raft. Not a `helm repo add`. |
-| **ClusdrCluster** | CRD kind, group `clusdr.io`. Desired host topology. Status from `Members()`. Raft stays the member list. `spec.leave` is `clusdr leave`. Install: `https://clusdr.io/download/clusdr-crds.yaml`. |
-| **Operator** (kube) | `clusdr-operator` ([Operator](guide/kubernetes-operator.md)): reconciles `ClusdrCluster` (DaemonSet or Sidecar STS) with `init` / `join`. `spec.leave` is `clusdr leave`. Crash / pod restart is not leave. Distinct from the human operator CLI. Image `durguto/clusdr-operator`. Install: `https://clusdr.io/download/clusdr-operator.yaml`. |
+| **Helm** | DaemonSet chart `charts/clusdr`, published as `oci://ghcr.io/clusdr/charts/clusdr` ([Helm](guide/kubernetes-helm.md)). Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). Not an Operator; does not join Raft. **Never** carries CRDs (permanent). Not a `helm repo add`. |
+| **ClusdrCluster** | CRD kind, group `clusdr.io`. Desired host topology. Status from `Members()`. Raft stays the member list. `spec.leave` is `clusdr leave`. Install: `https://clusdr.io/download/clusdr-operator-bundle.yaml`. |
+| **Operator** (kube) | `clusdr-operator` ([Operator](guide/kubernetes-operator.md)): reconciles `ClusdrCluster` (DaemonSet or Sidecar STS) with `init` / `join`. `spec.leave` is `clusdr leave`. Crash / pod restart is not leave. Distinct from the human operator CLI. Image `durguto/clusdr-operator`. Install: `https://clusdr.io/download/clusdr-operator-bundle.yaml`. |
 
 See also: [Architecture](architecture.md), [Membership](concepts/membership.md).

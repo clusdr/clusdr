@@ -2,7 +2,7 @@
 
 `clusdr-bench` is a separate binary: an in-process load generator. Use it when you want local p95 numbers for election, event fanout, member list, or lock acquire. It is not a cluster member and not a release artifact. Build from source with `make bench`.
 
-The process spins an in-process cluster, measures the selected scenarios, and tears the nodes down on SIGINT/SIGTERM. It does not join an existing daemon. Exit 1 if a targeted scenario misses. Not a 24-hour soak.
+The process spins an in-process cluster, measures the selected scenarios, and tears the nodes down on SIGINT/SIGTERM. It does not join an existing daemon. Exit 1 if a targeted scenario misses. Long-running stability is [`clusdr-soak`](soak.md).
 
 ## Synopsis
 

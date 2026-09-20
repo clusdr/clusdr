@@ -1,0 +1,53 @@
+# Example only. Not a Helm chart, not an Operator.
+# hostPath is not chowned by fsGroup. Distroless uid 65532.
+# Root, not privileged. Not the daemon image (no shell).
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: clusdr-prepare
+  namespace: clusdr
+  labels:
+    app.kubernetes.io/name: clusdr
+    app.kubernetes.io/component: prepare
+    app.kubernetes.io/part-of: clusdr
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clusdr
+      app.kubernetes.io/component: prepare
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clusdr
+        app.kubernetes.io/component: prepare
+        app.kubernetes.io/part-of: clusdr
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+        - name: prepare
+          image: busybox:1.37.0
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p \"$CLUSDR_DATA_DIR\" && chown 65532:65532 \"$CLUSDR_DATA_DIR\" && exec sleep infinity"]
+          env:
+            - name: CLUSDR_DATA_DIR
+              value: /var/lib/clusdr
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clusdr
+          resources:
+            requests:
+              cpu: 1m
+              memory: 8Mi
+            limits:
+              memory: 16Mi
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/clusdr
+            type: DirectoryOrCreate

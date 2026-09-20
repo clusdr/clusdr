@@ -267,6 +267,8 @@ jobs:
             "dist/clusdr-crds-${ver}.yaml" \
             "dist/clusdr-operator.yaml" \
             "dist/clusdr-operator-${ver}.yaml" \
+            "dist/clusdr-operator-bundle.yaml" \
+            "dist/clusdr-operator-bundle-${ver}.yaml" \
             --clobber --repo clusdr/clusdr
 
   docker:

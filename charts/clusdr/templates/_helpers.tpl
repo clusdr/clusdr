@@ -46,6 +46,27 @@ app.kubernetes.io/name: {{ include "clusdr.name" . }}
 {{- $n }}
 {{- end }}
 
+{{- define "clusdr.prepareImage" -}}
+{{- printf "%s:%s" .Values.prepare.image.repository .Values.prepare.image.tag }}
+{{- end }}
+
+{{- define "clusdr.prepareInit" -}}
+initContainers:
+  - name: prepare
+    image: {{ include "clusdr.prepareImage" . }}
+    imagePullPolicy: {{ .Values.prepare.image.pullPolicy }}
+    command: ["sh", "-c", "mkdir -p \"$CLUSDR_DATA_DIR\" && chown 65532:65532 \"$CLUSDR_DATA_DIR\""]
+    env:
+      - name: CLUSDR_DATA_DIR
+        value: {{ .Values.dataDir | quote }}
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+    volumeMounts:
+      - name: data
+        mountPath: {{ .Values.dataDir }}
+{{- end }}
+
 {{- define "clusdr.probes" -}}
 {{- if eq .Values.probes.type "tcp" }}
 livenessProbe:

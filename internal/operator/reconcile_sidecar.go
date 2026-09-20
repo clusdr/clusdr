@@ -9,7 +9,7 @@ import (
 // --bootstrap), delete Job (RWO), headless STS, join ordinals ≥ 1.
 func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 	if c.Spec.VoterCount < 1 || c.Spec.VoterCount%2 == 0 {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Error",
 			Message:            "voterCount must be an odd integer >= 1",
@@ -32,7 +32,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 			return err
 		}
 		if !ready {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Pending",
 				Message:            "waiting for sidecar bootstrap",
@@ -44,7 +44,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 		}
 		token, err = ParseJoinToken(logs)
 		if err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Error",
 				Message:            "bootstrap finished but join token missing (re-init or set secret)",
@@ -56,7 +56,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 		if err := r.Kube.DeleteJob(ctx, c); err != nil {
 			return err
 		}
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "waiting to start StatefulSet",
@@ -71,7 +71,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 		if err := r.Kube.DeleteJob(ctx, c); err != nil {
 			return err
 		}
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "waiting for bootstrap Job to release PVC",
@@ -86,7 +86,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 	}
 	seedAddr, err := r.Kube.SeedReadyAddr(ctx, c)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "waiting for sidecar-0 Runtime: " + err.Error(),
@@ -100,7 +100,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 
 	st, err := r.Joiner.Snapshot(ctx, seedAddr)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "members: " + err.Error(),
@@ -113,7 +113,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 			continue
 		}
 		if err := r.Joiner.Leave(ctx, seedAddr, id); err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Pending",
 				Message:            "leave " + id + ": " + err.Error(),
@@ -136,7 +136,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 			continue
 		}
 		if err := r.Joiner.Join(ctx, joinAddr(p), seedAddr, token, MemberObserver(ord-1, c.Spec.VoterCount)); err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Pending",
 				Message:            "join " + p.Name + ": " + err.Error(),
@@ -146,7 +146,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 
 	st, err = r.Joiner.Snapshot(ctx, seedAddr)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "members: " + err.Error(),
@@ -157,7 +157,7 @@ func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 		st.Phase = "Ready"
 	}
 	st.Message = ""
-	return r.Kube.PatchStatus(ctx, c, st)
+	return r.patchStatus(ctx, c, st)
 }
 
 func sidecarPodDNS(pod string, c Cluster) string {

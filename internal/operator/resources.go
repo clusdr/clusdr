@@ -20,12 +20,14 @@ const (
 	compInit        = "seed-init"
 	compSeed        = "seed"
 	compMember      = "member"
+	compPrepare     = "prepare"
 	compSidecar     = "sidecar"
 	compSidecarBoot = "sidecar-bootstrap"
 	runAs           = int64(65532)
 	grpcPort        = 7947
 	raftPort        = 7946
 	defaultImg      = "durguto/clusdr:0.2.0"
+	defaultPrepare  = "busybox:1.37.0"
 	defaultDir      = "/var/lib/clusdr"
 	topoDaemon      = "DaemonSet"
 	topoSidecar     = "Sidecar"
@@ -81,6 +83,7 @@ func i32(n int) int32 {
 
 func initJobName(cr string) string     { return cr + "-seed-init" }
 func seedName(cr string) string        { return cr + "-seed" }
+func prepareName(cr string) string     { return cr + "-prepare" }
 func tokenSecretName(cr string) string { return cr + "-join-token" }
 func daemonSetName(cr string) string   { return cr }
 func stsName(cr string) string         { return cr }
@@ -190,6 +193,40 @@ func nodeName(spec Spec) string {
 	return spec.SeedNodeName
 }
 
+func prepareResources() corev1.ResourceRequirements {
+	return corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1m"),
+			corev1.ResourceMemory: resource.MustParse("8Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse("16Mi"),
+		},
+	}
+}
+
+// prepareContainer chowns hostPath as root. stay=true keeps the DaemonSet
+// pod running so kube does not restart it. Distroless /clusdr has no shell.
+func prepareContainer(dir string, stay bool) corev1.Container {
+	cmd := `mkdir -p "$CLUSDR_DATA_DIR" && chown 65532:65532 "$CLUSDR_DATA_DIR"`
+	if stay {
+		cmd += " && exec sleep infinity"
+	}
+	return corev1.Container{
+		Name:            "prepare",
+		Image:           defaultPrepare,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         []string{"sh", "-c", cmd},
+		Env:             []corev1.EnvVar{{Name: "CLUSDR_DATA_DIR", Value: dir}},
+		VolumeMounts:    []corev1.VolumeMount{{Name: "data", MountPath: dir}},
+		SecurityContext: &corev1.SecurityContext{
+			RunAsUser:  ptr.To(int64(0)),
+			RunAsGroup: ptr.To(int64(0)),
+		},
+		Resources: prepareResources(),
+	}
+}
+
 // SeedInitJob is clusdr init once on the seed node's hostPath.
 func SeedInitJob(ns, crName, uid string, spec Spec) *batchv1.Job {
 	dir := spec.dataDir()
@@ -211,6 +248,7 @@ func SeedInitJob(ns, crName, uid string, spec Spec) *batchv1.Job {
 					Tolerations:     controlPlaneToleration(),
 					SecurityContext: podSecurity(),
 					NodeName:        nodeName(spec),
+					InitContainers:  []corev1.Container{prepareContainer(dir, false)},
 					Containers: []corev1.Container{{
 						Name:            "init",
 						Image:           spec.image(),
@@ -254,6 +292,7 @@ func SeedDeploy(ns, crName, uid string, spec Spec) *appsv1.Deployment {
 					Tolerations:     controlPlaneToleration(),
 					SecurityContext: podSecurity(),
 					NodeName:        nodeName(spec),
+					InitContainers:  []corev1.Container{prepareContainer(dir, false)},
 					Containers: []corev1.Container{{
 						Name:            "clusdr",
 						Image:           spec.image(),
@@ -302,6 +341,7 @@ func MemberDaemonSet(ns, crName, uid string, spec Spec) *appsv1.DaemonSet {
 							}},
 						},
 					},
+					InitContainers: []corev1.Container{prepareContainer(dir, false)},
 					Containers: []corev1.Container{{
 						Name:            "clusdr",
 						Image:           spec.image(),
@@ -315,6 +355,36 @@ func MemberDaemonSet(ns, crName, uid string, spec Spec) *appsv1.DaemonSet {
 						Resources:       resources(),
 					}},
 					Volumes: []corev1.Volume{hostPathVol(dir)},
+				},
+			},
+		},
+	}
+}
+
+// PrepareDaemonSet chowns dataDir on every node (hostPath ignores fsGroup).
+// Runs as root without privileged. Not baked into the distroless daemon image.
+func PrepareDaemonSet(ns, crName, uid string, spec Spec) *appsv1.DaemonSet {
+	dir := spec.dataDir()
+	sel := labels(crName, compPrepare)
+	return &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            prepareName(crName),
+			Namespace:       ns,
+			Labels:          sel,
+			OwnerReferences: owner(crName, uid),
+		},
+		Spec: appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{MatchLabels: sel},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{Labels: sel},
+				Spec: corev1.PodSpec{
+					Tolerations: controlPlaneToleration(),
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser:  ptr.To(int64(0)),
+						RunAsGroup: ptr.To(int64(0)),
+					},
+					Containers: []corev1.Container{prepareContainer(dir, true)},
+					Volumes:    []corev1.Volume{hostPathVol(dir)},
 				},
 			},
 		},

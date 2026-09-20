@@ -45,7 +45,7 @@ Over a name or table cap, the RPC fails — [errors](errors.md#locks-and-leases)
 | Linux install | `https://clusdr.io/install.sh` | amd64/arm64 only. |
 | Daemon image | Docker Hub `durguto/clusdr` (GHCR `ghcr.io/clusdr/clusdr`) | Same tag as the release. |
 | Operator image | `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`) | Not baked into the daemon image. |
-| Helm | `oci://ghcr.io/clusdr/charts/clusdr` | No `helm repo add`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). |
-| Operator YAML | `https://clusdr.io/download/clusdr-crds.yaml` + `clusdr-operator.yaml` | CRD is not in the Helm chart. |
+| Helm | `oci://ghcr.io/clusdr/charts/clusdr` | No `helm repo add`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). Chart **never** carries CRDs. |
+| Operator YAML | `https://clusdr.io/download/clusdr-operator-bundle.yaml` | CRDs then RBAC + Deployment. Two-file apply is the pin. CRD is not in the Helm chart. |
 | Python / Rust / TS / Java | `pip` / crate / `npm` / `io.clusdr:clusdr` | Same version train as the daemon. |
 | License | Apache-2.0 | [LICENSE](https://github.com/clusdr/clusdr/blob/main/LICENSE) |

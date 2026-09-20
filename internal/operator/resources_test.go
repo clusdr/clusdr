@@ -29,6 +29,35 @@ func TestSeedBootstrapsJoinersDoNot(t *testing.T) {
 	}
 }
 
+func TestPrepareDaemonSetChownsHostPath(t *testing.T) {
+	t.Parallel()
+	spec := Spec{VoterCount: 3, DataDir: "/var/lib/clusdr"}
+	ds := PrepareDaemonSet("clusdr", "demo", "uid", spec)
+	if ds.Name != "demo-prepare" {
+		t.Fatalf("name %s", ds.Name)
+	}
+	c := ds.Spec.Template.Spec.Containers[0]
+	if c.Image != defaultPrepare {
+		t.Fatalf("image %s", c.Image)
+	}
+	if c.SecurityContext == nil || c.SecurityContext.RunAsUser == nil || *c.SecurityContext.RunAsUser != 0 {
+		t.Fatal("prepare runs as root")
+	}
+	if c.SecurityContext.Privileged != nil && *c.SecurityContext.Privileged {
+		t.Fatal("privileged not required")
+	}
+	if !contains(c.Command, "sh") {
+		t.Fatalf("command %v", c.Command)
+	}
+	job := SeedInitJob("clusdr", "demo", "uid", spec)
+	if len(job.Spec.Template.Spec.InitContainers) != 1 {
+		t.Fatal("seed init must chown before /clusdr init")
+	}
+	if job.Spec.Template.Spec.InitContainers[0].Image == spec.image() {
+		t.Fatal("prepare is not the distroless daemon")
+	}
+}
+
 func TestSidecarStatefulSetNotEmptyDir(t *testing.T) {
 	t.Parallel()
 	spec := Spec{Topology: topoSidecar, VoterCount: 3, Image: "durguto/clusdr:0.2.0"}

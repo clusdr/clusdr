@@ -18,19 +18,17 @@ You need `kubectl` against a cluster with at least three nodes (kind name `clusd
 
 ## 1. Give each node a disk the daemon can keep
 
-A member’s identity lives on disk (`data.dir`). A pod restart with that disk is `clusdr start`, not another `join` — the same rule as a VM reboot ([presence](../concepts/presence.md)). On Kubernetes that disk is a **hostPath** on the node (`/var/lib/clusdr`), not an emptyDir and not a PVC shared across nodes.
+A member’s identity lives on disk (`data.dir`). A pod restart, drain, eviction, or PreStop with that disk is `clusdr start`, not another `join` — the same rule as a VM reboot ([presence](../concepts/presence.md)). On Kubernetes that disk is a **hostPath** on the node (`/var/lib/clusdr`), not an emptyDir and not a PVC shared across nodes.
 
-The image is distroless and runs as uid **65532**. hostPath is not chowned by `fsGroup`. If you skip the next loop, the seed Job fails with `Permission denied` writing `/var/lib/clusdr`.
+The image is distroless and runs as uid **65532**. hostPath is not chowned by `fsGroup`. Apply the prepare DaemonSet (root `mkdir` + `chown`, not privileged, not the daemon image). Seed init also has that step as an init container so the Job does not wait on the DaemonSet.
 
 ```bash
-# kind, cluster name clusdr
-for n in $(kind get nodes --name clusdr); do
-  docker exec "$n" mkdir -p /var/lib/clusdr
-  docker exec "$n" chown 65532:65532 /var/lib/clusdr
-done
+kubectl apply -f examples/k8s/namespace.yaml
+kubectl apply -f examples/k8s/prepare.yaml
+kubectl rollout status -n clusdr ds/clusdr-prepare
 ```
 
-On k3s or real nodes: the same `mkdir` + `chown` once per machine, as root.
+A kind/k3s node you already `chown`'d by hand still works; you do not need `docker exec` for a new cluster.
 
 ## 2. Put init and bootstrap on the same node
 
@@ -47,7 +45,6 @@ Set `spec.template.spec.nodeName` on both [`seed-init.yaml`](https://github.com/
 Same sequence as the laptop tutorial: identity first, then `--bootstrap` on the seed, then start joiners (they are not in Raft until step 4). Run these from a checkout that contains `examples/k8s/`, or pass the raw GitHub URLs.
 
 ```bash
-kubectl apply -f examples/k8s/namespace.yaml
 kubectl apply -f examples/k8s/seed-init.yaml
 kubectl wait -n clusdr --for=condition=complete job/clusdr-seed-init --timeout=60s
 kubectl logs -n clusdr job/clusdr-seed-init
@@ -61,7 +58,7 @@ kubectl rollout status -n clusdr deploy/clusdr-seed
 kubectl apply -f examples/k8s/daemonset.yaml
 ```
 
-If the Job is not complete, `wait` times out — check `kubectl describe job -n clusdr clusdr-seed-init` (almost always the hostPath chown or `nodeName`).
+If the Job is not complete, `wait` times out — check `kubectl describe job -n clusdr clusdr-seed-init` (wrong `nodeName`, or the prepare init container cannot chown).
 
 ## 4. Join the other nodes
 
@@ -85,17 +82,7 @@ On a 3-node cluster that is two joins, both voters. A later extra node: add `--o
 
 A pod’s `127.0.0.1:7947` is that pod, not the node daemon. Set the node Runtime or the SDK dials a closed port:
 
-```yaml
-env:
-  - name: NODE_IP
-    valueFrom:
-      fieldRef:
-        fieldPath: status.hostIP
-  - name: CLUSDR_GRPC_ADDR
-    value: "$(NODE_IP):7947"
-```
-
-Copy-paste Deployment: [`app.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/app.yaml). Python, Rust, TypeScript, and Java need PEMs from the node’s `data.dir` (same hostPath, read-only) or `CLUSDR_TLS=disabled` on **both** daemon and app — mixed TLS fails the handshake.
+Copy-paste Deployment: [`app.yaml`](https://github.com/clusdr/clusdr/blob/main/examples/k8s/app.yaml) (same block in [from your app](from-your-app.md) and the [Operator](kubernetes-operator.md) guide). Sidecar topology still uses `Local()` on `127.0.0.1` — do not set `hostIP` there.
 
 Probes: `clusdr health` or `tcpSocket` port 7947. Never `clusdr status` (Unix socket is not where the probe runs).
 

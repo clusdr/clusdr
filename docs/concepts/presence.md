@@ -28,7 +28,7 @@ A restart with the same `data.dir` and `node.id` is `clusdr start` only. Raft st
 | Operator ran `clusdr leave` | Same identity on disk is not a member. `clusdr join --token … <seed-runtime>` — token from `clusdr init` on the seed ([errors](../reference/errors.md#join)) |
 | New host or new `data.dir` | `start`, then `join` once |
 
-Default **3s** is how quickly Watch shows `member.dead` after a kill. It does not eject the voter. A systemd restart or a machine reboot is `clusdr start` with the same unit and the same `data.dir` — not a second `init`, not a new `node.id`, not another `join`.
+Default **3s** is how quickly Watch shows `member.dead` after a kill. It does not eject the voter. A systemd restart, a machine reboot, or a Kubernetes cordon/drain/evict/PreStop is `clusdr start` with the same unit and the same `data.dir` — not a second `init`, not a new `node.id`, not another `join`. On Kubernetes a later `leave` automation (not shipped) may fire only when the **Node object is deleted**.
 
 A dead voter still counts in quorum until `clusdr leave`. Prefer 3 or 5 voters so one down host does not lose majority.
 

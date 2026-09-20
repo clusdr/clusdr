@@ -22,7 +22,6 @@ Same as [`examples/k8s`](../../examples/k8s): one seed voter, DaemonSet on every
 Published on each `v*` tag as OCI (not `ghcr.io/clusdr/clusdr` — that is the daemon image). GitHub Release has the `.tgz`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`. Values are validated by `values.schema.json`. The OCI digest is Cosign-signed on publish.
 
 ```bash
-# hostPath uid 65532 on each node — see NOTES after install
 helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \
   --namespace clusdr --create-namespace \
   --set seed.nodeName=<node>
@@ -41,7 +40,8 @@ helm template clusdr charts/clusdr --namespace clusdr --set voterCount=4   # fai
 |---|---|
 | `image.repository` | Published `durguto/clusdr` |
 | `image.tag` | Empty uses `appVersion` (the daemon tag). Override to pin |
-| `dataDir` | hostPath on the node (`/var/lib/clusdr`) |
+| `dataDir` | hostPath on the node (`/var/lib/clusdr`). Prepare DaemonSet chowns uid 65532 |
+| `prepare.image` | busybox (daemon image has no shell) |
 | `voterCount` | Odd target. Helm does not join |
 | `seed.nodeName` | Same node for init Job and seed Deployment |
 | `probes.type` | `exec` (`clusdr health`) or `tcp` (7947) |
@@ -50,4 +50,4 @@ Hooks: the init Job is `pre-install,pre-upgrade` so the seed does not start on a
 
 Scaling a workload Deployment does not add Raft members. Restart with intact `dataDir` is `clusdr start`, not another `join`.
 
-Helm chart does not install CRDs. `ClusdrCluster` is [`config/crd`](../../config/crd). The Operator that joins Raft is [`config/operator`](../../config/operator), not this chart. Sidecar STS is CR/YAML, not `helm install`.
+This chart **never** installs CRDs (Helm CRD lifecycle; same split as cert-manager / prometheus-operator). Permanent — not a later fold-in. `ClusdrCluster` is [`config/crd`](../../config/crd) / the Operator bundle. The Operator that joins Raft is [`config/operator`](../../config/operator), not this chart. Sidecar STS is CR/YAML, not `helm install`. Cordon/drain/PreStop is reboot, not `leave`.

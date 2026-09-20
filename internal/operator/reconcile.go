@@ -10,6 +10,9 @@ import (
 type Cluster struct {
 	Namespace, Name, UID string
 	Generation           int64
+	ResourceVersion      string
+	StatusSeed           string
+	Warning              string
 	Spec                 Spec
 }
 
@@ -20,11 +23,12 @@ type MemberStatus struct {
 
 // Status is patched onto the CR (not EndpointSlice).
 type Status struct {
-	ClusterID          string
-	Leader             string
-	Members            []MemberStatus
-	ObservedGeneration int64
-	Phase, Message     string
+	ClusterID               string
+	Leader                  string
+	SeedNodeName            string
+	Members                 []MemberStatus
+	ObservedGeneration      int64
+	Phase, Message, Warning string
 }
 
 // PodAddr is a hostNetwork daemon the operator can Dial.
@@ -35,6 +39,10 @@ type PodAddr struct {
 
 // Platform is the Kubernetes surface (Jobs, DaemonSet, Secrets, CR status).
 type Platform interface {
+	ReadyNodes(ctx context.Context) ([]string, error)
+	ClaimSeed(ctx context.Context, c Cluster, node string) error
+	EnsurePrepare(ctx context.Context, spec Spec, c Cluster) error
+	PrepareReady(ctx context.Context, c Cluster) (bool, error)
 	EnsureJob(ctx context.Context, spec Spec, c Cluster) error
 	JobComplete(ctx context.Context, c Cluster) (bool, error)
 	JobLogs(ctx context.Context, c Cluster) (string, error)
@@ -52,6 +60,7 @@ type Platform interface {
 	DeleteJob(ctx context.Context, c Cluster) error
 	EnsureHeadless(ctx context.Context, spec Spec, c Cluster) error
 	EnsureStatefulSet(ctx context.Context, spec Spec, c Cluster) error
+	ClusterCount(ctx context.Context) (int, error)
 }
 
 // Joiner is Runtime join + leave + membership snapshot.
@@ -69,13 +78,16 @@ type Reconciler struct {
 
 // Reconcile forms a cluster from a ClusdrCluster (DaemonSet or Sidecar).
 func (r *Reconciler) Reconcile(ctx context.Context, c Cluster) error {
+	if err := r.noteWarning(ctx, &c); err != nil {
+		return err
+	}
 	switch c.Spec.topology() {
 	case topoSidecar:
 		return r.reconcileSidecar(ctx, c)
 	case topoDaemon:
 		return r.reconcileDaemon(ctx, c)
 	default:
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Error",
 			Message:            fmt.Sprintf("unknown topology %q", c.Spec.Topology),
@@ -86,13 +98,39 @@ func (r *Reconciler) Reconcile(ctx context.Context, c Cluster) error {
 // reconcileDaemon is the 14.2 sequence: init Job, seed --bootstrap, DS start, join.
 func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 	if c.Spec.VoterCount < 1 || c.Spec.VoterCount%2 == 0 {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Error",
 			Message:            "voterCount must be an odd integer >= 1",
 		})
 	}
 	// A missing or restarted pod is not leave. spec.leave is clusdr leave.
+
+	if err := r.resolveSeed(ctx, &c); err != nil {
+		return err
+	}
+	if c.Spec.SeedNodeName == "" {
+		return r.patchStatus(ctx, c, Status{
+			ObservedGeneration: c.Generation,
+			Phase:              "Pending",
+			Message:            "waiting for a Ready node",
+		})
+	}
+
+	if err := r.Kube.EnsurePrepare(ctx, c.Spec, c); err != nil {
+		return err
+	}
+	ready, err := r.Kube.PrepareReady(ctx, c)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return r.patchStatus(ctx, c, Status{
+			ObservedGeneration: c.Generation,
+			Phase:              "Pending",
+			Message:            "waiting for hostPath prepare",
+		})
+	}
 
 	if err := r.Kube.EnsureJob(ctx, c.Spec, c); err != nil {
 		return err
@@ -102,7 +140,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 		return err
 	}
 	if !done {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "waiting for seed init",
@@ -119,7 +157,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 		}
 		token, err = ParseJoinToken(logs)
 		if err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Error",
 				Message:            "init finished but join token missing (re-init or set secret)",
@@ -135,7 +173,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 	}
 	seedAddr, err := r.Kube.SeedReadyAddr(ctx, c)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "waiting for seed Runtime: " + err.Error(),
@@ -153,7 +191,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 
 	st, err := r.Joiner.Snapshot(ctx, seedAddr)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "members: " + err.Error(),
@@ -166,7 +204,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 			continue
 		}
 		if err := r.Joiner.Leave(ctx, seedAddr, id); err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Pending",
 				Message:            "leave " + id + ": " + err.Error(),
@@ -185,7 +223,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 			continue
 		}
 		if err := r.Joiner.Join(ctx, joinAddr(p), seedAddr, token, MemberObserver(i, c.Spec.VoterCount)); err != nil {
-			return r.Kube.PatchStatus(ctx, c, Status{
+			return r.patchStatus(ctx, c, Status{
 				ObservedGeneration: c.Generation,
 				Phase:              "Pending",
 				Message:            "join " + p.Name + ": " + err.Error(),
@@ -195,7 +233,7 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 
 	st, err = r.Joiner.Snapshot(ctx, seedAddr)
 	if err != nil {
-		return r.Kube.PatchStatus(ctx, c, Status{
+		return r.patchStatus(ctx, c, Status{
 			ObservedGeneration: c.Generation,
 			Phase:              "Pending",
 			Message:            "members: " + err.Error(),
@@ -206,5 +244,5 @@ func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 		st.Phase = "Ready"
 	}
 	st.Message = ""
-	return r.Kube.PatchStatus(ctx, c, st)
+	return r.patchStatus(ctx, c, st)
 }

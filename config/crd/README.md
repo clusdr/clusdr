@@ -3,7 +3,7 @@
 Kind `ClusdrCluster`, group `clusdr.io`, namespaced. Desired **host** topology. Raft stays the member list. There is no `ClusdrMember`.
 
 ```bash
-kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
+kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 # contributor: kubectl apply -k config/crd
 kubectl apply -f examples/k8s/clusdrcluster.yaml
 kubectl get clusdrcluster -n clusdr

@@ -39,11 +39,17 @@ Packaging of the same host model. The daemon and the SDKs do not require kube.
 
 | Layer | Job |
 |---|---|
-| **Helm** | Template the DaemonSet. Join stays CLI so you see the token and the seed address |
-| **CRD** | Desired **host** topology. Raft stays the member list |
-| **Operator** | Same CLI in-cluster: `init`, one `--bootstrap`, `join` / `join --observer`. Token is a Secret. `leave` is only `spec.leave` |
+| **Helm** | Template the DaemonSet. Join stays CLI so you see the token and the seed address. **Never** carries CRDs |
+| **CRD** | Desired **host** topology. Raft stays the member list. Installed with the Operator bundle, not the chart |
+| **Operator** | Same CLI in-cluster: writes `status.seedNodeName` then `init`, one `--bootstrap`, `join` / `join --observer`. Token is a Secret. `leave` is only `spec.leave` |
 
 Helm does not form Raft. The Operator does. A crash or missing pod is not leave — do not patch `spec.leave` to “fix” a bounce.
+
+The DaemonSet chart **never** carries CRDs. Permanent architecture, same split as cert-manager and prometheus-operator: Helm’s CRD lifecycle drifts on upgrade and delete. Not “we will fold them in later.” A Helm chart of the Operator is also not this product.
+
+## Crash, drain, leave
+
+Cordon, drain, eviction, and a pod PreStop are a **reboot**: `member.dead`, disk stays, [`clusdr start`](presence.md). They are not `leave`. Today the only RemoveServer path is `spec.leave` / [`clusdr leave`](../reference/cli/leave.md). A later automation (not shipped) may `leave` only when the Kubernetes **Node object is deleted** (autoscaler decommission, `kubectl delete node`). Implementing PreStop → `leave` is a Phase 13 bug.
 
 ## Not this
 
@@ -53,5 +59,7 @@ Helm does not form Raft. The Operator does. A crash or missing pod is not leave 
 - Growing Raft when you scale a Deployment
 - Sidecar injection / a mutating webhook on every pod
 - Treating StatefulSet ordinals as the default DaemonSet seed (members are **nodes**)
+- CRDs inside the DaemonSet Helm chart
+- PreStop / eviction / drain → `clusdr leave`
 
 How to apply YAML, Helm, the Operator, or the sidecar: [Run on Kubernetes](../guide/kubernetes.md) and the sibling how-to pages.

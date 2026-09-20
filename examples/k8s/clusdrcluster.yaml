@@ -18,5 +18,5 @@ spec:
   voterCount: 3
   image: durguto/clusdr:0.2.0
   dataDir: /var/lib/clusdr
-  # seedNodeName: kind-worker
+  # seedNodeName: kind-worker   # optional; omit and the Operator picks a Ready node
   # leave: []   # clusdr node.id to RemoveServer — not a vanished pod

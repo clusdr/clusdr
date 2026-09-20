@@ -62,7 +62,7 @@ release:
 
     - [Run on Kubernetes](https://clusdr.io/docs/guide/kubernetes): same Linux host model, one daemon per node
     - Helm chart: `helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version {{.Version}}`. Join is still `clusdr join`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr)
-    - `ClusdrCluster` CRD and `clusdr-operator`. Install with `https://clusdr.io/download/clusdr-crds.yaml` and `clusdr-operator.yaml`. Image: `durguto/clusdr-operator`
+    - `ClusdrCluster` CRD and `clusdr-operator`. Install with `https://clusdr.io/download/clusdr-operator-bundle.yaml`. Image: `durguto/clusdr-operator`
     - `clusdr health` (Runtime RPC) and `clusdr leave` (the only way to remove a Raft member)
     - Linux archives and `install.sh` from GitHub Releases (`https://clusdr.io/download/` 302s there)
     - Buf for proto; BSR modules [`buf.build/clusdr/api`](https://buf.build/clusdr/api) and [`buf.build/clusdr/internal`](https://buf.build/clusdr/internal)
@@ -89,8 +89,7 @@ release:
     ```
 
     ```bash
-    kubectl apply -f https://clusdr.io/download/clusdr-crds.yaml
-    kubectl apply -f https://clusdr.io/download/clusdr-operator.yaml
+    kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
     ```
 
     SDKs (same version train): `go get github.com/clusdr/clusdr/sdk`, `pip install clusdr`, `clusdr = "{{.Version}}"`, `npm install clusdr`, `io.clusdr:clusdr:{{.Version}}`.
