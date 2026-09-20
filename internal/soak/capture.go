@@ -19,6 +19,8 @@ var expectedInfo = map[string]struct{}{
 	"member.join":             {},
 	"member.left":             {},
 	"leader.changed":          {},
+	// Extra voters catch up via InstallSnapshot after the log is snapshotted.
+	"fsm snapshot restored": {},
 }
 
 // Expire apply can warn when leadership moves mid-scan. A healthy soak
