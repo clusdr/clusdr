@@ -146,7 +146,7 @@ A hyphen in the tag (`-rc.1`) is a prerelease: GitHub Release is marked prerelea
 digest (legacy `sha256-*.sig` tag so Artifact Hub can see it). Do not push the chart to
 `ghcr.io/clusdr/clusdr` (daemon image). Make the GHCR package `charts/clusdr` **public**.
 The GA job `oras push`es `charts/clusdr/artifacthub-repo.yml` as tag `artifacthub.io`.
-The GitHub Release also gets `checksums.txt.sig` and `checksums.txt.intoto.jsonl`.
+The GitHub Release also gets `checksums.txt.sig` and `checksums.txt.intoto.jsonl`. Cosign v3 `sign-blob` needs `--new-bundle-format=false --use-signing-config=false` to write those detached files.
 
 One-time on [Artifact Hub](https://artifacthub.io): in the **clusdr** org, add a Helm repository, kind **OCI**, URL `oci://ghcr.io/clusdr/charts/clusdr`. After the first chart tag exists, Artifact Hub indexes it. Paste the repository ID into `artifacthub-repo.yml` (`repositoryID`) so the next GA push can show Verified publisher. `owners.email` must match the Artifact Hub login. Catalog URL: `https://artifacthub.io/packages/helm/clusdr/clusdr` (repo name = what you set in the org). `scripts/package-operator-yaml.sh` writes `clusdr-crds.yaml`, `clusdr-operator.yaml`, and `clusdr-operator-bundle.yaml` (plus versioned copies) onto the GitHub Release. `https://clusdr.io/download/…` redirects there. Hero apply is the bundle.
 

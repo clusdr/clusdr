@@ -206,7 +206,7 @@ jobs:
           test -n "$digest"
           cosign sign --yes --new-bundle-format=false \
             "ghcr.io/clusdr/charts/clusdr@${digest}"
-          cosign sign-blob --yes --new-bundle-format=false \
+          cosign sign-blob --yes --new-bundle-format=false --use-signing-config=false \
             --output-signature "${tgz}.sig" \
             --output-certificate "${tgz}.pem" \
             "$tgz"
