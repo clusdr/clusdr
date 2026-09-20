@@ -78,8 +78,8 @@ spec:
                       message: voterCount must be odd
                 image:
                   type: string
-                  description: Published daemon image (example pin durguto/clusdr:0.2.0).
-                  default: durguto/clusdr:0.2.0
+                  description: Published daemon image (example pin durguto/clusdr:0.2.1).
+                  default: durguto/clusdr:0.2.1
                 dataDir:
                   type: string
                   description: Node-local data.dir (hostPath or PVC). Identity lives here (crash ≠ leave).

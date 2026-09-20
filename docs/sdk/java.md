@@ -14,7 +14,7 @@ A daemon must already be running ([guide: first member](../guide/first-member.md
 <dependency>
   <groupId>io.clusdr</groupId>
   <artifactId>clusdr</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
 </dependency>
 ```
 

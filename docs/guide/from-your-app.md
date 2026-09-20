@@ -10,7 +10,7 @@ Install the SDK for one language, then run the snippet. Full walkthroughs: [SDKs
 |---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` |
 | Python | `pip install clusdr` |
-| Rust | `clusdr = "0.2.0"` in `Cargo.toml` |
+| Rust | `clusdr = "0.2.1"` in `Cargo.toml` |
 | TypeScript | `npm install clusdr` |
 | Java | `io.clusdr:clusdr` on the same version train |
 

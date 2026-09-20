@@ -22,7 +22,7 @@ One seed voter, a DaemonSet on every other node, `data.dir` on hostPath. Join is
 Published on each `v*` tag as OCI (not `ghcr.io/clusdr/clusdr` — that is the daemon image). GitHub Release has the `.tgz`. Catalog: [Artifact Hub](https://artifacthub.io/packages/helm/clusdr/clusdr). There is no `helm repo add`. Values are validated by `values.schema.json`. The OCI digest is Cosign-signed on publish.
 
 ```bash
-helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \
+helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.1 \
   --namespace clusdr --create-namespace \
   --set seed.nodeName=<node>
 ```

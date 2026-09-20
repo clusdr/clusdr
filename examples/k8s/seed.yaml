@@ -37,7 +37,7 @@ spec:
         runAsGroup: 65532
       containers:
         - name: clusdr
-          image: durguto/clusdr:0.2.0
+          image: durguto/clusdr:0.2.1
           imagePullPolicy: IfNotPresent
           args: ["start", "--bootstrap", "--config", "/var/lib/clusdr/clusdr.yaml"]
           env:

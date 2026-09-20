@@ -26,7 +26,7 @@ Crash is `member.dead`. `spec.leave` is `clusdr leave` (`member.left`). A bounce
 
 | Tag | What it is |
 |---|---|
-| `v0.2.0`, `0.2.0` | Current release (same image) |
+| `v0.2.1`, `0.2.1` | Current release (same image) |
 | `latest` | Same image as the newest `vX.Y.Z` |
 
 Platforms: **linux/amd64**, **linux/arm64**. Distroless, non-root (`65532`). No shell.
@@ -48,7 +48,7 @@ kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 kubectl apply -f https://raw.githubusercontent.com/clusdr/clusdr/main/examples/k8s/clusdrcluster.yaml
 ```
 
-Pin with `clusdr-operator-bundle-0.2.0.yaml`, or the two-file apply (`clusdr-crds.yaml` then `clusdr-operator.yaml`). Sidecar CR: `examples/k8s/clusdrcluster-sidecar.yaml`. Do not apply DaemonSet and Sidecar CRs unless you mean two clusters.
+Pin with `clusdr-operator-bundle-0.2.1.yaml`, or the two-file apply (`clusdr-crds.yaml` then `clusdr-operator.yaml`). Sidecar CR: `examples/k8s/clusdrcluster-sidecar.yaml`. Do not apply DaemonSet and Sidecar CRs unless you mean two clusters.
 
 ## Image contract
 

@@ -6,14 +6,14 @@ A daemon must already be running ([guide: first member](../guide/first-member.md
 
 | | Value | Why it matters |
 |---|---|---|
-| Crate | `clusdr` | `clusdr = "0.2.0"` in `Cargo.toml`. |
+| Crate | `clusdr` | `clusdr = "0.2.1"` in `Cargo.toml`. |
 | Rust | 1.82+ | Older toolchains fail the edition / crate features this client uses. |
 | Runtime | Tokio | There is no blocking (non-Tokio) client — `local().await` needs a Tokio runtime. |
 | Version | same train as the daemon | A mismatched crate talks `clusdr.v1alpha1` stubs the running process does not serve. |
 
 ```toml
 [dependencies]
-clusdr = "0.2.0"
+clusdr = "0.2.1"
 ```
 
 Contributor checkout: `cargo test` in the `clusdr-rust` tree. `make proto` exports [`buf.build/clusdr/api`](https://buf.build/clusdr/api) (or sibling `../clusdr/proto/api`); `tonic-build` compiles that tree.

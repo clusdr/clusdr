@@ -4,8 +4,8 @@ description: >
   One clusdr daemon per node (DaemonSet topology). Not an Operator.
   Join is still clusdr join. Sidecar is not this chart.
 type: application
-version: 0.2.0
-appVersion: "0.2.0"
+version: 0.2.1
+appVersion: "0.2.1"
 kubeVersion: ">=1.25.0-0"
 home: https://clusdr.io
 icon: https://clusdr.io/k8s.svg

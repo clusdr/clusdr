@@ -30,10 +30,10 @@ cosign verify-blob \
 
 ## Images
 
-Replace `vX.Y.Z` with the tag you pulled (example: `v0.2.0`).
+Replace `vX.Y.Z` with the tag you pulled (example: `v0.2.1`).
 
 ```bash
-cosign verify ghcr.io/clusdr/clusdr:v0.2.0 \
+cosign verify ghcr.io/clusdr/clusdr:v0.2.1 \
   --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
@@ -42,10 +42,10 @@ Same identity for `ghcr.io/clusdr/clusdr-operator`. Docker Hub tags are the same
 
 ## Helm chart
 
-The chart tag is the version **without** `v` (example: `0.2.0`).
+The chart tag is the version **without** `v` (example: `0.2.1`).
 
 ```bash
-cosign verify ghcr.io/clusdr/charts/clusdr:0.2.0 \
+cosign verify ghcr.io/clusdr/charts/clusdr:0.2.1 \
   --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```

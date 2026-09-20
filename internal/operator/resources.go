@@ -26,7 +26,7 @@ const (
 	runAs           = int64(65532)
 	grpcPort        = 7947
 	raftPort        = 7946
-	defaultImg      = "durguto/clusdr:0.2.0"
+	defaultImg      = "durguto/clusdr:0.2.1"
 	defaultPrepare  = "busybox:1.37.0"
 	defaultDir      = "/var/lib/clusdr"
 	topoDaemon      = "DaemonSet"

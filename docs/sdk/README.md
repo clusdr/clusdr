@@ -14,7 +14,7 @@ Two apps on one machine share one daemon, the same way two processes share a loc
 |---|---|---|
 | Go | `go get github.com/clusdr/clusdr/sdk` | [Go SDK](go.md) |
 | Python | `pip install clusdr` | [Python SDK](python.md) |
-| Rust | `clusdr = "0.2.0"` | [Rust SDK](rust.md) |
+| Rust | `clusdr = "0.2.1"` | [Rust SDK](rust.md) |
 | TypeScript | `npm install clusdr` | [TypeScript SDK](typescript.md) |
 | Java | `io.clusdr:clusdr` | [Java SDK](java.md) |
 

@@ -14,7 +14,7 @@ app pods on A     app pods on B       app pods on C
 
 Helm templates this layout ([Install with Helm](kubernetes-helm.md)). The Operator runs `init` / `join` for you ([Install the Operator](kubernetes-operator.md)). This page is the hand-applied YAML so you can see each step.
 
-You need `kubectl` against a cluster with at least three nodes (kind name `clusdr` in the snippets). Manifests: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s). Image pin in those files is `durguto/clusdr:0.2.0`.
+You need `kubectl` against a cluster with at least three nodes (kind name `clusdr` in the snippets). Manifests: [`examples/k8s/`](https://github.com/clusdr/clusdr/tree/main/examples/k8s). Image pin in those files is `durguto/clusdr:0.2.1`.
 
 ## 1. Give each node a disk the daemon can keep
 
