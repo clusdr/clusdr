@@ -27,7 +27,7 @@ ci: run goreleaser check on pull requests
 
 A breaking change uses `feat!:` (or another type with `!`) and a `BREAKING CHANGE:` footer. Subject is lowercase after the type, no trailing period. Header and body lines are at most 100 characters (wrap the body; ~72 on the subject is easier to read). A body needs a blank line after the subject.
 
-CI lints PR commits against that grammar. Prefer squash-merge; the squash title must stay conventional.
+CI lints PR commits against that grammar. Dependabot bodies include compare URLs over 100 characters; those commits are ignored (`Signed-off-by: dependabot[bot]`). Prefer squash-merge; the squash title must stay conventional.
 
 ```bash
 make hooks   # .git/hooks: gofmt on staged .go, commit-msg same as CI
