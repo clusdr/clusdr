@@ -14,6 +14,7 @@ Notable changes in each release. The daemon and the language SDKs share one vers
 ### Changed
 
 - Release: Cosign v3 default — OCI referrers on images/chart, Sigstore bundle on `checksums.txt` and the chart tarball. No `sha256-*.sig` tags. `v0.2.1` stays detached `.sig` / `.pem`.
+- Soak: `fsm snapshot restored` is expected Info (extra voters catch up from a Raft snapshot). A 9h run failed the noise audit on that line only.
 
 ## 0.2.1 — 2026-09-20
 
