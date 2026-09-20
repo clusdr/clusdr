@@ -15,7 +15,17 @@ A verify that succeeds against another repo’s identity is the wrong check.
 
 ## Checksums
 
-From the [GitHub Release](https://github.com/clusdr/clusdr/releases) for that tag, download `checksums.txt`, `checksums.txt.sig`, and `checksums.txt.pem` into the current directory.
+From the [GitHub Release](https://github.com/clusdr/clusdr/releases) for that tag, download `checksums.txt` and `checksums.txt.sigstore.json` into the current directory.
+
+```bash
+cosign verify-blob \
+  --bundle checksums.txt.sigstore.json \
+  --certificate-identity-regexp '^https://github.com/clusdr/clusdr/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  checksums.txt
+```
+
+`v0.2.1` used detached `checksums.txt.sig` + `checksums.txt.pem` instead of a bundle:
 
 ```bash
 cosign verify-blob \
@@ -38,7 +48,7 @@ cosign verify ghcr.io/clusdr/clusdr:v0.2.1 \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-Same identity for `ghcr.io/clusdr/clusdr-operator`. Docker Hub tags are the same image; Cosign signatures live on GHCR.
+Same identity for `ghcr.io/clusdr/clusdr-operator`. Docker Hub tags are the same image; Cosign signatures live on GHCR. Tags after `v0.2.1` store the signature as an OCI referrer (no `sha256-*.sig` tag). `v0.2.1` used the legacy tag.
 
 ## Helm chart
 

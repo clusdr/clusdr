@@ -202,16 +202,12 @@ jobs:
           tgz=$(./scripts/package-chart.sh "$ver" dist)
           echo "$GH_TOKEN" | helm registry login ghcr.io -u "${{ github.actor }}" --password-stdin
           echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-          # Artifact Hub looks for the legacy sha256-*.sig tag, not OCI referrers.
           digest=$(helm push "$tgz" oci://ghcr.io/clusdr/charts 2>&1 | tee /dev/stderr | awk '/^Digest:/{print $2}')
           test -n "$digest"
-          cosign sign --yes --new-bundle-format=false --use-signing-config=false \
-            "ghcr.io/clusdr/charts/clusdr@${digest}"
-          cosign sign-blob --yes --new-bundle-format=false --use-signing-config=false \
-            --output-signature "${tgz}.sig" \
-            --output-certificate "${tgz}.pem" \
-            "$tgz"
-          gh release upload "$tag" "$tgz" "${tgz}.sig" "${tgz}.pem" --clobber --repo clusdr/clusdr
+          # Cosign v3 default: OCI referrers + Sigstore bundle. Artifact Hub reads both.
+          cosign sign --yes "ghcr.io/clusdr/charts/clusdr@${digest}"
+          cosign sign-blob --yes --bundle "${tgz}.sigstore.json" "$tgz"
+          gh release upload "$tag" "$tgz" "${tgz}.sigstore.json" --clobber --repo clusdr/clusdr
 
       - uses: oras-project/setup-oras@5c0b487ce3fe0ce3ab0d034e63669e426e294e4d # v1.2.2
 
@@ -370,7 +366,7 @@ jobs:
           sign_list() {
             while IFS= read -r img; do
               [ -n "$img" ] || continue
-              cosign sign --yes --new-bundle-format=false --use-signing-config=false "$img"
+              cosign sign --yes "$img"
             done
           }
           sign_list <<EOF

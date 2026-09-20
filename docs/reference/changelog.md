@@ -11,6 +11,10 @@ Notable changes in each release. The daemon and the language SDKs share one vers
 
 ## Unreleased
 
+### Changed
+
+- Release: Cosign v3 default — OCI referrers on images/chart, Sigstore bundle on `checksums.txt` and the chart tarball. No `sha256-*.sig` tags. `v0.2.1` stays detached `.sig` / `.pem`.
+
 ## 0.2.1 — 2026-09-20
 
 First signed GA after 0.2.0. `v0.2.1-rc.1` and `v0.2.1-rc.2` are tags only (Cosign v3). `v0.2.1-rc.3` signed the pipeline; `v0.2.1-rc.4` is this tree.
