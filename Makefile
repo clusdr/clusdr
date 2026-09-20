@@ -63,7 +63,7 @@ helm:
 	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'app.kubernetes.io/component: prepare'
 	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'busybox:1.37.0'
 	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'kind: Deployment'
-	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'image: durguto/clusdr:0.2.0'
+	helm template clusdr charts/clusdr --namespace clusdr | grep -q 'image: durguto/clusdr:0.2.1'
 	helm template clusdr charts/clusdr --namespace clusdr --set image.tag=dev | grep -q 'image: durguto/clusdr:dev'
 	if helm template clusdr charts/clusdr --namespace clusdr --set voterCount=4 >/dev/null 2>&1; then echo "voterCount=4 must fail" >&2; exit 1; fi
 	if helm template clusdr charts/clusdr --namespace clusdr --set probes.type=foo >/dev/null 2>&1; then echo "probes.type=foo must fail" >&2; exit 1; fi
@@ -76,16 +76,16 @@ helm:
 
 manifests:
 	tmp=$$(mktemp -d); \
-	./scripts/package-operator-yaml.sh 0.2.0 "$$tmp"; \
+	./scripts/package-operator-yaml.sh 0.2.1 "$$tmp"; \
 	grep -q 'kind: CustomResourceDefinition' "$$tmp/clusdr-crds.yaml"; \
 	grep -q 'name: WARNING' "$$tmp/clusdr-crds.yaml"; \
-	grep -q 'image: durguto/clusdr-operator:0.2.0' "$$tmp/clusdr-operator.yaml"; \
+	grep -q 'image: durguto/clusdr-operator:0.2.1' "$$tmp/clusdr-operator.yaml"; \
 	grep -q 'kind: CustomResourceDefinition' "$$tmp/clusdr-operator-bundle.yaml"; \
-	grep -q 'image: durguto/clusdr-operator:0.2.0' "$$tmp/clusdr-operator-bundle.yaml"; \
-	test -f "$$tmp/clusdr-crds-0.2.0.yaml"; \
-	test -f "$$tmp/clusdr-operator-0.2.0.yaml"; \
+	grep -q 'image: durguto/clusdr-operator:0.2.1' "$$tmp/clusdr-operator-bundle.yaml"; \
+	test -f "$$tmp/clusdr-crds-0.2.1.yaml"; \
+	test -f "$$tmp/clusdr-operator-0.2.1.yaml"; \
 	test -f "$$tmp/clusdr-operator-bundle.yaml"; \
-	test -f "$$tmp/clusdr-operator-bundle-0.2.0.yaml"; \
+	test -f "$$tmp/clusdr-operator-bundle-0.2.1.yaml"; \
 	if grep -q '^kind: CustomResourceDefinition$$' "$$tmp/clusdr-operator.yaml"; then echo "operator.yaml must not include the CRD" >&2; exit 1; fi; \
 	if grep -q '^kind: ClusdrCluster$$' "$$tmp/clusdr-operator.yaml" "$$tmp/clusdr-operator-bundle.yaml"; then echo "sample CR in operator YAML" >&2; exit 1; fi; \
 	rm -rf "$$tmp"; \

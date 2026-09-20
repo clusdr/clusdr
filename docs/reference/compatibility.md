@@ -18,7 +18,7 @@ This version is built and tested against the layers in the tables below. Pick a 
 | Install script | `https://clusdr.io/install.sh` (Linux amd64/arm64) |
 | Container | Docker Hub `durguto/clusdr` (linux/amd64, linux/arm64); GHCR mirror `ghcr.io/clusdr/clusdr` |
 | Operator image | Docker Hub `durguto/clusdr-operator` (linux/amd64, linux/arm64); GHCR `ghcr.io/clusdr/clusdr-operator`. Same tag as the daemon. Not baked into `durguto/clusdr` |
-| Release train | `0.2.0` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr`, crates.io `clusdr`, npm `clusdr`, Maven `io.clusdr:clusdr` |
+| Release train | `0.2.1` — daemon tag, Go modules `sdk`/`api`, PyPI `clusdr`, crates.io `clusdr`, npm `clusdr`, Maven `io.clusdr:clusdr` |
 | Local storage | BoltDB under `data.dir` |
 | Consensus | Hashicorp Raft |
 | Default OS assumption | Linux (Unix control socket) |

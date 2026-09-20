@@ -10,7 +10,7 @@ Field list: [ClusdrCluster](../reference/clusdrcluster.md). Why DaemonSet vs Sid
 kubectl apply -f https://clusdr.io/download/clusdr-operator-bundle.yaml
 ```
 
-That file is CRDs, then RBAC + Deployment. Pin a tag with `clusdr-operator-bundle-0.2.0.yaml`. The two-file apply (`clusdr-crds.yaml` then `clusdr-operator.yaml`, or the versioned names) stays as pin/fallback. Contributor: `kubectl apply -k config/crd` then `kubectl apply -k config/operator`.
+That file is CRDs, then RBAC + Deployment. Pin a tag with `clusdr-operator-bundle-0.2.1.yaml`. The two-file apply (`clusdr-crds.yaml` then `clusdr-operator.yaml`, or the versioned names) stays as pin/fallback. Contributor: `kubectl apply -k config/crd` then `kubectl apply -k config/operator`.
 
 Image: `durguto/clusdr-operator` (GHCR `ghcr.io/clusdr/clusdr-operator`). Same tag as the daemon. The CRD is not in the Helm chart — installing only the chart leaves `kubectl get clusdrcluster` unknown. There is no Helm chart of the Operator.
 

@@ -26,7 +26,7 @@ spec:
         runAsNonRoot: true
       containers:
         - name: operator
-          image: durguto/clusdr-operator:0.2.0
+          image: durguto/clusdr-operator:0.2.1
           imagePullPolicy: IfNotPresent
           args: []
           env:

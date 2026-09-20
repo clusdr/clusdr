@@ -16,6 +16,6 @@ metadata:
 spec:
   topology: Sidecar
   voterCount: 3
-  image: durguto/clusdr:0.2.0
+  image: durguto/clusdr:0.2.1
   dataDir: /var/lib/clusdr
   # leave: []   # clusdr node.id (pod name, e.g. clusdr-1) — not a vanished pod

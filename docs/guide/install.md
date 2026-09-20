@@ -19,7 +19,7 @@ curl -fsSL https://clusdr.io/install.sh | BINDIR=~/bin sh
 
 Then ensure `~/bin` is on `PATH`, or the next page’s `clusdr init` will say `command not found`.
 
-Pin a tag when you need a known build: `CLUSDR_VERSION=0.2.0`. The script checks SHA-256 against `checksums.txt` from the same release; a truncated download fails that check instead of installing a half file.
+Pin a tag when you need a known build: `CLUSDR_VERSION=0.2.1`. The script checks SHA-256 against `checksums.txt` from the same release; a truncated download fails that check instead of installing a half file.
 
 Sigstore signatures on that checksum file, the image, and the Helm chart live on [Verify a release](verify-release.md). `v0.2.0` and earlier are checksum-only.
 

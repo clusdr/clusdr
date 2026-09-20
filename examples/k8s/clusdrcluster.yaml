@@ -16,7 +16,7 @@ metadata:
 spec:
   topology: DaemonSet
   voterCount: 3
-  image: durguto/clusdr:0.2.0
+  image: durguto/clusdr:0.2.1
   dataDir: /var/lib/clusdr
   # seedNodeName: kind-worker   # optional; omit and the Operator picks a Ready node
   # leave: []   # clusdr node.id to RemoveServer — not a vanished pod

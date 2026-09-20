@@ -10,7 +10,7 @@ A release binary prints the tag. A source build prints `dev` unless ldflags set 
 clusdr version
 ```
 
-Example shape: `clusdr 0.2.0 (commit: …, built: …)` or `clusdr dev (commit: …, built: …)`.
+Example shape: `clusdr 0.2.1 (commit: …, built: …)` or `clusdr dev (commit: …, built: …)`.
 
 ## See also
 

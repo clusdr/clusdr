@@ -19,7 +19,7 @@ The chart ships a prepare DaemonSet (and an init container on the seed Job) that
 
 ```bash
 kubectl get nodes
-helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.0 \
+helm install clusdr oci://ghcr.io/clusdr/charts/clusdr --version 0.2.1 \
   --namespace clusdr --create-namespace \
   --set seed.nodeName=<name-from-get-nodes>
 ```

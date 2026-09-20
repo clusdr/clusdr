@@ -19,7 +19,7 @@ Install the Operator (CRD included): `https://clusdr.io/download/clusdr-operator
 |---|---|---|---|
 | `topology` | `DaemonSet` \| `Sidecar` | `DaemonSet` | Host layout |
 | `voterCount` | odd integer ≥ 1 | (required) | Voter target. Extra DaemonSet nodes join as observers. CEL: `self % 2 == 1` |
-| `image` | string | `durguto/clusdr:0.2.0` | Daemon image |
+| `image` | string | `durguto/clusdr:0.2.1` | Daemon image |
 | `dataDir` | string | `/var/lib/clusdr` | Node-local `data.dir` (hostPath or PVC) |
 | `seedNodeName` | string | | Optional pin. Empty: the Operator picks a Ready node, writes `status.seedNodeName`, then starts init + `--bootstrap` on that node |
 | `leave` | string[] | | clusdr `node.id` values to [`clusdr leave`](cli/leave.md). A missing pod is not leave |

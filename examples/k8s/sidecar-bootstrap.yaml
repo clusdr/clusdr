@@ -44,7 +44,7 @@ spec:
         fsGroup: 65532
       initContainers:
         - name: init
-          image: durguto/clusdr:0.2.0
+          image: durguto/clusdr:0.2.1
           imagePullPolicy: IfNotPresent
           command: ["/clusdr", "init"]
           args: ["--config", "/var/lib/clusdr/clusdr.yaml"]
@@ -58,7 +58,7 @@ spec:
               mountPath: /var/lib/clusdr
       containers:
         - name: clusdr
-          image: durguto/clusdr:0.2.0
+          image: durguto/clusdr:0.2.1
           imagePullPolicy: IfNotPresent
           args: ["start", "--bootstrap", "--config", "/var/lib/clusdr/clusdr.yaml"]
           env:

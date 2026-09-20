@@ -76,7 +76,7 @@ spec:
               mountPath: /var/lib/clusdr
               readOnly: true
         - name: clusdr
-          image: durguto/clusdr:0.2.0
+          image: durguto/clusdr:0.2.1
           imagePullPolicy: IfNotPresent
           args: ["start", "--config", "/var/lib/clusdr/clusdr.yaml"]
           env:

@@ -17,7 +17,7 @@ Same topology as the Helm chart (`oci://ghcr.io/clusdr/charts/clusdr`; in-tree [
 | [clusdrcluster.yaml](clusdrcluster.yaml) | `ClusdrCluster` DaemonSet sample. Needs the CRD. Operator forms the cluster |
 | [clusdrcluster-sidecar.yaml](clusdrcluster-sidecar.yaml) | `ClusdrCluster` Sidecar sample. PVC STS, app `127.0.0.1`. Not injection |
 
-Image: published `durguto/clusdr` (example pins `0.2.0`). Probes call [`clusdr health`](../../docs/reference/cli/health.md) (Runtime Health RPC). Else `tcpSocket` port `7947`. Never `clusdr status` (Unix socket).
+Image: published `durguto/clusdr` (example pins `0.2.1`). Probes call [`clusdr health`](../../docs/reference/cli/health.md) (Runtime Health RPC). Else `tcpSocket` port `7947`. Never `clusdr status` (Unix socket).
 
 Kube's native gRPC probe speaks `grpc.health.v1`, which this daemon does not implement.
 
