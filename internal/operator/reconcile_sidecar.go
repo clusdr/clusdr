@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// reconcileSidecar is the 14.4 sequence: PVC-0, bootstrap Job (init +
-// --bootstrap), delete Job (RWO), headless STS, join ordinals ≥ 1.
+// reconcileSidecar is PVC-0, bootstrap Job (init + --bootstrap), delete
+// Job (RWO), headless STS, then join ordinals ≥ 1.
 func (r *Reconciler) reconcileSidecar(ctx context.Context, c Cluster) error {
 	if c.Spec.VoterCount < 1 || c.Spec.VoterCount%2 == 0 {
 		return r.patchStatus(ctx, c, Status{

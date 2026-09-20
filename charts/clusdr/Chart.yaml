@@ -1,8 +1,8 @@
 apiVersion: v2
 name: clusdr
 description: >
-  One clusdr daemon per node (DaemonSet topology). Packages examples/k8s.
-  Not an Operator. Join is still clusdr join. Sidecar is not this chart.
+  One clusdr daemon per node (DaemonSet topology). Not an Operator.
+  Join is still clusdr join. Sidecar is not this chart.
 type: application
 version: 0.2.0
 appVersion: "0.2.0"

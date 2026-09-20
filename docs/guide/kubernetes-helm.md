@@ -1,6 +1,6 @@
 # Install with Helm
 
-Helm templates the DaemonSet topology from chart values. Join stays CLI — Helm does not call `clusdr join`. The chart **never** installs the CRD or the Operator (Helm CRD lifecycle: upgrade/delete drift; same split as cert-manager and prometheus-operator). That is permanent, not a later fold-in. If you want automatic join, use [Install the Operator](kubernetes-operator.md) instead.
+Helm templates the DaemonSet topology from chart values. Join stays CLI — Helm does not call `clusdr join`. The chart does not install the CRD or the Operator (Helm CRD lifecycle: upgrade/delete drift; same split as cert-manager and prometheus-operator). If you want automatic join, use [Install the Operator](kubernetes-operator.md) instead.
 
 Why that split exists: [Kubernetes](../concepts/kubernetes.md). Same topology by hand: [Run on Kubernetes](kubernetes.md).
 

@@ -70,7 +70,7 @@ type Joiner interface {
 	Snapshot(ctx context.Context, seedAddr string) (Status, error)
 }
 
-// Reconciler forms a DaemonSet cluster (14.2) from a ClusdrCluster.
+// Reconciler forms a DaemonSet cluster from a ClusdrCluster.
 type Reconciler struct {
 	Kube   Platform
 	Joiner Joiner
@@ -95,7 +95,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, c Cluster) error {
 	}
 }
 
-// reconcileDaemon is the 14.2 sequence: init Job, seed --bootstrap, DS start, join.
+// reconcileDaemon is init Job, seed --bootstrap, DaemonSet start, then join.
 func (r *Reconciler) reconcileDaemon(ctx context.Context, c Cluster) error {
 	if c.Spec.VoterCount < 1 || c.Spec.VoterCount%2 == 0 {
 		return r.patchStatus(ctx, c, Status{

@@ -1,5 +1,5 @@
 # Sidecar topology. Requires the CRD and clusdr-operator.
-# Replica is the member (14.4). App Local() at 127.0.0.1. PVC, not emptyDir.
+# Replica is the member. App Local() at 127.0.0.1. PVC, not emptyDir.
 # Not the default. Not injection. Not a Deployment sidecar.
 #
 #   kubectl apply -f config/crd/clusdr.io_clusdrclusters.yaml
