@@ -11,9 +11,9 @@ Notable changes in each release. The daemon and the language SDKs share one vers
 
 ## Unreleased
 
-## 0.2.1-rc.1 — 2026-09-20
+## 0.2.1-rc.2 — 2026-09-20
 
-Prerelease. Images, chart, operator YAML, and cosign signatures use this tag. `:latest`, `latest.json`, Artifact Hub metadata, BSR, and language SDK registries stay on 0.2.0.
+Prerelease. Images, chart, operator YAML, and cosign signatures use this tag. `:latest`, `latest.json`, Artifact Hub metadata, BSR, and language SDK registries stay on 0.2.0. `v0.2.1-rc.1` exists as a tag only — Cosign’s new bundle default aborted goreleaser before a GitHub Release.
 
 ### Added
 
