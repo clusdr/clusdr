@@ -53,3 +53,18 @@ func TestCapture_Audit(t *testing.T) {
 
 	_ = c.Enabled(context.Background(), slog.LevelInfo)
 }
+
+func TestCapture_AuditAllowsFSMSnapshotRestore(t *testing.T) {
+	c := newCapture(nil)
+	log := c.logger()
+	for i := 0; i < 20; i++ {
+		log.Info("fsm snapshot restored")
+		log.Info("member.join")
+	}
+	fails := c.audit(time.Minute, 20)
+	for _, f := range fails {
+		if strings.Contains(f, "fsm snapshot restored") {
+			t.Fatalf("snapshot restore is expected on extra join: %v", fails)
+		}
+	}
+}
