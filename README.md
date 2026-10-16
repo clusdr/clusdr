@@ -2,7 +2,7 @@
   <a href="https://clusdr.io">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="docs/assets/clusdr-lettermark-side-dark.svg">
-      <img src="docs/assets/clusdr-lettermark-side.svg" alt="clusdr" width="360" height="119">
+      <img src="docs/assets/clusdr-lettermark-side.svg" alt="clusdr" width="360" height="115">
     </picture>
   </a>
 </h1>
