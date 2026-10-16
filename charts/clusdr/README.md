@@ -2,7 +2,7 @@
   <a href="https://artifacthub.io/packages/helm/clusdr/clusdr">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="k8s-lettermark-dark.svg">
-      <img src="k8s-lettermark.svg" alt="clusdr Helm" width="160" height="164">
+      <img src="k8s-lettermark.svg" alt="clusdr Helm" width="160" height="180">
     </picture>
   </a>
 </h1>
