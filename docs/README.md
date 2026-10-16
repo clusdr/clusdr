@@ -17,6 +17,7 @@ The tutorial is five pages, in order: install → first member → grow → watc
 |---|---|
 | Real NICs, the Docker image, or which health check to trust | [Run on other hosts](guide/other-hosts.md) |
 | The same host model on a Kubernetes node | [Run on Kubernetes](guide/kubernetes.md) |
+| A known pattern: leader election, cron once, fencing, sharding, worker liveness, cache invalidation | [Use cases](use-cases/) |
 | Why it is built this way, and the trade-offs | [Overview](overview.md) · [Architecture](architecture.md) · [Concepts](concepts/) |
 
 Contributor build, proto, and tests live in [CONTRIBUTING.md](https://github.com/clusdr/clusdr/blob/main/CONTRIBUTING.md), not in this tree — that file is the source-build path, not how operators install a cluster.
