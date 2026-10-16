@@ -209,7 +209,7 @@ jobs:
           cosign sign-blob --yes --bundle "${tgz}.sigstore.json" "$tgz"
           gh release upload "$tag" "$tgz" "${tgz}.sigstore.json" --clobber --repo clusdr/clusdr
 
-      - uses: oras-project/setup-oras@5c0b487ce3fe0ce3ab0d034e63669e426e294e4d # v1.2.2
+      - uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
 
       - name: Artifact Hub repo metadata
         if: ${{ !contains(github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name, '-') }}
